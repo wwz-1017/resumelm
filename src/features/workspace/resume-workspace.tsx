@@ -16,6 +16,7 @@ import {
   Trash2
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics/track";
+import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { createEmptyResume } from "@/lib/resume-schema/defaults";
 import type { Education, Experience, ResumeDocument } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
@@ -73,6 +74,8 @@ export function ResumeWorkspace() {
   const [saveState, setSaveState] = useState("正在准备本地草稿");
   const [importError, setImportError] = useState("");
   const [templateId, setTemplateId] = useState<TemplateId>("classic");
+  const [aiTask, setAiTask] = useState<AiTask | null>(null);
+  const [aiError, setAiError] = useState("");
   const issues = validateResume(resume);
 
   useEffect(() => {
@@ -179,6 +182,63 @@ export function ResumeWorkspace() {
     trackEvent("resume_saved", sessionId, { trigger: "manual" });
   };
 
+  const runAiAction = async (task: AiTask) => {
+    setAiTask(task);
+    setAiError("");
+
+    try {
+      const response = await fetch("/api/ai", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ task, resume })
+      });
+
+      if (!response.ok) {
+        throw new Error("AI request failed");
+      }
+
+      const result = (await response.json()) as AiGatewayResponse;
+
+      if (result.task === "generate_resume") {
+        setResume(result.resume);
+      }
+
+      if (result.task === "rewrite_summary") {
+        setResume((current) => ({ ...current, personalSummary: result.text }));
+      }
+
+      if (result.task === "rewrite_project") {
+        setResume((current) => ({
+          ...current,
+          projects:
+            current.projects.length > 0
+              ? current.projects.map((project, index) => (index === 0 ? { ...project, description: result.text } : project))
+              : [
+                  {
+                    title: "校招项目",
+                    organization: "项目负责人",
+                    startDate: "",
+                    endDate: "",
+                    description: result.text
+                  }
+                ]
+        }));
+      }
+
+      if (result.task === "recommend_keywords") {
+        setResume((current) => ({ ...current, skills: Array.from(new Set([...current.skills, ...result.keywords])) }));
+      }
+
+      trackEvent("ai_generated", sessionId, { task, provider: result.provider });
+    } catch {
+      setAiError("AI 生成失败，请稍后重试。");
+    } finally {
+      setAiTask(null);
+    }
+  };
+
   return (
     <main className="app-shell">
       <div className="workspace">
@@ -213,9 +273,36 @@ export function ResumeWorkspace() {
 
           {importError ? <p className="notice">{importError}</p> : null}
 
+          {aiError ? <p className="notice">{aiError}</p> : null}
+
           {issues.length > 0 ? <p className="notice">{issues.map((issue) => issue.message).join("，")}。</p> : null}
 
           <form className="form">
+            <section className="ai-panel" aria-label="AI 简历助手">
+              <div>
+                <span className="eyebrow">AI 简历助手</span>
+                <strong>{aiTask ? "正在生成" : "可用"}</strong>
+              </div>
+              <div className="ai-actions">
+                <button disabled={Boolean(aiTask)} type="button" onClick={() => runAiAction("generate_resume")}>
+                  <Sparkles size={15} />
+                  生成初稿
+                </button>
+                <button disabled={Boolean(aiTask)} type="button" onClick={() => runAiAction("rewrite_summary")}>
+                  <Sparkles size={15} />
+                  优化评价
+                </button>
+                <button disabled={Boolean(aiTask)} type="button" onClick={() => runAiAction("rewrite_project")}>
+                  <Sparkles size={15} />
+                  润色项目
+                </button>
+                <button disabled={Boolean(aiTask)} type="button" onClick={() => runAiAction("recommend_keywords")}>
+                  <Sparkles size={15} />
+                  推荐关键词
+                </button>
+              </div>
+            </section>
+
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="基础信息" />
             <div className="field-grid two">
               <TextField label="姓名" value={resume.profile.name} onChange={(value) => updateProfile("name", value)} />

@@ -1,6 +1,7 @@
 const ANALYTICS_KEY = "resumelm.analytics-events.v1";
 
 export type AnalyticsEventName =
+  | "ai_generated"
   | "workspace_entered"
   | "resume_created"
   | "resume_imported"

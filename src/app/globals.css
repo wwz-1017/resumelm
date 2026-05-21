@@ -149,6 +149,48 @@ button {
   padding: 18px;
 }
 
+.ai-panel {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid rgba(83, 107, 79, 0.22);
+  border-radius: 8px;
+  background: linear-gradient(135deg, #f9f6ea, #eef5eb);
+}
+
+.ai-panel > div:first-child {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ai-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.ai-actions button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 10px;
+  border: 1px solid #cfd8ca;
+  border-radius: 8px;
+  background: #fffef9;
+  color: var(--moss-dark);
+  cursor: pointer;
+}
+
+.ai-actions button:disabled {
+  cursor: wait;
+  opacity: 0.58;
+}
+
 .section-title {
   display: flex;
   align-items: center;
@@ -516,6 +558,10 @@ button {
   }
 
   .field-grid.two {
+    grid-template-columns: 1fr;
+  }
+
+  .ai-actions {
     grid-template-columns: 1fr;
   }
 }
