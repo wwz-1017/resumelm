@@ -113,7 +113,8 @@ button {
 }
 
 .icon-button,
-.primary-button {
+.primary-button,
+.secondary-button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -140,8 +141,16 @@ button {
   color: #fff;
 }
 
+.secondary-button {
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  background: #fffdf8;
+  color: var(--moss-dark);
+}
+
 .icon-button:hover,
-.primary-button:hover {
+.primary-button:hover,
+.secondary-button:hover {
   transform: translateY(-1px);
 }
 

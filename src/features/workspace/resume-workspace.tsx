@@ -6,6 +6,7 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {
   BriefcaseBusiness,
   Download,
+  FileText,
   FileUp,
   GraduationCap,
   LayoutTemplate,
@@ -18,6 +19,7 @@ import {
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics/track";
 import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
+import { downloadResumeWord, printResumePdf } from "@/lib/export/resume-export";
 import { createEmptyResume } from "@/lib/resume-schema/defaults";
 import type { Education, Experience, ResumeDocument } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
@@ -182,6 +184,20 @@ export function ResumeWorkspace() {
     trackEvent("resume_exported", sessionId, { format: "json" });
   };
 
+  const exportWord = () => {
+    downloadResumeWord(resume.profile.name);
+    trackEvent("export_completed", sessionId, { format: "word" });
+  };
+
+  const exportPdf = () => {
+    try {
+      printResumePdf(resume.profile.name);
+      trackEvent("export_completed", sessionId, { format: "pdf" });
+    } catch {
+      setImportError("PDF 导出窗口被浏览器拦截，请允许弹窗后重试。");
+    }
+  };
+
   const saveResumeDraft = () => {
     saveResume(resume);
     trackEvent("resume_saved", sessionId, { trigger: "manual" });
@@ -287,6 +303,14 @@ export function ResumeWorkspace() {
           </header>
 
           <div className="toolbar" aria-label="简历操作">
+            <button className="primary-button" type="button" onClick={exportPdf}>
+              <Download size={17} />
+              导出 PDF
+            </button>
+            <button className="secondary-button" type="button" onClick={exportWord}>
+              <FileText size={17} />
+              导出 Word
+            </button>
             <button className="primary-button" type="button" onClick={exportResume}>
               <Download size={17} />
               导出 JSON
