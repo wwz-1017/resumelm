@@ -161,8 +161,54 @@ button {
   text-transform: uppercase;
 }
 
+.section-title span {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+}
+
 .section-title:first-child {
   margin-top: 0;
+}
+
+.tiny-action,
+.ghost-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.tiny-action {
+  gap: 5px;
+  min-height: 30px;
+  padding: 0 9px;
+  border: 1px solid rgba(83, 107, 79, 0.24);
+  background: #f6faf3;
+  color: var(--moss-dark);
+  font-size: 12px;
+}
+
+.ghost-icon {
+  width: 30px;
+  height: 30px;
+  background: transparent;
+  color: var(--muted);
+}
+
+.ghost-icon:hover {
+  background: #f6f4ed;
+  color: var(--coral);
+}
+
+.field-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.field-grid.two {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
 .field {
@@ -193,6 +239,33 @@ button {
   line-height: 1.55;
 }
 
+.editor-block {
+  margin-bottom: 14px;
+  padding: 12px;
+  border: 1px solid #e5e8df;
+  border-radius: 8px;
+  background: rgba(255, 254, 250, 0.78);
+}
+
+.editor-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+
+.editor-block-head strong {
+  color: var(--moss-dark);
+  font-size: 13px;
+}
+
+.empty-line {
+  margin: 0 0 12px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
 .field input:focus,
 .field textarea:focus {
   border-color: var(--moss);
@@ -214,6 +287,50 @@ button {
   padding: 26px;
 }
 
+.preview-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 860px;
+  margin: 0 auto 18px;
+}
+
+.preview-toolbar > div:first-child {
+  display: grid;
+  gap: 2px;
+}
+
+.eyebrow {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 4px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fffefa;
+}
+
+.segmented button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 0 10px;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted);
+  cursor: pointer;
+}
+
+.segmented button.active {
+  background: var(--moss-dark);
+  color: #fff;
+}
+
 .resume-paper {
   min-height: calc(100vh - 100px);
   max-width: 860px;
@@ -221,6 +338,32 @@ button {
   padding: 48px;
   border: 1px solid #e1ded3;
   background: #fffefb;
+}
+
+.template-compact {
+  max-width: 760px;
+  padding: 36px 44px;
+}
+
+.template-project {
+  border-top: 8px solid var(--gold);
+}
+
+.template-project .resume-section h3 {
+  color: #8a6231;
+}
+
+.template-project .resume-head {
+  border-bottom-color: var(--gold);
+}
+
+.template-compact .resume-head {
+  border-bottom-width: 1px;
+}
+
+.template-compact .skill-list span {
+  border-radius: 6px;
+  background: transparent;
 }
 
 .resume-head {
@@ -253,6 +396,10 @@ button {
   margin-top: 24px;
 }
 
+.resume-item + .resume-item {
+  margin-top: 16px;
+}
+
 .resume-section h3 {
   margin: 0 0 10px;
   color: var(--moss-dark);
@@ -264,6 +411,12 @@ button {
   margin: 0;
   color: #303832;
   line-height: 1.72;
+}
+
+.resume-list {
+  margin: 0;
+  padding-left: 18px;
+  line-height: 1.7;
 }
 
 .resume-row {
@@ -323,6 +476,19 @@ button {
     padding: 28px;
   }
 
+  .preview-toolbar {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .segmented {
+    width: 100%;
+  }
+
+  .segmented button {
+    flex: 1;
+  }
+
   .resume-head {
     display: block;
   }
@@ -347,5 +513,9 @@ button {
 
   .resume-head h2 {
     font-size: 30px;
+  }
+
+  .field-grid.two {
+    grid-template-columns: 1fr;
   }
 }
