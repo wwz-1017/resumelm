@@ -6,7 +6,8 @@ export type AnalyticsEventName =
   | "resume_created"
   | "resume_imported"
   | "resume_exported"
-  | "resume_saved";
+  | "resume_saved"
+  | "score_completed";
 
 export type AnalyticsEvent = {
   id: string;

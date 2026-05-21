@@ -13,6 +13,7 @@ import {
   RotateCcw,
   Save,
   Sparkles,
+  Target,
   Trash2
 } from "lucide-react";
 import { trackEvent } from "@/lib/analytics/track";
@@ -20,6 +21,7 @@ import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { createEmptyResume } from "@/lib/resume-schema/defaults";
 import type { Education, Experience, ResumeDocument } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
+import type { ScoreDimension, ScoreReport } from "@/lib/scoring/types";
 import {
   downloadResumeJson,
   getAnonymousSessionId,
@@ -76,6 +78,9 @@ export function ResumeWorkspace() {
   const [templateId, setTemplateId] = useState<TemplateId>("classic");
   const [aiTask, setAiTask] = useState<AiTask | null>(null);
   const [aiError, setAiError] = useState("");
+  const [scoreReport, setScoreReport] = useState<ScoreReport | null>(null);
+  const [isScoring, setIsScoring] = useState(false);
+  const [scoreError, setScoreError] = useState("");
   const issues = validateResume(resume);
 
   useEffect(() => {
@@ -239,6 +244,33 @@ export function ResumeWorkspace() {
     }
   };
 
+  const runScoreAction = async () => {
+    setIsScoring(true);
+    setScoreError("");
+
+    try {
+      const response = await fetch("/api/score", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ resume })
+      });
+
+      if (!response.ok) {
+        throw new Error("Score request failed");
+      }
+
+      const report = (await response.json()) as ScoreReport;
+      setScoreReport(report);
+      trackEvent("score_completed", sessionId, { score: report.overallScore });
+    } catch {
+      setScoreError("评分失败，请稍后重试。");
+    } finally {
+      setIsScoring(false);
+    }
+  };
+
   return (
     <main className="app-shell">
       <div className="workspace">
@@ -275,6 +307,8 @@ export function ResumeWorkspace() {
 
           {aiError ? <p className="notice">{aiError}</p> : null}
 
+          {scoreError ? <p className="notice">{scoreError}</p> : null}
+
           {issues.length > 0 ? <p className="notice">{issues.map((issue) => issue.message).join("，")}。</p> : null}
 
           <form className="form">
@@ -301,6 +335,17 @@ export function ResumeWorkspace() {
                   推荐关键词
                 </button>
               </div>
+            </section>
+
+            <section className="score-panel" aria-label="简历评分">
+              <div>
+                <span className="eyebrow">ATS / JD 评分</span>
+                <strong>{scoreReport ? `${scoreReport.overallScore} 分` : "未评分"}</strong>
+              </div>
+              <button disabled={isScoring} type="button" onClick={runScoreAction}>
+                <Target size={15} />
+                {isScoring ? "评分中" : "生成评分"}
+              </button>
             </section>
 
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="基础信息" />
@@ -395,6 +440,7 @@ export function ResumeWorkspace() {
         </aside>
 
         <section className="preview-shell" aria-label="简历预览">
+          {scoreReport ? <ScoreReportView report={scoreReport} /> : null}
           <div className="preview-toolbar">
             <div>
               <span className="eyebrow">模板预览</span>
@@ -558,6 +604,83 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
       <TagSection items={skills.length ? skills : ["数据分析", "用户研究", "文档表达"]} title="技能" />
       {awards.length ? <ListSection items={awards} title="奖项" /> : null}
     </article>
+  );
+}
+
+const dimensionLabels: Record<ScoreDimension, string> = {
+  ats_compatibility: "ATS 结构",
+  content_completeness: "内容完整",
+  keyword_match: "关键词匹配",
+  quantified_impact: "成果量化",
+  summary_strength: "个人优势",
+  readability: "可读性"
+};
+
+const dimensionMaxScores: Record<ScoreDimension, number> = {
+  ats_compatibility: 25,
+  content_completeness: 20,
+  keyword_match: 30,
+  quantified_impact: 10,
+  summary_strength: 10,
+  readability: 5
+};
+
+function ScoreReportView({ report }: { report: ScoreReport }) {
+  const dimensions = Object.entries(report.dimensionScores) as Array<[ScoreDimension, number]>;
+
+  return (
+    <section className="score-report" aria-label="评分报告">
+      <div className="score-hero">
+        <div>
+          <span className="eyebrow">评分报告</span>
+          <strong>{report.overallScore}</strong>
+        </div>
+        <p>基于规则引擎检查 ATS 结构、内容完整度、JD 关键词覆盖和表达质量。</p>
+      </div>
+
+      <div className="score-grid">
+        {dimensions.map(([dimension, score]) => (
+          <div className="score-dimension" key={dimension}>
+            <div>
+              <span>{dimensionLabels[dimension]}</span>
+              <strong>
+                {score}/{dimensionMaxScores[dimension]}
+              </strong>
+            </div>
+            <progress max={dimensionMaxScores[dimension]} value={score} />
+          </div>
+        ))}
+      </div>
+
+      <div className="score-columns">
+        <KeywordGroup items={report.matchedKeywords} title="已覆盖关键词" />
+        <KeywordGroup items={report.missingKeywords} title="建议补充关键词" />
+      </div>
+
+      <div className="suggestion-list">
+        <h3>改进建议</h3>
+        {report.suggestions.length === 0 ? <p>当前简历结构较完整，可以继续根据目标岗位微调措辞。</p> : null}
+        {report.suggestions.map((suggestion, index) => (
+          <div className="suggestion-item" key={`${suggestion.priority}-${index}`}>
+            <span>{suggestion.priority}</span>
+            <p>{suggestion.text}</p>
+          </div>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function KeywordGroup({ items, title }: { items: string[]; title: string }) {
+  return (
+    <div className="keyword-group">
+      <h3>{title}</h3>
+      <div className="keyword-list">
+        {(items.length ? items : ["暂无"]).map((item) => (
+          <span key={item}>{item}</span>
+        ))}
+      </div>
+    </div>
   );
 }
 
