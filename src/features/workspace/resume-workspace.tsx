@@ -10,16 +10,21 @@ import {
   FileUp,
   GraduationCap,
   LayoutTemplate,
+  MessageSquare,
   Plus,
   RotateCcw,
   Save,
   Sparkles,
   Target,
+  ThumbsDown,
+  ThumbsUp,
   Trash2
 } from "lucide-react";
+import { getDashboardMetrics, type DashboardMetrics } from "@/lib/analytics/dashboard";
 import { trackEvent } from "@/lib/analytics/track";
 import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { downloadResumeWord, printResumePdf } from "@/lib/export/resume-export";
+import { saveFeedback, type FeedbackTarget, type FeedbackVote } from "@/lib/feedback/store";
 import { createEmptyResume } from "@/lib/resume-schema/defaults";
 import type { Education, Experience, ResumeDocument } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
@@ -40,6 +45,11 @@ const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "compact", label: "极简" },
   { id: "project", label: "项目" }
 ];
+
+const feedbackReasons: Record<FeedbackVote, string[]> = {
+  up: ["表达更专业", "关键词更准确", "建议可执行", "导出体验顺畅"],
+  down: ["内容空泛", "不符合本人经历", "ATS 建议不实用", "导出不满意"]
+};
 
 const blankEducation = (): Education => ({
   school: "",
@@ -83,6 +93,8 @@ export function ResumeWorkspace() {
   const [scoreReport, setScoreReport] = useState<ScoreReport | null>(null);
   const [isScoring, setIsScoring] = useState(false);
   const [scoreError, setScoreError] = useState("");
+  const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
+  const [feedbackNotice, setFeedbackNotice] = useState("");
   const issues = validateResume(resume);
 
   useEffect(() => {
@@ -90,6 +102,7 @@ export function ResumeWorkspace() {
     setSessionId(nextSessionId);
     setResume(loadResume());
     trackEvent("workspace_entered", nextSessionId);
+    setDashboardMetrics(getDashboardMetrics());
   }, []);
 
   useEffect(() => {
@@ -182,17 +195,20 @@ export function ResumeWorkspace() {
   const exportResume = () => {
     downloadResumeJson(resume);
     trackEvent("resume_exported", sessionId, { format: "json" });
+    setDashboardMetrics(getDashboardMetrics());
   };
 
   const exportWord = () => {
     downloadResumeWord(resume.profile.name);
     trackEvent("export_completed", sessionId, { format: "word" });
+    setDashboardMetrics(getDashboardMetrics());
   };
 
   const exportPdf = () => {
     try {
       printResumePdf(resume.profile.name);
       trackEvent("export_completed", sessionId, { format: "pdf" });
+      setDashboardMetrics(getDashboardMetrics());
     } catch {
       setImportError("PDF 导出窗口被浏览器拦截，请允许弹窗后重试。");
     }
@@ -253,6 +269,7 @@ export function ResumeWorkspace() {
       }
 
       trackEvent("ai_generated", sessionId, { task, provider: result.provider });
+      setDashboardMetrics(getDashboardMetrics());
     } catch {
       setAiError("AI 生成失败，请稍后重试。");
     } finally {
@@ -280,11 +297,25 @@ export function ResumeWorkspace() {
       const report = (await response.json()) as ScoreReport;
       setScoreReport(report);
       trackEvent("score_completed", sessionId, { score: report.overallScore });
+      setDashboardMetrics(getDashboardMetrics());
     } catch {
       setScoreError("评分失败，请稍后重试。");
     } finally {
       setIsScoring(false);
     }
+  };
+
+  const submitFeedback = (target: FeedbackTarget, vote: FeedbackVote, reason: string, note: string) => {
+    saveFeedback({
+      sessionId,
+      target,
+      vote,
+      reason,
+      note
+    });
+    trackEvent("feedback_submitted", sessionId, { target, vote, reason });
+    setDashboardMetrics(getDashboardMetrics());
+    setFeedbackNotice("反馈已记录，感谢你帮我们校准产品。");
   };
 
   return (
@@ -333,6 +364,8 @@ export function ResumeWorkspace() {
 
           {scoreError ? <p className="notice">{scoreError}</p> : null}
 
+          {feedbackNotice ? <p className="success-notice">{feedbackNotice}</p> : null}
+
           {issues.length > 0 ? <p className="notice">{issues.map((issue) => issue.message).join("，")}。</p> : null}
 
           <form className="form">
@@ -371,6 +404,8 @@ export function ResumeWorkspace() {
                 {isScoring ? "评分中" : "生成评分"}
               </button>
             </section>
+
+            <FeedbackPanel onSubmit={submitFeedback} />
 
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="基础信息" />
             <div className="field-grid two">
@@ -464,6 +499,7 @@ export function ResumeWorkspace() {
         </aside>
 
         <section className="preview-shell" aria-label="简历预览">
+          {dashboardMetrics ? <DashboardPanel metrics={dashboardMetrics} /> : null}
           {scoreReport ? <ScoreReportView report={scoreReport} /> : null}
           <div className="preview-toolbar">
             <div>
@@ -488,6 +524,106 @@ export function ResumeWorkspace() {
         </section>
       </div>
     </main>
+  );
+}
+
+function FeedbackPanel({
+  onSubmit
+}: {
+  onSubmit: (target: FeedbackTarget, vote: FeedbackVote, reason: string, note: string) => void;
+}) {
+  const [target, setTarget] = useState<FeedbackTarget>("overall");
+  const [vote, setVote] = useState<FeedbackVote>("up");
+  const [reason, setReason] = useState(feedbackReasons.up[0]);
+  const [note, setNote] = useState("");
+
+  const updateVote = (nextVote: FeedbackVote) => {
+    setVote(nextVote);
+    setReason(feedbackReasons[nextVote][0]);
+  };
+
+  return (
+    <section className="feedback-panel" aria-label="产品反馈">
+      <div className="feedback-head">
+        <div>
+          <span className="eyebrow">产品反馈</span>
+          <strong>点赞 / 点踩</strong>
+        </div>
+        <MessageSquare size={18} />
+      </div>
+      <div className="feedback-controls">
+        <select value={target} onChange={(event) => setTarget(event.target.value as FeedbackTarget)}>
+          <option value="overall">整体体验</option>
+          <option value="ai">AI 结果</option>
+          <option value="score">评分报告</option>
+          <option value="export">导出体验</option>
+        </select>
+        <div className="vote-toggle">
+          <button className={vote === "up" ? "active" : ""} type="button" onClick={() => updateVote("up")}>
+            <ThumbsUp size={15} />
+            赞
+          </button>
+          <button className={vote === "down" ? "active" : ""} type="button" onClick={() => updateVote("down")}>
+            <ThumbsDown size={15} />
+            踩
+          </button>
+        </div>
+        <select value={reason} onChange={(event) => setReason(event.target.value)}>
+          {feedbackReasons[vote].map((item) => (
+            <option key={item} value={item}>
+              {item}
+            </option>
+          ))}
+        </select>
+        <textarea placeholder="补充一句具体感受" value={note} onChange={(event) => setNote(event.target.value)} />
+        <button className="primary-button" type="button" onClick={() => onSubmit(target, vote, reason, note)}>
+          提交反馈
+        </button>
+      </div>
+    </section>
+  );
+}
+
+function DashboardPanel({ metrics }: { metrics: DashboardMetrics }) {
+  return (
+    <section className="dashboard-panel" aria-label="BI 看板">
+      <div className="dashboard-head">
+        <div>
+          <span className="eyebrow">BI 看板</span>
+          <strong>本地运营指标</strong>
+        </div>
+        <span>{metrics.positiveRate}% 好评率</span>
+      </div>
+      <div className="metric-grid">
+        <MetricCard label="会话" value={metrics.sessions} />
+        <MetricCard label="事件" value={metrics.events} />
+        <MetricCard label="AI" value={metrics.aiRuns} />
+        <MetricCard label="评分" value={metrics.scores} />
+        <MetricCard label="导出" value={metrics.exports} />
+        <MetricCard label="赞/踩" value={`${metrics.upVotes}/${metrics.downVotes}`} />
+      </div>
+      <div className="reason-rank">
+        <span>差评原因</span>
+        {metrics.topDownReasons.length ? (
+          metrics.topDownReasons.map((item) => (
+            <strong key={item.reason}>
+              {item.reason} · {item.count}
+            </strong>
+          ))
+        ) : (
+          <strong>暂无</strong>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function MetricCard({ label, value }: { label: string; value: number | string }) {
+  return (
+    <div className="metric-card">
+      <span>{label}</span>
+      <strong>{value}</strong>
+    </div>
   );
 }
 

@@ -7,6 +7,7 @@ export type AnalyticsEventName =
   | "resume_imported"
   | "resume_exported"
   | "export_completed"
+  | "feedback_submitted"
   | "resume_saved"
   | "score_completed";
 
@@ -16,6 +17,11 @@ export type AnalyticsEvent = {
   sessionId: string;
   createdAt: string;
   properties?: Record<string, string | number | boolean>;
+};
+
+export const readAnalyticsEvents = (): AnalyticsEvent[] => {
+  const existing = window.localStorage.getItem(ANALYTICS_KEY);
+  return existing ? (JSON.parse(existing) as AnalyticsEvent[]) : [];
 };
 
 const createId = () => {
@@ -33,8 +39,7 @@ export const trackEvent = (
 ) => {
   if (!sessionId) return;
 
-  const existing = window.localStorage.getItem(ANALYTICS_KEY);
-  const events = existing ? (JSON.parse(existing) as AnalyticsEvent[]) : [];
+  const events = readAnalyticsEvents();
 
   events.push({
     id: createId(),
