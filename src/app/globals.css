@@ -42,15 +42,18 @@ button {
 }
 
 .app-shell {
-  min-height: 100vh;
-  padding: 24px;
+  height: 100vh;
+  min-height: 640px;
+  overflow: hidden;
+  padding: 12px;
 }
 
 .workspace {
   display: grid;
-  grid-template-columns: minmax(320px, 440px) minmax(0, 1fr);
-  gap: 18px;
-  max-width: 1440px;
+  grid-template-columns: minmax(280px, 36vw) minmax(0, 1fr);
+  gap: 12px;
+  height: calc(100vh - 24px);
+  max-width: 1680px;
   margin: 0 auto;
 }
 
@@ -63,7 +66,9 @@ button {
 }
 
 .sidebar {
-  min-height: calc(100vh - 48px);
+  display: grid;
+  grid-template-rows: auto auto auto 1fr auto;
+  min-height: 0;
   border-radius: 8px;
   overflow: hidden;
 }
@@ -73,7 +78,7 @@ button {
   align-items: flex-start;
   justify-content: space-between;
   gap: 18px;
-  padding: 22px;
+  padding: 14px;
   background: linear-gradient(135deg, #f9f2df, #ffffff 58%, #eaf2e6);
   border-bottom: 1px solid var(--line);
 }
@@ -81,14 +86,15 @@ button {
 .brand h1 {
   margin: 0;
   font-family: Georgia, "Times New Roman", serif;
-  font-size: 34px;
+  font-size: 28px;
   letter-spacing: 0;
 }
 
 .brand p {
-  margin: 8px 0 0;
+  margin: 6px 0 0;
   color: var(--muted);
   line-height: 1.5;
+  font-size: 14px;
 }
 
 .session-chip {
@@ -108,7 +114,7 @@ button {
   display: flex;
   gap: 8px;
   flex-wrap: wrap;
-  padding: 16px 18px;
+  padding: 10px 12px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -155,7 +161,9 @@ button {
 }
 
 .form {
-  padding: 18px;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 14px;
 }
 
 .ai-panel {
@@ -436,17 +444,18 @@ button {
 }
 
 .preview-shell {
-  min-height: calc(100vh - 48px);
+  min-height: 0;
+  overflow-y: auto;
   border-radius: 8px;
-  padding: 26px;
+  padding: 14px;
 }
 
 .score-report {
   display: grid;
   gap: 14px;
   max-width: 860px;
-  margin: 0 auto 18px;
-  padding: 18px;
+  margin: 0 auto 12px;
+  padding: 14px;
   border: 1px solid #e6d9c7;
   border-radius: 8px;
   background: #fffdf8;
@@ -454,28 +463,53 @@ button {
 
 .dashboard-panel {
   display: grid;
-  gap: 14px;
+  gap: 10px;
   max-width: 860px;
-  margin: 0 auto 18px;
-  padding: 18px;
+  margin: 0 auto 12px;
+  padding: 0;
   border: 1px solid #d7dfd0;
   border-radius: 8px;
   background: #f8fbf5;
 }
 
-.dashboard-head {
+.dashboard-summary {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 16px;
+  gap: 12px;
+  padding: 11px 14px;
+  color: var(--moss-dark);
+  cursor: pointer;
+  list-style: none;
 }
 
-.dashboard-head > div {
-  display: grid;
-  gap: 2px;
+.dashboard-summary::-webkit-details-marker {
+  display: none;
 }
 
-.dashboard-head > span {
+.dashboard-summary::before {
+  content: "+";
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  background: #eaf2e6;
+  font-weight: 800;
+}
+
+.dashboard-panel[open] .dashboard-summary::before {
+  content: "-";
+}
+
+.dashboard-summary span {
+  flex: 1;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dashboard-summary strong {
   padding: 7px 9px;
   border-radius: 999px;
   background: #eaf2e6;
@@ -484,9 +518,15 @@ button {
   font-weight: 800;
 }
 
+.dashboard-content {
+  display: grid;
+  gap: 12px;
+  padding: 0 14px 14px;
+}
+
 .metric-grid {
   display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 8px;
 }
 
@@ -554,7 +594,7 @@ button {
 
 .score-grid {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(6, minmax(0, 1fr));
   gap: 10px;
 }
 
@@ -657,7 +697,7 @@ button {
   justify-content: space-between;
   gap: 16px;
   max-width: 860px;
-  margin: 0 auto 18px;
+  margin: 0 auto 12px;
 }
 
 .preview-toolbar > div:first-child {
@@ -696,10 +736,11 @@ button {
 }
 
 .resume-paper {
-  min-height: calc(100vh - 100px);
-  max-width: 860px;
+  min-height: 1123px;
+  width: 100%;
+  max-width: 794px;
   margin: 0 auto;
-  padding: 48px;
+  padding: 36px;
   border: 1px solid #e1ded3;
   background: #fffefb;
 }
@@ -831,18 +872,27 @@ button {
   line-height: 1.5;
 }
 
-@media (max-width: 980px) {
+@media (max-width: 560px) {
   .app-shell {
+    height: auto;
+    min-height: 100vh;
+    overflow: visible;
     padding: 14px;
   }
 
   .workspace {
     grid-template-columns: 1fr;
+    height: auto;
   }
 
   .sidebar,
   .preview-shell {
     min-height: auto;
+    overflow: visible;
+  }
+
+  .form {
+    overflow: visible;
   }
 
   .resume-paper {
@@ -882,9 +932,7 @@ button {
   .resume-target {
     margin-top: 10px;
   }
-}
 
-@media (max-width: 560px) {
   .brand {
     display: block;
   }

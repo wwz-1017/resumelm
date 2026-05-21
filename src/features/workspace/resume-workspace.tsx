@@ -586,35 +586,34 @@ function FeedbackPanel({
 
 function DashboardPanel({ metrics }: { metrics: DashboardMetrics }) {
   return (
-    <section className="dashboard-panel" aria-label="BI 看板">
-      <div className="dashboard-head">
-        <div>
-          <span className="eyebrow">BI 看板</span>
-          <strong>本地运营指标</strong>
+    <details className="dashboard-panel" aria-label="BI 看板">
+      <summary className="dashboard-summary">
+        <span>BI 看板 · 本地运营指标</span>
+        <strong>{metrics.positiveRate}% 好评率</strong>
+      </summary>
+      <div className="dashboard-content">
+        <div className="metric-grid">
+          <MetricCard label="会话" value={metrics.sessions} />
+          <MetricCard label="事件" value={metrics.events} />
+          <MetricCard label="AI" value={metrics.aiRuns} />
+          <MetricCard label="评分" value={metrics.scores} />
+          <MetricCard label="导出" value={metrics.exports} />
+          <MetricCard label="赞/踩" value={`${metrics.upVotes}/${metrics.downVotes}`} />
         </div>
-        <span>{metrics.positiveRate}% 好评率</span>
+        <div className="reason-rank">
+          <span>差评原因</span>
+          {metrics.topDownReasons.length ? (
+            metrics.topDownReasons.map((item) => (
+              <strong key={item.reason}>
+                {item.reason} · {item.count}
+              </strong>
+            ))
+          ) : (
+            <strong>暂无</strong>
+          )}
+        </div>
       </div>
-      <div className="metric-grid">
-        <MetricCard label="会话" value={metrics.sessions} />
-        <MetricCard label="事件" value={metrics.events} />
-        <MetricCard label="AI" value={metrics.aiRuns} />
-        <MetricCard label="评分" value={metrics.scores} />
-        <MetricCard label="导出" value={metrics.exports} />
-        <MetricCard label="赞/踩" value={`${metrics.upVotes}/${metrics.downVotes}`} />
-      </div>
-      <div className="reason-rank">
-        <span>差评原因</span>
-        {metrics.topDownReasons.length ? (
-          metrics.topDownReasons.map((item) => (
-            <strong key={item.reason}>
-              {item.reason} · {item.count}
-            </strong>
-          ))
-        ) : (
-          <strong>暂无</strong>
-        )}
-      </div>
-    </section>
+    </details>
   );
 }
 
