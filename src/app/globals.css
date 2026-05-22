@@ -1125,6 +1125,23 @@ button {
   line-height: 1.45;
 }
 
+.photo-style-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.photo-style-actions button {
+  min-height: 30px;
+  border: 1px solid rgba(83, 107, 79, 0.22);
+  border-radius: 8px;
+  background: #f6faf3;
+  color: var(--moss-dark);
+  cursor: pointer;
+  font-size: 12px;
+  font-weight: 700;
+}
+
 .resume-target {
   align-self: flex-end;
   color: var(--resume-accent-color);

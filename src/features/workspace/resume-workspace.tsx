@@ -1023,7 +1023,6 @@ export function ResumeWorkspace() {
           <ResumePreview
             resume={resume}
             templateId={templateId}
-            onPhotoCropChange={updatePhotoCrop}
             onPhotoSettingsChange={updatePhotoSettings}
             onSwapModules={swapModules}
             onToggleVisibility={toggleVisibility}
@@ -1455,81 +1454,25 @@ function PhotoUploadPanel({
 }
 
 function PhotoStylePopover({
-  hasPhoto,
-  onCropChange,
-  onSettingsChange,
-  photo,
-  settings
+  onSettingsChange
 }: {
-  hasPhoto: boolean;
-  onCropChange: (field: "x" | "y" | "zoom", value: number) => void;
   onSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
-  photo: ResumeDocument["profile"]["photo"];
-  settings: ResumePhotoSettings;
 }) {
   return (
     <div className="photo-style-popover" onClick={(event) => event.stopPropagation()}>
       <div>
         <span className="eyebrow">照片样式</span>
-        <strong>裁剪 / 大小 / 位置</strong>
+        <strong>直接拖拽调整</strong>
       </div>
-      <RangeField
-        label="宽度"
-        max={180}
-        min={56}
-        step={1}
-        value={settings.width}
-        onChange={(value) => onSettingsChange({ width: value })}
-      />
-      <RangeField
-        label="高度"
-        max={220}
-        min={70}
-        step={1}
-        value={settings.height}
-        onChange={(value) => onSettingsChange({ height: value })}
-      />
-      <RangeField
-        label="水平位置"
-        max={140}
-        min={-140}
-        step={1}
-        value={settings.offsetX}
-        onChange={(value) => onSettingsChange({ offsetX: value })}
-      />
-      <RangeField
-        label="垂直位置"
-        max={140}
-        min={-140}
-        step={1}
-        value={settings.offsetY}
-        onChange={(value) => onSettingsChange({ offsetY: value })}
-      />
-      <RangeField
-        label="左右位置"
-        max={100}
-        min={0}
-        step={1}
-        value={photo?.crop.x ?? 50}
-        onChange={(value) => onCropChange("x", value)}
-      />
-      <RangeField
-        label="上下位置"
-        max={100}
-        min={0}
-        step={1}
-        value={photo?.crop.y ?? 50}
-        onChange={(value) => onCropChange("y", value)}
-      />
-      <RangeField
-        label="裁剪缩放"
-        max={1.8}
-        min={1}
-        step={0.05}
-        value={photo?.crop.zoom ?? 1}
-        onChange={(value) => onCropChange("zoom", value)}
-      />
-      {!hasPhoto ? <p>上传照片后可以继续微调裁剪位置。</p> : null}
+      <p>拖动照片可以移动位置，拖动右下角可以直接改变大小。</p>
+      <div className="photo-style-actions">
+        <button type="button" onClick={() => onSettingsChange({ width: 88, height: 110 })}>
+          重置大小
+        </button>
+        <button type="button" onClick={() => onSettingsChange({ offsetX: 0, offsetY: 0 })}>
+          重置位置
+        </button>
+      </div>
     </div>
   );
 }
@@ -1609,14 +1552,12 @@ function ExperienceEditor({
 }
 
 function ResumePreview({
-  onPhotoCropChange,
   onPhotoSettingsChange,
   onSwapModules,
   onToggleVisibility,
   resume,
   templateId
 }: {
-  onPhotoCropChange: (field: "x" | "y" | "zoom", value: number) => void;
   onPhotoSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onSwapModules: (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => void;
   onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
@@ -1855,10 +1796,6 @@ function ResumePreview({
             </div>
             {isPhotoStyleOpen ? (
               <PhotoStylePopover
-                hasPhoto={Boolean(resume.profile.photo)}
-                photo={resume.profile.photo}
-                settings={photoSettings}
-                onCropChange={onPhotoCropChange}
                 onSettingsChange={onPhotoSettingsChange}
               />
             ) : null}
