@@ -1490,6 +1490,22 @@ function PhotoStylePopover({
         onChange={(value) => onSettingsChange({ height: value })}
       />
       <RangeField
+        label="水平位置"
+        max={140}
+        min={-140}
+        step={1}
+        value={settings.offsetX}
+        onChange={(value) => onSettingsChange({ offsetX: value })}
+      />
+      <RangeField
+        label="垂直位置"
+        max={140}
+        min={-140}
+        step={1}
+        value={settings.offsetY}
+        onChange={(value) => onSettingsChange({ offsetY: value })}
+      />
+      <RangeField
         label="左右位置"
         max={100}
         min={0}
@@ -1650,6 +1666,31 @@ function ResumePreview({
     window.addEventListener("mousemove", handleMove);
     window.addEventListener("mouseup", handleUp);
   };
+  const startPhotoMove = (event: React.MouseEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return;
+
+    event.preventDefault();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startOffsetX = photoSettings.offsetX;
+    const startOffsetY = photoSettings.offsetY;
+
+    const handleMove = (moveEvent: MouseEvent) => {
+      onPhotoSettingsChange({
+        offsetX: Math.min(140, Math.max(-140, startOffsetX + moveEvent.clientX - startX)),
+        offsetY: Math.min(140, Math.max(-140, startOffsetY + moveEvent.clientY - startY))
+      });
+    };
+
+    const handleUp = () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+  };
   const getModuleControls = (moduleId: ResumeModuleId) => (
     <ResumeModuleControls
       isVisible={visibilitySettings[moduleId]}
@@ -1771,6 +1812,9 @@ function ResumePreview({
         {photoSettings.visible ? (
           <div
             className="resume-photo-wrap"
+            style={{
+              transform: `translate(${photoSettings.offsetX}px, ${photoSettings.offsetY}px)`
+            }}
             onContextMenu={(event) => {
               event.preventDefault();
               setIsPhotoStyleOpen((isOpen) => !isOpen);
@@ -1792,6 +1836,7 @@ function ResumePreview({
                 width: photoSettings.width,
                 height: photoSettings.height
               }}
+              onMouseDown={startPhotoMove}
             >
               {resume.profile.photo ? (
                 /* eslint-disable-next-line @next/next/no-img-element -- Resume exports need a plain img with the local data URL. */

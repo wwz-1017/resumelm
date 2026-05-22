@@ -21,6 +21,8 @@ export type ResumePhotoSettings = {
   visible: boolean;
   width: number;
   height: number;
+  offsetX: number;
+  offsetY: number;
 };
 
 export type Education = {

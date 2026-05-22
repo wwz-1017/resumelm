@@ -1040,6 +1040,7 @@ button {
 .resume-photo-wrap {
   position: relative;
   flex: 0 0 auto;
+  cursor: move;
 }
 
 .resume-photo {
@@ -1054,6 +1055,7 @@ button {
   background: linear-gradient(135deg, #f3f0ea, #d9dedb);
   color: #7c8784;
   font-size: 12px;
+  user-select: none;
 }
 
 .resume-photo-remove {
