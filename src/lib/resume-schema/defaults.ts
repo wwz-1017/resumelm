@@ -17,7 +17,8 @@ export const createEmptyResume = (): ResumeDocument => ({
     phone: "",
     email: "",
     city: "",
-    targetRole: ""
+    targetRole: "",
+    photo: undefined
   },
   iconSettings: createDefaultIconSettings(),
   personalSummary: "",

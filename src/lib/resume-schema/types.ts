@@ -4,6 +4,17 @@ export type ResumeProfile = {
   email: string;
   city: string;
   targetRole: string;
+  photo?: ResumePhoto;
+};
+
+export type ResumePhoto = {
+  dataUrl: string;
+  fileName: string;
+  crop: {
+    x: number;
+    y: number;
+    zoom: number;
+  };
 };
 
 export type Education = {

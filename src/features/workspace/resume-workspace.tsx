@@ -202,6 +202,8 @@ const nonEmpty = (items: string[]) => items.filter((item) => item.trim());
 const hasExperienceContent = (item: Experience) =>
   Boolean(item.title.trim() || item.organization.trim() || item.description.trim());
 
+const maxPhotoSize = 2 * 1024 * 1024;
+
 const getIconNode = (iconId: ResumeIconId, size = 14) => {
   const strokeWidth = 2;
 
@@ -335,6 +337,81 @@ export function ResumeWorkspace() {
       profile: {
         ...current.profile,
         [field]: value
+      }
+    }));
+  };
+
+  const uploadPhoto = (event: ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      setImportError("图片上传失败：请使用 JPG、PNG 或 WebP 格式。");
+      event.target.value = "";
+      return;
+    }
+
+    if (file.size > maxPhotoSize) {
+      setImportError("图片上传失败：图片需小于 2MB。");
+      event.target.value = "";
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (typeof reader.result !== "string") {
+        setImportError("图片读取失败，请重新选择。");
+        return;
+      }
+
+      setResume((current) => ({
+        ...current,
+        profile: {
+          ...current.profile,
+          photo: {
+            dataUrl: reader.result as string,
+            fileName: file.name,
+            crop: {
+              x: 50,
+              y: 50,
+              zoom: 1
+            }
+          }
+        }
+      }));
+      setImportError("");
+    };
+    reader.onerror = () => setImportError("图片读取失败，请重新选择。");
+    reader.readAsDataURL(file);
+    event.target.value = "";
+  };
+
+  const updatePhotoCrop = (field: "x" | "y" | "zoom", value: number) => {
+    setResume((current) => {
+      if (!current.profile.photo) return current;
+
+      return {
+        ...current,
+        profile: {
+          ...current.profile,
+          photo: {
+            ...current.profile.photo,
+            crop: {
+              ...current.profile.photo.crop,
+              [field]: value
+            }
+          }
+        }
+      };
+    });
+  };
+
+  const removePhoto = () => {
+    setResume((current) => ({
+      ...current,
+      profile: {
+        ...current.profile,
+        photo: undefined
       }
     }));
   };
@@ -644,6 +721,12 @@ export function ResumeWorkspace() {
               <TextField label="邮箱" value={resume.profile.email} onChange={(value) => updateProfile("email", value)} />
               <TextField label="城市" value={resume.profile.city} onChange={(value) => updateProfile("city", value)} />
             </div>
+            <PhotoUploadPanel
+              photo={resume.profile.photo}
+              onCropChange={updatePhotoCrop}
+              onRemove={removePhoto}
+              onUpload={uploadPhoto}
+            />
 
             <SectionHeading icon={<Sparkles size={15} />} title="个人评价" />
             <TextAreaField
@@ -974,6 +1057,105 @@ function TextAreaField({ label, onChange, value }: { label: string; onChange: (v
   );
 }
 
+function PhotoUploadPanel({
+  onCropChange,
+  onRemove,
+  onUpload,
+  photo
+}: {
+  onCropChange: (field: "x" | "y" | "zoom", value: number) => void;
+  onRemove: () => void;
+  onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
+  photo: ResumeDocument["profile"]["photo"];
+}) {
+  return (
+    <section className="photo-upload-panel" aria-label="头像上传与裁剪">
+      <div className="photo-upload-head">
+        <div>
+          <span className="eyebrow">头像 / 照片</span>
+          <strong>{photo ? "已上传" : "可选上传"}</strong>
+        </div>
+        <label className="secondary-button photo-upload-button">
+          <FileUp size={15} />
+          上传图片
+          <input accept="image/jpeg,image/png,image/webp" hidden type="file" onChange={onUpload} />
+        </label>
+      </div>
+      <p>支持 JPG、PNG、WebP，2MB 以内。上传后只保存在当前浏览器草稿中。</p>
+      {photo ? (
+        <div className="photo-crop-box">
+          <div className="photo-crop-preview">
+            {/* eslint-disable-next-line @next/next/no-img-element -- Local data URLs cannot be optimized by next/image. */}
+            <img
+              alt="头像裁剪预览"
+              src={photo.dataUrl}
+              style={{
+                objectPosition: `${photo.crop.x}% ${photo.crop.y}%`,
+                transform: `scale(${photo.crop.zoom})`
+              }}
+            />
+          </div>
+          <div className="photo-crop-controls">
+            <RangeField
+              label="左右位置"
+              max={100}
+              min={0}
+              step={1}
+              value={photo.crop.x}
+              onChange={(value) => onCropChange("x", value)}
+            />
+            <RangeField
+              label="上下位置"
+              max={100}
+              min={0}
+              step={1}
+              value={photo.crop.y}
+              onChange={(value) => onCropChange("y", value)}
+            />
+            <RangeField
+              label="缩放"
+              max={1.8}
+              min={1}
+              step={0.05}
+              value={photo.crop.zoom}
+              onChange={(value) => onCropChange("zoom", value)}
+            />
+            <button className="secondary-button" type="button" onClick={onRemove}>
+              删除图片
+            </button>
+          </div>
+        </div>
+      ) : null}
+    </section>
+  );
+}
+
+function RangeField({
+  label,
+  max,
+  min,
+  onChange,
+  step,
+  value
+}: {
+  label: string;
+  max: number;
+  min: number;
+  onChange: (value: number) => void;
+  step: number;
+  value: number;
+}) {
+  return (
+    <label className="range-field">
+      <span>
+        {label}
+        <strong>{Number.isInteger(value) ? value : value.toFixed(2)}</strong>
+      </span>
+      <input max={max} min={min} step={step} type="range" value={value} onChange={(event) => onChange(Number(event.target.value))} />
+    </label>
+  );
+}
+
 function ExperienceEditor({
   items,
   onAdd,
@@ -1031,17 +1213,29 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
             {contactItems.map((item, index) => (
               <span className="resume-contact-item" key={`${item.icon}-${index}`}>
                 <ResumeIcon enabled={iconEnabled} iconId={item.icon} />
-                {item.text}
+                <span className="resume-inline-text">{item.text}</span>
               </span>
             ))}
           </p>
         </div>
-        <div className="resume-photo" aria-hidden="true">
-          照片
+        <div className="resume-photo" aria-label={resume.profile.photo ? "简历头像" : "照片占位"}>
+          {resume.profile.photo ? (
+            /* eslint-disable-next-line @next/next/no-img-element -- Resume exports need a plain img with the local data URL. */
+            <img
+              alt="简历头像"
+              src={resume.profile.photo.dataUrl}
+              style={{
+                objectPosition: `${resume.profile.photo.crop.x}% ${resume.profile.photo.crop.y}%`,
+                transform: `scale(${resume.profile.photo.crop.zoom})`
+              }}
+            />
+          ) : (
+            "照片"
+          )}
         </div>
         <div className="resume-target">
           <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
-          {resume.profile.targetRole || resume.targetJob.title || "目标岗位"}
+          <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</span>
         </div>
       </header>
 
@@ -1059,7 +1253,7 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
       <section className="resume-section">
         <h3>
           <ResumeIcon enabled={iconEnabled} iconId={iconSettings.education} />
-          教育经历
+          <span className="resume-inline-text">教育经历</span>
         </h3>
         {(resume.education.length ? resume.education : [blankEducation()]).map((item, index) => (
           <div className="resume-item" key={index}>
@@ -1197,7 +1391,7 @@ function ResumeSection({
     <section className="resume-section">
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
-        {title}
+        <span className="resume-inline-text">{title}</span>
       </h3>
       <p>{children}</p>
     </section>
@@ -1221,7 +1415,7 @@ function ExperiencePreview({
     <section className="resume-section">
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
-        {title}
+        <span className="resume-inline-text">{title}</span>
       </h3>
       {items.length === 0 ? <p>{fallback}</p> : null}
       {items.map((item, index) => (
@@ -1253,7 +1447,7 @@ function TagSection({
     <section className="resume-section">
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
-        {title}
+        <span className="resume-inline-text">{title}</span>
       </h3>
       <div className="skill-list">
         {items.map((item) => (
@@ -1279,7 +1473,7 @@ function ListSection({
     <section className="resume-section">
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
-        {title}
+        <span className="resume-inline-text">{title}</span>
       </h3>
       <ul className="resume-list">
         {items.map((item) => (
