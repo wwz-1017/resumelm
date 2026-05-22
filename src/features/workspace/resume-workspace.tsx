@@ -897,15 +897,15 @@ export function ResumeWorkspace() {
               <TextField label="邮箱" value={resume.profile.email} onChange={(value) => updateProfile("email", value)} />
               <TextField label="城市" value={resume.profile.city} onChange={(value) => updateProfile("city", value)} />
             </div>
-            <PhotoUploadPanel
-              photo={resume.profile.photo}
-              photoSettings={photoSettings}
-              photoSupported={isPhotoSupported}
-              templateLabel={templates.find((template) => template.id === templateId)?.label ?? "当前模板"}
-              onRemove={removePhoto}
-              onSettingsChange={updatePhotoSettings}
-              onUpload={uploadPhoto}
-            />
+            {isPhotoSupported ? (
+              <PhotoUploadPanel
+                photo={resume.profile.photo}
+                photoSettings={photoSettings}
+                onRemove={removePhoto}
+                onSettingsChange={updatePhotoSettings}
+                onUpload={uploadPhoto}
+              />
+            ) : null}
 
             <div className={getEditorModuleClassName("personalSummary")} data-editor-module="personalSummary">
               <SectionHeading
@@ -1435,33 +1435,14 @@ function PhotoUploadPanel({
   onSettingsChange,
   onUpload,
   photo,
-  photoSettings,
-  photoSupported,
-  templateLabel
+  photoSettings
 }: {
   onRemove: () => void;
   onSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   photo: ResumeDocument["profile"]["photo"];
   photoSettings: ResumePhotoSettings;
-  photoSupported: boolean;
-  templateLabel: string;
 }) {
-  if (!photoSupported) {
-    return (
-      <section className="photo-upload-panel is-disabled" aria-label="照片暂不可用">
-        <div className="photo-upload-head">
-          <div>
-            <span className="eyebrow">头像 / 照片</span>
-            <strong>当前模板暂不支持</strong>
-          </div>
-          <LayoutTemplate size={18} />
-        </div>
-        <p>{templateLabel} 暂时关闭照片功能。切换到好用蓝灰、简约金灰或应届蓝线后，可以继续上传和调整照片。</p>
-      </section>
-    );
-  }
-
   return (
     <section className="photo-upload-panel" aria-label="头像上传与裁剪">
       <div className="photo-upload-head">

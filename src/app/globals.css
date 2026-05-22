@@ -566,11 +566,6 @@ button {
   background: #f8faf5;
 }
 
-.photo-upload-panel.is-disabled {
-  background: #f8f6ee;
-  color: var(--muted);
-}
-
 .photo-upload-head {
   display: flex;
   align-items: center;
