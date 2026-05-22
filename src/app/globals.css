@@ -1057,7 +1057,6 @@ button {
 .resume-module-frame {
   margin-top: 20px;
   padding: 10px;
-  border: 1px solid transparent;
   border-radius: 12px;
   cursor: grab;
   transition:
@@ -1069,9 +1068,7 @@ button {
 .resume-module-frame:hover,
 .resume-module-frame.is-drop-target {
   background: color-mix(in srgb, var(--resume-accent-color) 5%, #ffffff);
-  box-shadow:
-    0 12px 28px rgba(31, 39, 34, 0.12),
-    0 0 0 1px color-mix(in srgb, var(--resume-accent-color) 18%, transparent);
+  box-shadow: 0 12px 28px rgba(31, 39, 34, 0.12);
 }
 
 .resume-module-frame.is-dragging {
