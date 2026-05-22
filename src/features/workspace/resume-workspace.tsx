@@ -37,7 +37,7 @@ import {
   saveResume
 } from "@/lib/storage/local-resume-store";
 
-type TemplateId = "useful" | "simple" | "graduate" | "brick" | "leftBlue";
+type TemplateId = "useful" | "simple" | "graduate" | "brick" | "leftBlue" | "minimalPm";
 type ExperienceSection = "internships" | "projects" | "campusExperience";
 
 const templates: Array<{ id: TemplateId; label: string }> = [
@@ -45,7 +45,8 @@ const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "simple", label: "简约金灰" },
   { id: "graduate", label: "应届蓝线" },
   { id: "brick", label: "砖红双栏" },
-  { id: "leftBlue", label: "深蓝左栏" }
+  { id: "leftBlue", label: "深蓝左栏" },
+  { id: "minimalPm", label: "极简PM" }
 ];
 
 const feedbackReasons: Record<FeedbackVote, string[]> = {
