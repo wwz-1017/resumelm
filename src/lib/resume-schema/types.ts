@@ -121,6 +121,8 @@ export type ResumeVisibilitySettings = {
   awards: boolean;
 };
 
+export type ResumeModuleId = keyof ResumeVisibilitySettings;
+
 export type ResumeDocument = {
   schemaVersion: 1;
   id: string;
@@ -129,6 +131,7 @@ export type ResumeDocument = {
   iconSettings?: ResumeIconSettings;
   styleSettings?: ResumeStyleSettings;
   visibilitySettings?: ResumeVisibilitySettings;
+  moduleOrder?: ResumeModuleId[];
   personalSummary: string;
   strengths: string[];
   education: Education[];

@@ -1,6 +1,7 @@
 import {
   createEmptyResume,
   normalizeIconSettings,
+  normalizeModuleOrder,
   normalizeStyleSettings,
   normalizeVisibilitySettings
 } from "@/lib/resume-schema/defaults";
@@ -38,7 +39,8 @@ export const loadResume = (): ResumeDocument => {
           ...parsed,
           iconSettings: normalizeIconSettings(parsed.iconSettings),
           styleSettings: normalizeStyleSettings(parsed.styleSettings),
-          visibilitySettings: normalizeVisibilitySettings(parsed.visibilitySettings)
+          visibilitySettings: normalizeVisibilitySettings(parsed.visibilitySettings),
+          moduleOrder: normalizeModuleOrder(parsed.moduleOrder)
         }
       : createEmptyResume();
   } catch {

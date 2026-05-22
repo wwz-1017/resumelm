@@ -4,6 +4,7 @@ import type {
   ResumeFontId,
   ResumeIconId,
   ResumeIconSettings,
+  ResumeModuleId,
   ResumeStyleSettings,
   ResumeVisibilitySettings
 } from "./types";
@@ -31,6 +32,7 @@ export const createEmptyResume = (): ResumeDocument => ({
   iconSettings: createDefaultIconSettings(),
   styleSettings: createDefaultStyleSettings(),
   visibilitySettings: createDefaultVisibilitySettings(),
+  moduleOrder: createDefaultModuleOrder(),
   personalSummary: "",
   strengths: ["", "", ""],
   education: [
@@ -166,4 +168,17 @@ export function normalizeVisibilitySettings(settings?: Partial<ResumeVisibilityS
     ...createDefaultVisibilitySettings(),
     ...settings
   };
+}
+
+export function createDefaultModuleOrder(): ResumeModuleId[] {
+  return ["personalSummary", "strengths", "education", "internships", "projects", "campusExperience", "skills", "awards"];
+}
+
+export function normalizeModuleOrder(order?: ResumeModuleId[]): ResumeModuleId[] {
+  const defaults = createDefaultModuleOrder();
+  const validIds = new Set(defaults);
+  const uniqueOrder = (order ?? []).filter((moduleId, index, currentOrder) => validIds.has(moduleId) && currentOrder.indexOf(moduleId) === index);
+  const missingIds = defaults.filter((moduleId) => !uniqueOrder.includes(moduleId));
+
+  return [...uniqueOrder, ...missingIds];
 }
