@@ -2,6 +2,7 @@ import type {
   ResumeColorId,
   ResumeDocument,
   ResumeFontId,
+  ResumeHeaderAlignment,
   ResumeIconId,
   ResumeIconSettings,
   ResumeModuleId,
@@ -117,6 +118,7 @@ export function createDefaultStyleSettings(): ResumeStyleSettings {
   return {
     headingFont: "georgia",
     bodyFont: "pingfang",
+    headerAlignment: "center",
     nameSize: 38,
     sectionTitleSize: 15,
     bodySize: 14,
@@ -129,6 +131,7 @@ export function createDefaultStyleSettings(): ResumeStyleSettings {
 
 const fontIds: ResumeFontId[] = ["microsoftYahei", "simsun", "simhei", "kaiti", "fangsong", "pingfang", "times", "georgia"];
 const colorIds: ResumeColorId[] = ["black", "darkGray", "darkBlue", "mossGreen"];
+const headerAlignments: ResumeHeaderAlignment[] = ["center", "left", "right"];
 const nameSizes = [24, 28, 32, 36, 38, 40];
 const sectionTitleSizes = [13, 14, 15, 16, 18];
 const bodySizes = [12, 13, 14, 15, 16];
@@ -142,6 +145,7 @@ export function normalizeStyleSettings(settings?: Partial<ResumeStyleSettings>):
   return {
     headingFont: pickOption(next.headingFont, fontIds, defaults.headingFont),
     bodyFont: pickOption(next.bodyFont, fontIds, defaults.bodyFont),
+    headerAlignment: pickOption(next.headerAlignment, headerAlignments, defaults.headerAlignment),
     nameSize: pickOption(next.nameSize, nameSizes, defaults.nameSize),
     sectionTitleSize: pickOption(next.sectionTitleSize, sectionTitleSizes, defaults.sectionTitleSize),
     bodySize: pickOption(next.bodySize, bodySizes, defaults.bodySize),

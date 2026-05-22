@@ -105,9 +105,12 @@ export type ResumeFontId = "microsoftYahei" | "simsun" | "simhei" | "kaiti" | "f
 
 export type ResumeColorId = "black" | "darkGray" | "darkBlue" | "mossGreen";
 
+export type ResumeHeaderAlignment = "center" | "left" | "right";
+
 export type ResumeStyleSettings = {
   headingFont: ResumeFontId;
   bodyFont: ResumeFontId;
+  headerAlignment: ResumeHeaderAlignment;
   nameSize: number;
   sectionTitleSize: number;
   bodySize: number;

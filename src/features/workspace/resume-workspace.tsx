@@ -73,6 +73,7 @@ import type {
   ResumeColorId,
   ResumeDocument,
   ResumeFontId,
+  ResumeHeaderAlignment,
   ResumeIconId,
   ResumeIconSettings,
   ResumeModuleId,
@@ -137,6 +138,11 @@ const colorOptions: Array<{ id: ResumeColorId; label: string; value: string }> =
 const nameSizeOptions = [24, 28, 32, 36, 38, 40];
 const sectionTitleSizeOptions = [13, 14, 15, 16, 18];
 const bodySizeOptions = [12, 13, 14, 15, 16];
+const headerAlignmentOptions: Array<{ id: ResumeHeaderAlignment; label: string }> = [
+  { id: "center", label: "居中" },
+  { id: "left", label: "靠左" },
+  { id: "right", label: "靠右" }
+];
 
 const iconStyleOptions: Record<keyof Omit<ResumeIconSettings, "enabled">, Array<{ id: ResumeIconId; label: string }>> = {
   phone: [
@@ -1166,6 +1172,12 @@ function StyleSettingsPanel({
           onChange={(value) => onChange({ bodyFont: value as ResumeFontId })}
         />
         <SelectField
+          label="基础信息位置"
+          value={settings.headerAlignment}
+          options={headerAlignmentOptions}
+          onChange={(value) => onChange({ headerAlignment: value as ResumeHeaderAlignment })}
+        />
+        <SelectField
           label="姓名字号"
           value={String(settings.nameSize)}
           options={nameSizeOptions.map((size) => ({ id: String(size), label: `${size}` }))}
@@ -1724,7 +1736,7 @@ function ResumePreview({
   };
 
   return (
-    <article className={`resume-paper template-${templateId}`} style={getResumeStyleVars(styleSettings)}>
+    <article className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`} style={getResumeStyleVars(styleSettings)}>
       <header className={`resume-head ${isPhotoEnabled ? `photo-${photoSettings.position}` : "photo-none"}`}>
         {isPhotoEnabled && photoSettings.position === "left" ? photoNode : null}
         <div className="resume-head-content">
