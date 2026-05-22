@@ -55,8 +55,17 @@ import { trackEvent } from "@/lib/analytics/track";
 import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { downloadResumeWord, printResumePdf } from "@/lib/export/resume-export";
 import { saveFeedback, type FeedbackTarget, type FeedbackVote } from "@/lib/feedback/store";
-import { createEmptyResume, normalizeIconSettings } from "@/lib/resume-schema/defaults";
-import type { Education, Experience, ResumeDocument, ResumeIconId, ResumeIconSettings } from "@/lib/resume-schema/types";
+import { createEmptyResume, normalizeIconSettings, normalizeStyleSettings } from "@/lib/resume-schema/defaults";
+import type {
+  Education,
+  Experience,
+  ResumeColorId,
+  ResumeDocument,
+  ResumeFontId,
+  ResumeIconId,
+  ResumeIconSettings,
+  ResumeStyleSettings
+} from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
 import type { ScoreDimension, ScoreReport } from "@/lib/scoring/types";
 import {
@@ -78,6 +87,28 @@ const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "leftBlue", label: "深蓝左栏" },
   { id: "minimalPm", label: "极简PM" }
 ];
+
+const fontOptions: Array<{ id: ResumeFontId; label: string; value: string }> = [
+  { id: "microsoftYahei", label: "微软雅黑", value: '"Microsoft YaHei", "PingFang SC", sans-serif' },
+  { id: "simsun", label: "宋体", value: '"SimSun", "Songti SC", serif' },
+  { id: "simhei", label: "黑体", value: '"SimHei", "Microsoft YaHei", sans-serif' },
+  { id: "kaiti", label: "楷体", value: '"KaiTi", "STKaiti", serif' },
+  { id: "fangsong", label: "仿宋", value: '"FangSong", "STFangsong", serif' },
+  { id: "pingfang", label: "苹方", value: '"PingFang SC", "Avenir Next", sans-serif' },
+  { id: "times", label: "Times New Roman", value: '"Times New Roman", "Songti SC", serif' },
+  { id: "georgia", label: "Georgia", value: 'Georgia, "Times New Roman", serif' }
+];
+
+const colorOptions: Array<{ id: ResumeColorId; label: string; value: string }> = [
+  { id: "black", label: "黑色", value: "#111111" },
+  { id: "darkGray", label: "深灰", value: "#4f5a54" },
+  { id: "darkBlue", label: "深蓝", value: "#294864" },
+  { id: "mossGreen", label: "墨绿", value: "#314934" }
+];
+
+const nameSizeOptions = [24, 28, 32, 36, 38, 40];
+const sectionTitleSizeOptions = [13, 14, 15, 16, 18];
+const bodySizeOptions = [12, 13, 14, 15, 16];
 
 const iconStyleOptions: Record<keyof Omit<ResumeIconSettings, "enabled">, Array<{ id: ResumeIconId; label: string }>> = {
   phone: [
@@ -204,6 +235,23 @@ const hasExperienceContent = (item: Experience) =>
 
 const maxPhotoSize = 2 * 1024 * 1024;
 
+const getFontValue = (fontId: ResumeFontId) => fontOptions.find((option) => option.id === fontId)?.value ?? fontOptions[0].value;
+
+const getColorValue = (colorId: ResumeColorId) => colorOptions.find((option) => option.id === colorId)?.value ?? colorOptions[0].value;
+
+const getResumeStyleVars = (settings: ResumeStyleSettings) =>
+  ({
+    "--resume-heading-font": getFontValue(settings.headingFont),
+    "--resume-body-font": getFontValue(settings.bodyFont),
+    "--resume-name-size": `${settings.nameSize}px`,
+    "--resume-section-title-size": `${settings.sectionTitleSize}px`,
+    "--resume-body-size": `${settings.bodySize}px`,
+    "--resume-name-color": getColorValue(settings.nameColor),
+    "--resume-section-title-color": getColorValue(settings.sectionTitleColor),
+    "--resume-body-color": getColorValue(settings.bodyColor),
+    "--resume-accent-color": getColorValue(settings.accentColor)
+  }) as React.CSSProperties;
+
 const getIconNode = (iconId: ResumeIconId, size = 14) => {
   const strokeWidth = 2;
 
@@ -315,6 +363,7 @@ export function ResumeWorkspace() {
   const [feedbackNotice, setFeedbackNotice] = useState("");
   const issues = validateResume(resume);
   const iconSettings = normalizeIconSettings(resume.iconSettings);
+  const styleSettings = normalizeStyleSettings(resume.styleSettings);
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -421,6 +470,16 @@ export function ResumeWorkspace() {
       ...current,
       iconSettings: {
         ...normalizeIconSettings(current.iconSettings),
+        ...nextSettings
+      }
+    }));
+  };
+
+  const updateStyleSettings = (nextSettings: Partial<ResumeStyleSettings>) => {
+    setResume((current) => ({
+      ...current,
+      styleSettings: {
+        ...normalizeStyleSettings(current.styleSettings),
         ...nextSettings
       }
     }));
@@ -713,6 +772,8 @@ export function ResumeWorkspace() {
 
             <IconSettingsPanel settings={iconSettings} onChange={updateIconSettings} />
 
+            <StyleSettingsPanel settings={styleSettings} onChange={updateStyleSettings} />
+
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="基础信息" />
             <div className="field-grid two">
               <TextField label="姓名" value={resume.profile.name} onChange={(value) => updateProfile("name", value)} />
@@ -953,6 +1014,107 @@ function IconSettingsPanel({
         ))}
       </div>
     </section>
+  );
+}
+
+function StyleSettingsPanel({
+  onChange,
+  settings
+}: {
+  onChange: (nextSettings: Partial<ResumeStyleSettings>) => void;
+  settings: ResumeStyleSettings;
+}) {
+  return (
+    <section className="style-settings-panel" aria-label="简历样式">
+      <div className="style-settings-head">
+        <div>
+          <span className="eyebrow">简历样式</span>
+          <strong>常用字体字号颜色</strong>
+        </div>
+        <LayoutTemplate size={18} />
+      </div>
+      <div className="style-settings-grid">
+        <SelectField
+          label="标题字体"
+          value={settings.headingFont}
+          options={fontOptions}
+          onChange={(value) => onChange({ headingFont: value as ResumeFontId })}
+        />
+        <SelectField
+          label="正文字体"
+          value={settings.bodyFont}
+          options={fontOptions}
+          onChange={(value) => onChange({ bodyFont: value as ResumeFontId })}
+        />
+        <SelectField
+          label="姓名字号"
+          value={String(settings.nameSize)}
+          options={nameSizeOptions.map((size) => ({ id: String(size), label: `${size}` }))}
+          onChange={(value) => onChange({ nameSize: Number(value) })}
+        />
+        <SelectField
+          label="标题字号"
+          value={String(settings.sectionTitleSize)}
+          options={sectionTitleSizeOptions.map((size) => ({ id: String(size), label: `${size}` }))}
+          onChange={(value) => onChange({ sectionTitleSize: Number(value) })}
+        />
+        <SelectField
+          label="正文字号"
+          value={String(settings.bodySize)}
+          options={bodySizeOptions.map((size) => ({ id: String(size), label: `${size}` }))}
+          onChange={(value) => onChange({ bodySize: Number(value) })}
+        />
+        <SelectField
+          label="姓名颜色"
+          value={settings.nameColor}
+          options={colorOptions}
+          onChange={(value) => onChange({ nameColor: value as ResumeColorId })}
+        />
+        <SelectField
+          label="标题颜色"
+          value={settings.sectionTitleColor}
+          options={colorOptions}
+          onChange={(value) => onChange({ sectionTitleColor: value as ResumeColorId })}
+        />
+        <SelectField
+          label="正文颜色"
+          value={settings.bodyColor}
+          options={colorOptions}
+          onChange={(value) => onChange({ bodyColor: value as ResumeColorId })}
+        />
+        <SelectField
+          label="强调色"
+          value={settings.accentColor}
+          options={colorOptions}
+          onChange={(value) => onChange({ accentColor: value as ResumeColorId })}
+        />
+      </div>
+    </section>
+  );
+}
+
+function SelectField({
+  label,
+  onChange,
+  options,
+  value
+}: {
+  label: string;
+  onChange: (value: string) => void;
+  options: Array<{ id: string; label: string }>;
+  value: string;
+}) {
+  return (
+    <label className="select-field">
+      <span>{label}</span>
+      <select value={value} onChange={(event) => onChange(event.target.value)}>
+        {options.map((option) => (
+          <option key={option.id} value={option.id}>
+            {option.label}
+          </option>
+        ))}
+      </select>
+    </label>
   );
 }
 
@@ -1197,6 +1359,7 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
   const skills = nonEmpty(resume.skills);
   const awards = nonEmpty(resume.awards);
   const iconSettings = normalizeIconSettings(resume.iconSettings);
+  const styleSettings = normalizeStyleSettings(resume.styleSettings);
   const iconEnabled = iconSettings.enabled;
   const contactItems = [
     { icon: iconSettings.phone, text: resume.profile.phone || "电话" },
@@ -1205,7 +1368,7 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
   ];
 
   return (
-    <article className={`resume-paper template-${templateId}`}>
+    <article className={`resume-paper template-${templateId}`} style={getResumeStyleVars(styleSettings)}>
       <header className="resume-head">
         <div>
           <h2>{resume.profile.name || "你的姓名"}</h2>

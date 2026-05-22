@@ -1,4 +1,4 @@
-import type { ResumeDocument, ResumeIconId, ResumeIconSettings } from "./types";
+import type { ResumeDocument, ResumeColorId, ResumeFontId, ResumeIconId, ResumeIconSettings, ResumeStyleSettings } from "./types";
 
 const createId = () => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -21,6 +21,7 @@ export const createEmptyResume = (): ResumeDocument => ({
     photo: undefined
   },
   iconSettings: createDefaultIconSettings(),
+  styleSettings: createDefaultStyleSettings(),
   personalSummary: "",
   strengths: ["", "", ""],
   education: [
@@ -96,5 +97,44 @@ export function normalizeIconSettings(settings?: Partial<ResumeIconSettings>): R
     campusExperience: legacyMap[next.campusExperience] ?? next.campusExperience,
     skills: legacyMap[next.skills] ?? next.skills,
     awards: legacyMap[next.awards] ?? next.awards
+  };
+}
+
+export function createDefaultStyleSettings(): ResumeStyleSettings {
+  return {
+    headingFont: "georgia",
+    bodyFont: "pingfang",
+    nameSize: 38,
+    sectionTitleSize: 15,
+    bodySize: 14,
+    nameColor: "black",
+    sectionTitleColor: "mossGreen",
+    bodyColor: "black",
+    accentColor: "mossGreen"
+  };
+}
+
+const fontIds: ResumeFontId[] = ["microsoftYahei", "simsun", "simhei", "kaiti", "fangsong", "pingfang", "times", "georgia"];
+const colorIds: ResumeColorId[] = ["black", "darkGray", "darkBlue", "mossGreen"];
+const nameSizes = [24, 28, 32, 36, 38, 40];
+const sectionTitleSizes = [13, 14, 15, 16, 18];
+const bodySizes = [12, 13, 14, 15, 16];
+
+const pickOption = <T>(value: unknown, options: T[], fallback: T): T => (options.includes(value as T) ? (value as T) : fallback);
+
+export function normalizeStyleSettings(settings?: Partial<ResumeStyleSettings>): ResumeStyleSettings {
+  const defaults = createDefaultStyleSettings();
+  const next = { ...defaults, ...settings };
+
+  return {
+    headingFont: pickOption(next.headingFont, fontIds, defaults.headingFont),
+    bodyFont: pickOption(next.bodyFont, fontIds, defaults.bodyFont),
+    nameSize: pickOption(next.nameSize, nameSizes, defaults.nameSize),
+    sectionTitleSize: pickOption(next.sectionTitleSize, sectionTitleSizes, defaults.sectionTitleSize),
+    bodySize: pickOption(next.bodySize, bodySizes, defaults.bodySize),
+    nameColor: pickOption(next.nameColor, colorIds, defaults.nameColor),
+    sectionTitleColor: pickOption(next.sectionTitleColor, colorIds, defaults.sectionTitleColor),
+    bodyColor: pickOption(next.bodyColor, colorIds, defaults.bodyColor),
+    accentColor: pickOption(next.accentColor, colorIds, defaults.accentColor)
   };
 }

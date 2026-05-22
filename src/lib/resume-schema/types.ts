@@ -94,12 +94,29 @@ export type ResumeIconSettings = {
   awards: ResumeIconId;
 };
 
+export type ResumeFontId = "microsoftYahei" | "simsun" | "simhei" | "kaiti" | "fangsong" | "pingfang" | "times" | "georgia";
+
+export type ResumeColorId = "black" | "darkGray" | "darkBlue" | "mossGreen";
+
+export type ResumeStyleSettings = {
+  headingFont: ResumeFontId;
+  bodyFont: ResumeFontId;
+  nameSize: number;
+  sectionTitleSize: number;
+  bodySize: number;
+  nameColor: ResumeColorId;
+  sectionTitleColor: ResumeColorId;
+  bodyColor: ResumeColorId;
+  accentColor: ResumeColorId;
+};
+
 export type ResumeDocument = {
   schemaVersion: 1;
   id: string;
   updatedAt: string;
   profile: ResumeProfile;
   iconSettings?: ResumeIconSettings;
+  styleSettings?: ResumeStyleSettings;
   personalSummary: string;
   strengths: string[];
   education: Education[];

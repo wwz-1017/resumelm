@@ -374,6 +374,51 @@ button {
   opacity: 0.55;
 }
 
+.style-settings-panel {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid #dfe4d8;
+  border-radius: 8px;
+  background: #fffefa;
+}
+
+.style-settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  color: var(--moss-dark);
+}
+
+.style-settings-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.style-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.select-field {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.select-field select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 9px;
+  background: #fffefa;
+  color: var(--ink);
+}
+
 .section-title {
   display: flex;
   align-items: center;
@@ -882,6 +927,15 @@ button {
 }
 
 .resume-paper {
+  --resume-heading-font: Georgia, "Times New Roman", serif;
+  --resume-body-font: "PingFang SC", "Avenir Next", sans-serif;
+  --resume-name-size: 38px;
+  --resume-section-title-size: 15px;
+  --resume-body-size: 14px;
+  --resume-name-color: #111111;
+  --resume-section-title-color: var(--moss-dark);
+  --resume-body-color: #111111;
+  --resume-accent-color: var(--moss-dark);
   min-height: 1123px;
   width: 100%;
   max-width: 794px;
@@ -889,6 +943,9 @@ button {
   padding: 36px;
   border: 1px solid #e1ded3;
   background: #fffefb;
+  color: var(--resume-body-color);
+  font-family: var(--resume-body-font);
+  font-size: var(--resume-body-size);
 }
 
 .resume-head {
@@ -898,12 +955,14 @@ button {
   gap: 24px;
   padding-bottom: 18px;
   border-bottom: 3px solid var(--moss-dark);
+  border-bottom-color: var(--resume-accent-color);
 }
 
 .resume-head h2 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
-  font-size: 38px;
+  color: var(--resume-name-color);
+  font-family: var(--resume-heading-font);
+  font-size: var(--resume-name-size);
   letter-spacing: 0;
 }
 
@@ -957,7 +1016,7 @@ button {
 
 .resume-target {
   align-self: flex-end;
-  color: var(--moss-dark);
+  color: var(--resume-accent-color);
   flex-wrap: wrap;
   font-weight: 800;
 }
@@ -972,14 +1031,15 @@ button {
 
 .resume-section h3 {
   margin: 0 0 10px;
-  color: var(--moss-dark);
-  font-size: 15px;
+  color: var(--resume-section-title-color);
+  font-family: var(--resume-heading-font);
+  font-size: var(--resume-section-title-size);
   letter-spacing: 0.08em;
 }
 
 .resume-section p {
   margin: 0;
-  color: #303832;
+  color: var(--resume-body-color);
   line-height: 1.72;
 }
 
@@ -997,11 +1057,11 @@ button {
 }
 
 .resume-row strong {
-  color: var(--ink);
+  color: var(--resume-body-color);
 }
 
 .muted {
-  color: var(--muted);
+  color: color-mix(in srgb, var(--resume-body-color) 72%, #ffffff);
 }
 
 .skill-list {
@@ -1018,8 +1078,8 @@ button {
 }
 
 .template-useful {
-  --template-main: #5f7899;
-  --template-soft: #eef3f7;
+  --template-main: var(--resume-accent-color);
+  --template-soft: color-mix(in srgb, var(--resume-accent-color) 10%, #ffffff);
   border: 12px solid #c8cdd1;
   background: #ffffff;
 }
@@ -1029,27 +1089,30 @@ button {
   padding: 14px 18px;
   border: 0;
   border-radius: 3px;
-  background: linear-gradient(90deg, var(--template-main), #8da4bd);
-  color: #ffffff;
-}
-
-.template-useful .resume-head h2,
-.template-useful .resume-head p,
-.template-useful .resume-target {
-  color: #ffffff;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--template-main) 18%, #ffffff), #ffffff);
+  color: var(--resume-body-color);
 }
 
 .template-useful .resume-head h2 {
-  font-size: 30px;
+  color: var(--resume-name-color);
+}
+
+.template-useful .resume-head p {
+  color: var(--resume-body-color);
+}
+
+.template-useful .resume-target {
+  color: var(--resume-accent-color);
 }
 
 .template-useful .resume-section h3 {
   display: inline-flex;
   min-width: 104px;
   padding: 5px 14px;
+  border: 1px solid color-mix(in srgb, var(--template-main) 34%, #ffffff);
   border-radius: 999px;
-  background: var(--template-main);
-  color: #ffffff;
+  background: var(--template-soft);
+  color: var(--resume-section-title-color);
   letter-spacing: 0.02em;
 }
 
@@ -1061,12 +1124,12 @@ button {
 .template-useful .skill-list span {
   background: var(--template-soft);
   border-color: #cbd8e4;
-  color: #38536d;
+  color: var(--resume-accent-color);
 }
 
 .template-simple {
-  --template-main: #6e7f7c;
-  --template-gold: #b7975f;
+  --template-main: var(--resume-accent-color);
+  --template-gold: var(--resume-accent-color);
   border: 12px solid #c9ced0;
   background: #ffffff;
 }
@@ -1074,10 +1137,6 @@ button {
 .template-simple .resume-head {
   align-items: center;
   border-bottom: 5px solid var(--template-gold);
-}
-
-.template-simple .resume-head h2 {
-  font-size: 30px;
 }
 
 .template-simple .resume-photo {
@@ -1094,8 +1153,9 @@ button {
 .template-simple .resume-section h3 {
   position: relative;
   padding: 5px 12px;
-  background: var(--template-main);
-  color: #ffffff;
+  border: 1px solid color-mix(in srgb, var(--template-main) 34%, #ffffff);
+  background: color-mix(in srgb, var(--template-main) 12%, #ffffff);
+  color: var(--resume-section-title-color);
   letter-spacing: 0.02em;
 }
 
@@ -1106,11 +1166,11 @@ button {
   top: 0;
   border-top: 14px solid transparent;
   border-bottom: 14px solid transparent;
-  border-left: 14px solid var(--template-main);
+  border-left: 14px solid color-mix(in srgb, var(--template-main) 12%, #ffffff);
 }
 
 .template-graduate {
-  --template-main: #2d4f6b;
+  --template-main: var(--resume-accent-color);
   border: 12px solid #c9ced0;
   border-top-width: 18px;
   border-bottom-width: 18px;
@@ -1126,11 +1186,6 @@ button {
   padding-top: 20px;
 }
 
-.template-graduate .resume-head h2 {
-  font-family: "Avenir Next", "PingFang SC", sans-serif;
-  font-size: 27px;
-}
-
 .template-graduate .resume-photo {
   display: grid;
   place-items: center;
@@ -1143,7 +1198,7 @@ button {
 }
 
 .template-graduate .resume-target {
-  color: var(--template-main);
+  color: var(--resume-accent-color);
 }
 
 .template-graduate .resume-section {
@@ -1153,11 +1208,11 @@ button {
 .template-graduate .resume-section h3 {
   padding-bottom: 6px;
   border-bottom: 2px solid #dce4ea;
-  color: var(--template-main);
+  color: var(--resume-section-title-color);
 }
 
 .template-brick {
-  --template-main: #d65e57;
+  --template-main: var(--resume-accent-color);
   display: grid;
   grid-template-columns: 180px minmax(0, 1fr);
   column-gap: 30px;
@@ -1182,8 +1237,7 @@ button {
 }
 
 .template-brick .resume-head h2 {
-  color: var(--template-main);
-  font-size: 25px;
+  color: var(--resume-name-color);
   line-height: 1.16;
   overflow-wrap: anywhere;
   text-align: center;
@@ -1241,7 +1295,7 @@ button {
 
 .template-brick .resume-target {
   align-self: stretch;
-  color: var(--template-main);
+  color: var(--resume-accent-color);
 }
 
 .template-brick .resume-section {
@@ -1254,7 +1308,7 @@ button {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: var(--template-main);
+  color: var(--resume-section-title-color);
 }
 
 .template-brick .resume-section h3::before {
@@ -1271,7 +1325,7 @@ button {
 }
 
 .template-leftBlue {
-  --template-main: #294864;
+  --template-main: var(--resume-accent-color);
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
   column-gap: 30px;
@@ -1295,9 +1349,8 @@ button {
 }
 
 .template-leftBlue .resume-head h2 {
-  font-family: "Avenir Next", "PingFang SC", sans-serif;
+  font-family: var(--resume-heading-font);
   color: #ffffff;
-  font-size: 23px;
   line-height: 1.2;
   overflow-wrap: anywhere;
 }
@@ -1346,13 +1399,13 @@ button {
 .template-leftBlue .resume-section h3 {
   padding-bottom: 8px;
   border-bottom: 2px solid #d7e0e7;
-  color: var(--template-main);
+  color: var(--resume-section-title-color);
 }
 
 .template-leftBlue .skill-list span {
   border-color: #cad8e3;
   background: #f3f7fa;
-  color: var(--template-main);
+  color: var(--resume-accent-color);
 }
 
 .template-minimalPm {
@@ -1360,9 +1413,8 @@ button {
   padding: 26px 40px 28px;
   border: 1px solid #d8d8d8;
   background: #ffffff;
-  color: #111111;
-  font-family: "Times New Roman", "Songti SC", "SimSun", serif;
-  font-size: 13px;
+  color: var(--resume-body-color);
+  font-family: var(--resume-body-font);
   line-height: 1.42;
 }
 
@@ -1375,16 +1427,15 @@ button {
 
 .template-minimalPm .resume-head h2 {
   margin-bottom: 4px;
-  color: #111111;
-  font-family: "Times New Roman", "Songti SC", "SimSun", serif;
-  font-size: 18px;
+  color: var(--resume-name-color);
+  font-family: var(--resume-heading-font);
   font-weight: 800;
   line-height: 1.2;
 }
 
 .template-minimalPm .resume-head p {
   margin: 0;
-  color: #111111;
+  color: var(--resume-body-color);
   font-size: 12px;
 }
 
@@ -1395,7 +1446,7 @@ button {
 .template-minimalPm .resume-target {
   display: inline-block;
   margin-top: 4px;
-  color: #111111;
+  color: var(--resume-accent-color);
   font-size: 12px;
   font-weight: 700;
 }
@@ -1408,8 +1459,7 @@ button {
   margin-bottom: 5px;
   padding-bottom: 3px;
   border-bottom: 1px solid #111111;
-  color: #111111;
-  font-size: 14px;
+  color: var(--resume-section-title-color);
   font-weight: 800;
   letter-spacing: 0;
 }
@@ -1420,8 +1470,7 @@ button {
 
 .template-minimalPm .resume-row {
   margin-bottom: 3px;
-  color: #111111;
-  font-size: 13px;
+  color: var(--resume-body-color);
 }
 
 .template-minimalPm .resume-row strong {
@@ -1429,13 +1478,12 @@ button {
 }
 
 .template-minimalPm .muted {
-  color: #111111;
+  color: var(--resume-body-color);
 }
 
 .template-minimalPm .resume-section p,
 .template-minimalPm .resume-list {
-  color: #111111;
-  font-size: 12.5px;
+  color: var(--resume-body-color);
   line-height: 1.48;
 }
 
@@ -1453,12 +1501,12 @@ button {
   border: 0;
   border-radius: 0;
   background: transparent;
-  color: #111111;
+  color: var(--resume-body-color);
 }
 
 .template-minimalPm .skill-list span + span::before {
   content: " / ";
-  color: #111111;
+  color: var(--resume-body-color);
 }
 
 .notice {
