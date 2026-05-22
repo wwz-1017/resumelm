@@ -17,6 +17,12 @@ export type ResumePhoto = {
   };
 };
 
+export type ResumePhotoSettings = {
+  visible: boolean;
+  width: number;
+  height: number;
+};
+
 export type Education = {
   school: string;
   degree: string;
@@ -131,6 +137,7 @@ export type ResumeDocument = {
   iconSettings?: ResumeIconSettings;
   styleSettings?: ResumeStyleSettings;
   visibilitySettings?: ResumeVisibilitySettings;
+  photoSettings?: ResumePhotoSettings;
   moduleOrder?: ResumeModuleId[];
   personalSummary: string;
   strengths: string[];

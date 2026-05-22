@@ -5,6 +5,7 @@ import type {
   ResumeIconId,
   ResumeIconSettings,
   ResumeModuleId,
+  ResumePhotoSettings,
   ResumeStyleSettings,
   ResumeVisibilitySettings
 } from "./types";
@@ -32,6 +33,7 @@ export const createEmptyResume = (): ResumeDocument => ({
   iconSettings: createDefaultIconSettings(),
   styleSettings: createDefaultStyleSettings(),
   visibilitySettings: createDefaultVisibilitySettings(),
+  photoSettings: createDefaultPhotoSettings(),
   moduleOrder: createDefaultModuleOrder(),
   personalSummary: "",
   strengths: ["", "", ""],
@@ -181,4 +183,23 @@ export function normalizeModuleOrder(order?: ResumeModuleId[]): ResumeModuleId[]
   const missingIds = defaults.filter((moduleId) => !uniqueOrder.includes(moduleId));
 
   return [...uniqueOrder, ...missingIds];
+}
+
+export function createDefaultPhotoSettings(): ResumePhotoSettings {
+  return {
+    visible: true,
+    width: 88,
+    height: 110
+  };
+}
+
+export function normalizePhotoSettings(settings?: Partial<ResumePhotoSettings>): ResumePhotoSettings {
+  const defaults = createDefaultPhotoSettings();
+  const next = { ...defaults, ...settings };
+
+  return {
+    visible: typeof next.visible === "boolean" ? next.visible : defaults.visible,
+    width: Math.min(180, Math.max(56, Number.isFinite(next.width) ? next.width : defaults.width)),
+    height: Math.min(220, Math.max(70, Number.isFinite(next.height) ? next.height : defaults.height))
+  };
 }

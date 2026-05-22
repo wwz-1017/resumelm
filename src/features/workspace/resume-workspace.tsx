@@ -51,7 +51,8 @@ import {
   Trophy,
   Trash2,
   User,
-  UserRound
+  UserRound,
+  X
 } from "lucide-react";
 import { getDashboardMetrics, type DashboardMetrics } from "@/lib/analytics/dashboard";
 import { trackEvent } from "@/lib/analytics/track";
@@ -62,6 +63,7 @@ import {
   createEmptyResume,
   normalizeIconSettings,
   normalizeModuleOrder,
+  normalizePhotoSettings,
   normalizeStyleSettings,
   normalizeVisibilitySettings
 } from "@/lib/resume-schema/defaults";
@@ -74,6 +76,7 @@ import type {
   ResumeIconId,
   ResumeIconSettings,
   ResumeModuleId,
+  ResumePhotoSettings,
   ResumeStyleSettings,
   ResumeVisibilitySettings
 } from "@/lib/resume-schema/types";
@@ -387,6 +390,7 @@ export function ResumeWorkspace() {
   const iconSettings = normalizeIconSettings(resume.iconSettings);
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
+  const photoSettings = normalizePhotoSettings(resume.photoSettings);
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -449,6 +453,10 @@ export function ResumeWorkspace() {
               zoom: 1
             }
           }
+        },
+        photoSettings: {
+          ...normalizePhotoSettings(current.photoSettings),
+          visible: true
         }
       }));
       setImportError("");
@@ -484,6 +492,16 @@ export function ResumeWorkspace() {
       profile: {
         ...current.profile,
         photo: undefined
+      }
+    }));
+  };
+
+  const updatePhotoSettings = (nextSettings: Partial<ResumePhotoSettings>) => {
+    setResume((current) => ({
+      ...current,
+      photoSettings: {
+        ...normalizePhotoSettings(current.photoSettings),
+        ...nextSettings
       }
     }));
   };
@@ -602,6 +620,7 @@ export function ResumeWorkspace() {
         iconSettings: normalizeIconSettings(parsed.iconSettings),
         styleSettings: normalizeStyleSettings(parsed.styleSettings),
         visibilitySettings: normalizeVisibilitySettings(parsed.visibilitySettings),
+        photoSettings: normalizePhotoSettings(parsed.photoSettings),
         moduleOrder: normalizeModuleOrder(parsed.moduleOrder)
       });
       setImportError("");
@@ -847,8 +866,10 @@ export function ResumeWorkspace() {
             </div>
             <PhotoUploadPanel
               photo={resume.profile.photo}
+              photoSettings={photoSettings}
               onCropChange={updatePhotoCrop}
               onRemove={removePhoto}
+              onSettingsChange={updatePhotoSettings}
               onUpload={uploadPhoto}
             />
 
@@ -1002,6 +1023,8 @@ export function ResumeWorkspace() {
           <ResumePreview
             resume={resume}
             templateId={templateId}
+            onPhotoCropChange={updatePhotoCrop}
+            onPhotoSettingsChange={updatePhotoSettings}
             onSwapModules={swapModules}
             onToggleVisibility={toggleVisibility}
           />
@@ -1352,13 +1375,17 @@ function TextAreaField({ label, onChange, value }: { label: string; onChange: (v
 function PhotoUploadPanel({
   onCropChange,
   onRemove,
+  onSettingsChange,
   onUpload,
-  photo
+  photo,
+  photoSettings
 }: {
   onCropChange: (field: "x" | "y" | "zoom", value: number) => void;
   onRemove: () => void;
+  onSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   photo: ResumeDocument["profile"]["photo"];
+  photoSettings: ResumePhotoSettings;
 }) {
   return (
     <section className="photo-upload-panel" aria-label="头像上传与裁剪">
@@ -1374,6 +1401,11 @@ function PhotoUploadPanel({
         </label>
       </div>
       <p>支持 JPG、PNG、WebP，2MB 以内。上传后只保存在当前浏览器草稿中。</p>
+      {!photoSettings.visible ? (
+        <button className="secondary-button" type="button" onClick={() => onSettingsChange({ visible: true })}>
+          恢复显示照片
+        </button>
+      ) : null}
       {photo ? (
         <div className="photo-crop-box">
           <div className="photo-crop-preview">
@@ -1419,6 +1451,70 @@ function PhotoUploadPanel({
         </div>
       ) : null}
     </section>
+  );
+}
+
+function PhotoStylePopover({
+  hasPhoto,
+  onCropChange,
+  onSettingsChange,
+  photo,
+  settings
+}: {
+  hasPhoto: boolean;
+  onCropChange: (field: "x" | "y" | "zoom", value: number) => void;
+  onSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
+  photo: ResumeDocument["profile"]["photo"];
+  settings: ResumePhotoSettings;
+}) {
+  return (
+    <div className="photo-style-popover" onClick={(event) => event.stopPropagation()}>
+      <div>
+        <span className="eyebrow">照片样式</span>
+        <strong>裁剪 / 大小 / 位置</strong>
+      </div>
+      <RangeField
+        label="宽度"
+        max={180}
+        min={56}
+        step={1}
+        value={settings.width}
+        onChange={(value) => onSettingsChange({ width: value })}
+      />
+      <RangeField
+        label="高度"
+        max={220}
+        min={70}
+        step={1}
+        value={settings.height}
+        onChange={(value) => onSettingsChange({ height: value })}
+      />
+      <RangeField
+        label="左右位置"
+        max={100}
+        min={0}
+        step={1}
+        value={photo?.crop.x ?? 50}
+        onChange={(value) => onCropChange("x", value)}
+      />
+      <RangeField
+        label="上下位置"
+        max={100}
+        min={0}
+        step={1}
+        value={photo?.crop.y ?? 50}
+        onChange={(value) => onCropChange("y", value)}
+      />
+      <RangeField
+        label="裁剪缩放"
+        max={1.8}
+        min={1}
+        step={0.05}
+        value={photo?.crop.zoom ?? 1}
+        onChange={(value) => onCropChange("zoom", value)}
+      />
+      {!hasPhoto ? <p>上传照片后可以继续微调裁剪位置。</p> : null}
+    </div>
   );
 }
 
@@ -1497,11 +1593,15 @@ function ExperienceEditor({
 }
 
 function ResumePreview({
+  onPhotoCropChange,
+  onPhotoSettingsChange,
   onSwapModules,
   onToggleVisibility,
   resume,
   templateId
 }: {
+  onPhotoCropChange: (field: "x" | "y" | "zoom", value: number) => void;
+  onPhotoSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onSwapModules: (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => void;
   onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
   resume: ResumeDocument;
@@ -1509,6 +1609,7 @@ function ResumePreview({
 }) {
   const [draggingModule, setDraggingModule] = useState<ResumeModuleId | null>(null);
   const [dragOverModule, setDragOverModule] = useState<ResumeModuleId | null>(null);
+  const [isPhotoStyleOpen, setIsPhotoStyleOpen] = useState(false);
   const internships = resume.internships.filter(hasExperienceContent);
   const projects = resume.projects.filter(hasExperienceContent);
   const campusExperience = resume.campusExperience.filter(hasExperienceContent);
@@ -1517,6 +1618,7 @@ function ResumePreview({
   const iconSettings = normalizeIconSettings(resume.iconSettings);
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
+  const photoSettings = normalizePhotoSettings(resume.photoSettings);
   const moduleOrder = normalizeModuleOrder(resume.moduleOrder);
   const iconEnabled = iconSettings.enabled;
   const contactItems = [
@@ -1524,6 +1626,30 @@ function ResumePreview({
     { icon: iconSettings.email, text: resume.profile.email || "邮箱" },
     { icon: iconSettings.city, text: resume.profile.city || "城市" }
   ];
+  const startPhotoResize = (event: React.MouseEvent<HTMLSpanElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startWidth = photoSettings.width;
+    const startHeight = photoSettings.height;
+
+    const handleMove = (moveEvent: MouseEvent) => {
+      onPhotoSettingsChange({
+        width: Math.min(180, Math.max(56, startWidth + moveEvent.clientX - startX)),
+        height: Math.min(220, Math.max(70, startHeight + moveEvent.clientY - startY))
+      });
+    };
+
+    const handleUp = () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+  };
   const getModuleControls = (moduleId: ResumeModuleId) => (
     <ResumeModuleControls
       isVisible={visibilitySettings[moduleId]}
@@ -1642,21 +1768,57 @@ function ResumePreview({
             ))}
           </p>
         </div>
-        <div className="resume-photo" aria-label={resume.profile.photo ? "简历头像" : "照片占位"}>
-          {resume.profile.photo ? (
-            /* eslint-disable-next-line @next/next/no-img-element -- Resume exports need a plain img with the local data URL. */
-            <img
-              alt="简历头像"
-              src={resume.profile.photo.dataUrl}
+        {photoSettings.visible ? (
+          <div
+            className="resume-photo-wrap"
+            onContextMenu={(event) => {
+              event.preventDefault();
+              setIsPhotoStyleOpen((isOpen) => !isOpen);
+            }}
+          >
+            <button
+              aria-label="隐藏照片"
+              className="resume-photo-remove"
+              title="隐藏照片"
+              type="button"
+              onClick={() => onPhotoSettingsChange({ visible: false })}
+            >
+              <X size={13} />
+            </button>
+            <div
+              className="resume-photo"
+              aria-label={resume.profile.photo ? "简历头像" : "照片占位"}
               style={{
-                objectPosition: `${resume.profile.photo.crop.x}% ${resume.profile.photo.crop.y}%`,
-                transform: `scale(${resume.profile.photo.crop.zoom})`
+                width: photoSettings.width,
+                height: photoSettings.height
               }}
-            />
-          ) : (
-            "照片"
-          )}
-        </div>
+            >
+              {resume.profile.photo ? (
+                /* eslint-disable-next-line @next/next/no-img-element -- Resume exports need a plain img with the local data URL. */
+                <img
+                  alt="简历头像"
+                  src={resume.profile.photo.dataUrl}
+                  style={{
+                    objectPosition: `${resume.profile.photo.crop.x}% ${resume.profile.photo.crop.y}%`,
+                    transform: `scale(${resume.profile.photo.crop.zoom})`
+                  }}
+                />
+              ) : (
+                "照片"
+              )}
+              <span className="resume-photo-resize" aria-hidden="true" onMouseDown={startPhotoResize} />
+            </div>
+            {isPhotoStyleOpen ? (
+              <PhotoStylePopover
+                hasPhoto={Boolean(resume.profile.photo)}
+                photo={resume.profile.photo}
+                settings={photoSettings}
+                onCropChange={onPhotoCropChange}
+                onSettingsChange={onPhotoSettingsChange}
+              />
+            ) : null}
+          </div>
+        ) : null}
         <div className="resume-target">
           <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
           <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</span>

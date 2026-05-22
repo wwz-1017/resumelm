@@ -2,6 +2,7 @@ import {
   createEmptyResume,
   normalizeIconSettings,
   normalizeModuleOrder,
+  normalizePhotoSettings,
   normalizeStyleSettings,
   normalizeVisibilitySettings
 } from "@/lib/resume-schema/defaults";
@@ -40,6 +41,7 @@ export const loadResume = (): ResumeDocument => {
           iconSettings: normalizeIconSettings(parsed.iconSettings),
           styleSettings: normalizeStyleSettings(parsed.styleSettings),
           visibilitySettings: normalizeVisibilitySettings(parsed.visibilitySettings),
+          photoSettings: normalizePhotoSettings(parsed.photoSettings),
           moduleOrder: normalizeModuleOrder(parsed.moduleOrder)
         }
       : createEmptyResume();
