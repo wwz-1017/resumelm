@@ -1054,6 +1054,35 @@ button {
   margin-top: 24px;
 }
 
+.resume-module-frame {
+  margin-top: 20px;
+  padding: 10px;
+  border: 1px dashed rgba(101, 114, 105, 0.26);
+  border-radius: 12px;
+  cursor: grab;
+  transition:
+    border-color 0.18s ease,
+    background 0.18s ease,
+    box-shadow 0.18s ease,
+    opacity 0.18s ease;
+}
+
+.resume-module-frame:hover,
+.resume-module-frame.is-drop-target {
+  border-color: color-mix(in srgb, var(--resume-accent-color) 68%, #ffffff);
+  background: color-mix(in srgb, var(--resume-accent-color) 5%, #ffffff);
+  box-shadow: 0 10px 24px rgba(31, 39, 34, 0.08);
+}
+
+.resume-module-frame.is-dragging {
+  cursor: grabbing;
+  opacity: 0.52;
+}
+
+.resume-module-frame > .resume-section {
+  margin-top: 0;
+}
+
 .resume-edit-controls {
   position: absolute;
   top: -14px;
@@ -1090,6 +1119,16 @@ button {
   background: transparent;
   color: var(--resume-accent-color);
   cursor: pointer;
+}
+
+.resume-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--muted);
+  cursor: grab;
 }
 
 .resume-edit-controls button:hover:not(:disabled) {
@@ -1397,6 +1436,16 @@ button {
   margin-bottom: 22px;
 }
 
+.template-brick .resume-module-frame {
+  grid-column: 2;
+  margin-top: 0;
+  margin-bottom: 22px;
+}
+
+.template-brick .resume-module-frame > .resume-section {
+  margin-bottom: 0;
+}
+
 .template-brick .resume-section h3 {
   display: flex;
   align-items: center;
@@ -1485,7 +1534,16 @@ button {
   margin-right: 36px;
 }
 
-.template-leftBlue .resume-section:first-of-type {
+.template-leftBlue .resume-module-frame {
+  grid-column: 2;
+  margin-right: 36px;
+}
+
+.template-leftBlue .resume-module-frame > .resume-section {
+  margin-right: 0;
+}
+
+.template-leftBlue .resume-module-frame:first-of-type {
   margin-top: 38px;
 }
 
@@ -1599,6 +1657,13 @@ button {
 }
 
 @media print {
+  .resume-module-frame {
+    margin-top: 24px;
+    padding: 0;
+    border: 0;
+    box-shadow: none;
+  }
+
   .resume-edit-controls,
   .resume-hidden-placeholder {
     display: none !important;

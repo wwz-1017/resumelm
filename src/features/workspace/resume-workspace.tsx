@@ -2,11 +2,9 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { ChangeEvent, Fragment, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useState } from "react";
 import {
   Activity,
-  ArrowDown,
-  ArrowUp,
   Award,
   BadgeCheck,
   BookOpen,
@@ -24,6 +22,7 @@ import {
   FileText,
   FileUp,
   GraduationCap,
+  GripVertical,
   Heart,
   Headphones,
   IdCard,
@@ -523,16 +522,18 @@ export function ResumeWorkspace() {
     });
   };
 
-  const moveModule = (moduleId: ResumeModuleId, direction: "up" | "down") => {
+  const swapModules = (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => {
+    if (sourceModuleId === targetModuleId) return;
+
     setResume((current) => {
       const currentOrder = normalizeModuleOrder(current.moduleOrder);
-      const currentIndex = currentOrder.indexOf(moduleId);
-      const targetIndex = direction === "up" ? currentIndex - 1 : currentIndex + 1;
+      const sourceIndex = currentOrder.indexOf(sourceModuleId);
+      const targetIndex = currentOrder.indexOf(targetModuleId);
 
-      if (currentIndex < 0 || targetIndex < 0 || targetIndex >= currentOrder.length) return current;
+      if (sourceIndex < 0 || targetIndex < 0) return current;
 
       const nextOrder = [...currentOrder];
-      [nextOrder[currentIndex], nextOrder[targetIndex]] = [nextOrder[targetIndex], nextOrder[currentIndex]];
+      [nextOrder[sourceIndex], nextOrder[targetIndex]] = [nextOrder[targetIndex], nextOrder[sourceIndex]];
 
       return {
         ...current,
@@ -1001,7 +1002,7 @@ export function ResumeWorkspace() {
           <ResumePreview
             resume={resume}
             templateId={templateId}
-            onMoveModule={moveModule}
+            onSwapModules={swapModules}
             onToggleVisibility={toggleVisibility}
           />
         </section>
@@ -1496,16 +1497,18 @@ function ExperienceEditor({
 }
 
 function ResumePreview({
-  onMoveModule,
+  onSwapModules,
   onToggleVisibility,
   resume,
   templateId
 }: {
-  onMoveModule: (moduleId: ResumeModuleId, direction: "up" | "down") => void;
+  onSwapModules: (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => void;
   onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
   resume: ResumeDocument;
   templateId: TemplateId;
 }) {
+  const [draggingModule, setDraggingModule] = useState<ResumeModuleId | null>(null);
+  const [dragOverModule, setDragOverModule] = useState<ResumeModuleId | null>(null);
   const internships = resume.internships.filter(hasExperienceContent);
   const projects = resume.projects.filter(hasExperienceContent);
   const campusExperience = resume.campusExperience.filter(hasExperienceContent);
@@ -1523,11 +1526,8 @@ function ResumePreview({
   ];
   const getModuleControls = (moduleId: ResumeModuleId) => (
     <ResumeModuleControls
-      isFirst={moduleOrder.indexOf(moduleId) === 0}
-      isLast={moduleOrder.indexOf(moduleId) === moduleOrder.length - 1}
       isVisible={visibilitySettings[moduleId]}
       moduleId={moduleId}
-      onMove={onMoveModule}
       onToggleVisibility={onToggleVisibility}
     />
   );
@@ -1663,9 +1663,40 @@ function ResumePreview({
         </div>
       </header>
 
-      {moduleOrder.map((moduleId) => (
-        <Fragment key={moduleId}>{sectionRenderers[moduleId]}</Fragment>
-      ))}
+      {moduleOrder.map((moduleId) =>
+        sectionRenderers[moduleId] ? (
+          <div
+            className={`resume-module-frame ${draggingModule === moduleId ? "is-dragging" : ""} ${
+              dragOverModule === moduleId && draggingModule !== moduleId ? "is-drop-target" : ""
+            }`}
+            draggable
+            key={moduleId}
+            title="拖动这个模块框可以和其他模块交换位置"
+            onDragEnd={() => {
+              setDraggingModule(null);
+              setDragOverModule(null);
+            }}
+            onDragOver={(event) => {
+              event.preventDefault();
+              setDragOverModule(moduleId);
+            }}
+            onDragStart={(event) => {
+              event.dataTransfer.effectAllowed = "move";
+              event.dataTransfer.setData("text/plain", moduleId);
+              setDraggingModule(moduleId);
+            }}
+            onDrop={(event) => {
+              event.preventDefault();
+              const sourceModuleId = event.dataTransfer.getData("text/plain") as ResumeModuleId;
+              onSwapModules(sourceModuleId, moduleId);
+              setDraggingModule(null);
+              setDragOverModule(null);
+            }}
+          >
+            {sectionRenderers[moduleId]}
+          </div>
+        ) : null
+      )}
     </article>
   );
 }
@@ -1689,30 +1720,21 @@ const dimensionMaxScores: Record<ScoreDimension, number> = {
 };
 
 function ResumeModuleControls({
-  isFirst,
-  isLast,
   isVisible,
   moduleId,
-  onMove,
   onToggleVisibility
 }: {
-  isFirst: boolean;
-  isLast: boolean;
   isVisible: boolean;
   moduleId: ResumeModuleId;
-  onMove: (moduleId: ResumeModuleId, direction: "up" | "down") => void;
   onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
 }) {
   const label = moduleLabels[moduleId];
 
   return (
     <div className="resume-edit-controls" aria-label={`${label}模块控制`}>
-      <button aria-label={`上移${label}`} disabled={isFirst} title="上移模块" type="button" onClick={() => onMove(moduleId, "up")}>
-        <ArrowUp size={13} />
-      </button>
-      <button aria-label={`下移${label}`} disabled={isLast} title="下移模块" type="button" onClick={() => onMove(moduleId, "down")}>
-        <ArrowDown size={13} />
-      </button>
+      <span className="resume-drag-handle" aria-hidden="true" title="拖动模块框调整位置">
+        <GripVertical size={13} />
+      </span>
       <button
         aria-label={isVisible ? `隐藏${label}` : `显示${label}`}
         className={isVisible ? "" : "is-off"}

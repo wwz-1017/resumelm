@@ -137,6 +137,9 @@ const getResumePreviewHtml = () => {
 
   const exportPaper = resumePaper.cloneNode(true) as HTMLElement;
   exportPaper.querySelectorAll(".resume-edit-controls, .resume-hidden-placeholder").forEach((node) => node.remove());
+  exportPaper.querySelectorAll(".resume-module-frame").forEach((frame) => {
+    frame.replaceWith(...Array.from(frame.childNodes));
+  });
 
   return exportPaper.outerHTML;
 };
