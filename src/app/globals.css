@@ -1065,16 +1065,23 @@ button {
 }
 
 .skill-list {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  display: block;
+  color: var(--resume-body-color);
+  line-height: 1.7;
 }
 
 .skill-list span {
-  padding: 6px 9px;
-  border: 1px solid #dfe4d8;
-  background: #f8faf5;
-  border-radius: 999px;
+  display: inline;
+  padding: 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--resume-body-color);
+}
+
+.skill-list span + span::before {
+  content: " / ";
+  color: var(--resume-body-color);
 }
 
 .template-useful {
@@ -1119,12 +1126,6 @@ button {
 .template-useful .resume-row {
   border-bottom: 1px solid #dfe6ed;
   padding-bottom: 6px;
-}
-
-.template-useful .skill-list span {
-  background: var(--template-soft);
-  border-color: #cbd8e4;
-  color: var(--resume-accent-color);
 }
 
 .template-simple {
@@ -1402,12 +1403,6 @@ button {
   color: var(--resume-section-title-color);
 }
 
-.template-leftBlue .skill-list span {
-  border-color: #cad8e3;
-  background: #f3f7fa;
-  color: var(--resume-accent-color);
-}
-
 .template-minimalPm {
   max-width: 794px;
   padding: 26px 40px 28px;
@@ -1489,24 +1484,6 @@ button {
 
 .template-minimalPm .resume-list {
   padding-left: 16px;
-}
-
-.template-minimalPm .skill-list {
-  display: block;
-}
-
-.template-minimalPm .skill-list span {
-  display: inline;
-  padding: 0;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--resume-body-color);
-}
-
-.template-minimalPm .skill-list span + span::before {
-  content: " / ";
-  color: var(--resume-body-color);
 }
 
 .notice {
