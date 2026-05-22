@@ -190,8 +190,7 @@ export function createDefaultPhotoSettings(): ResumePhotoSettings {
     visible: true,
     width: 88,
     height: 110,
-    offsetX: 0,
-    offsetY: 0
+    position: "right"
   };
 }
 
@@ -203,7 +202,6 @@ export function normalizePhotoSettings(settings?: Partial<ResumePhotoSettings>):
     visible: typeof next.visible === "boolean" ? next.visible : defaults.visible,
     width: Math.min(180, Math.max(56, Number.isFinite(next.width) ? next.width : defaults.width)),
     height: Math.min(220, Math.max(70, Number.isFinite(next.height) ? next.height : defaults.height)),
-    offsetX: Math.min(140, Math.max(-140, Number.isFinite(next.offsetX) ? next.offsetX : defaults.offsetX)),
-    offsetY: Math.min(140, Math.max(-140, Number.isFinite(next.offsetY) ? next.offsetY : defaults.offsetY))
+    position: next.position === "left" || next.position === "right" ? next.position : defaults.position
   };
 }

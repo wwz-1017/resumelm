@@ -1453,30 +1453,6 @@ function PhotoUploadPanel({
   );
 }
 
-function PhotoStylePopover({
-  onSettingsChange
-}: {
-  onSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
-}) {
-  return (
-    <div className="photo-style-popover" onClick={(event) => event.stopPropagation()}>
-      <div>
-        <span className="eyebrow">照片样式</span>
-        <strong>直接拖拽调整</strong>
-      </div>
-      <p>拖动照片可以移动位置，拖动右下角可以直接改变大小。</p>
-      <div className="photo-style-actions">
-        <button type="button" onClick={() => onSettingsChange({ width: 88, height: 110 })}>
-          重置大小
-        </button>
-        <button type="button" onClick={() => onSettingsChange({ offsetX: 0, offsetY: 0 })}>
-          重置位置
-        </button>
-      </div>
-    </div>
-  );
-}
-
 function RangeField({
   label,
   max,
@@ -1566,7 +1542,6 @@ function ResumePreview({
 }) {
   const [draggingModule, setDraggingModule] = useState<ResumeModuleId | null>(null);
   const [dragOverModule, setDragOverModule] = useState<ResumeModuleId | null>(null);
-  const [isPhotoStyleOpen, setIsPhotoStyleOpen] = useState(false);
   const internships = resume.internships.filter(hasExperienceContent);
   const projects = resume.projects.filter(hasExperienceContent);
   const campusExperience = resume.campusExperience.filter(hasExperienceContent);
@@ -1586,7 +1561,6 @@ function ResumePreview({
   const startPhotoResize = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    setIsPhotoStyleOpen(false);
 
     const startX = event.clientX;
     const startY = event.clientY;
@@ -1612,21 +1586,25 @@ function ResumePreview({
     if (event.button !== 0) return;
 
     event.preventDefault();
-    setIsPhotoStyleOpen(false);
+    event.stopPropagation();
 
     const startX = event.clientX;
-    const startY = event.clientY;
-    const startOffsetX = photoSettings.offsetX;
-    const startOffsetY = photoSettings.offsetY;
+    const headerElement = event.currentTarget.closest(".resume-head");
 
     const handleMove = (moveEvent: MouseEvent) => {
-      onPhotoSettingsChange({
-        offsetX: Math.min(140, Math.max(-140, startOffsetX + moveEvent.clientX - startX)),
-        offsetY: Math.min(140, Math.max(-140, startOffsetY + moveEvent.clientY - startY))
-      });
+      moveEvent.preventDefault();
     };
 
-    const handleUp = () => {
+    const handleUp = (upEvent: MouseEvent) => {
+      const headerRect = headerElement?.getBoundingClientRect();
+      const releaseX = Math.abs(upEvent.clientX - startX) < 4 ? startX : upEvent.clientX;
+
+      if (headerRect) {
+        onPhotoSettingsChange({
+          position: releaseX < headerRect.left + headerRect.width / 2 ? "left" : "right"
+        });
+      }
+
       window.removeEventListener("mousemove", handleMove);
       window.removeEventListener("mouseup", handleUp);
     };
@@ -1641,6 +1619,43 @@ function ResumePreview({
       onToggleVisibility={onToggleVisibility}
     />
   );
+  const photoNode = photoSettings.visible ? (
+    <div className="resume-photo-wrap" title="拖动照片到左侧或右侧">
+      <button
+        aria-label="隐藏照片"
+        className="resume-photo-remove"
+        title="隐藏照片"
+        type="button"
+        onClick={() => onPhotoSettingsChange({ visible: false })}
+      >
+        <X size={13} />
+      </button>
+      <div
+        className="resume-photo"
+        aria-label={resume.profile.photo ? "简历头像" : "照片占位"}
+        style={{
+          width: photoSettings.width,
+          height: photoSettings.height
+        }}
+        onMouseDown={startPhotoMove}
+      >
+        {resume.profile.photo ? (
+          /* eslint-disable-next-line @next/next/no-img-element -- Resume exports need a plain img with the local data URL. */
+          <img
+            alt="简历头像"
+            src={resume.profile.photo.dataUrl}
+            style={{
+              objectPosition: `${resume.profile.photo.crop.x}% ${resume.profile.photo.crop.y}%`,
+              transform: `scale(${resume.profile.photo.crop.zoom})`
+            }}
+          />
+        ) : (
+          "照片"
+        )}
+        <span className="resume-photo-resize" aria-hidden="true" onMouseDown={startPhotoResize} />
+      </div>
+    </div>
+  ) : null;
   const sectionRenderers: Record<ResumeModuleId, React.ReactNode> = {
     personalSummary: visibilitySettings.personalSummary ? (
       <ResumeSection controls={getModuleControls("personalSummary")} iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title="个人评价">
@@ -1739,13 +1754,10 @@ function ResumePreview({
   };
 
   return (
-    <article
-      className={`resume-paper template-${templateId}`}
-      style={getResumeStyleVars(styleSettings)}
-      onClick={() => setIsPhotoStyleOpen(false)}
-    >
-      <header className="resume-head">
-        <div>
+    <article className={`resume-paper template-${templateId}`} style={getResumeStyleVars(styleSettings)}>
+      <header className={`resume-head photo-${photoSettings.position}`}>
+        {photoSettings.position === "left" ? photoNode : null}
+        <div className="resume-head-content">
           <h2>{resume.profile.name || "你的姓名"}</h2>
           <p className="resume-contact-line">
             {contactItems.map((item, index) => (
@@ -1755,61 +1767,12 @@ function ResumePreview({
               </span>
             ))}
           </p>
-        </div>
-        {photoSettings.visible ? (
-          <div
-            className="resume-photo-wrap"
-            style={{
-              transform: `translate(${photoSettings.offsetX}px, ${photoSettings.offsetY}px)`
-            }}
-            onContextMenu={(event) => {
-              event.preventDefault();
-              event.stopPropagation();
-              setIsPhotoStyleOpen(true);
-            }}
-          >
-            <button
-              aria-label="隐藏照片"
-              className="resume-photo-remove"
-              title="隐藏照片"
-              type="button"
-              onClick={() => onPhotoSettingsChange({ visible: false })}
-            >
-              <X size={13} />
-            </button>
-            <div
-              className="resume-photo"
-              aria-label={resume.profile.photo ? "简历头像" : "照片占位"}
-              style={{
-                width: photoSettings.width,
-                height: photoSettings.height
-              }}
-              onMouseDown={startPhotoMove}
-            >
-              {resume.profile.photo ? (
-                /* eslint-disable-next-line @next/next/no-img-element -- Resume exports need a plain img with the local data URL. */
-                <img
-                  alt="简历头像"
-                  src={resume.profile.photo.dataUrl}
-                  style={{
-                    objectPosition: `${resume.profile.photo.crop.x}% ${resume.profile.photo.crop.y}%`,
-                    transform: `scale(${resume.profile.photo.crop.zoom})`
-                  }}
-                />
-              ) : (
-                "照片"
-              )}
-              <span className="resume-photo-resize" aria-hidden="true" onMouseDown={startPhotoResize} />
-            </div>
-            {isPhotoStyleOpen ? (
-              <PhotoStylePopover onSettingsChange={onPhotoSettingsChange} />
-            ) : null}
+          <div className="resume-target">
+            <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
+            <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</span>
           </div>
-        ) : null}
-        <div className="resume-target">
-          <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
-          <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</span>
         </div>
+        {photoSettings.position === "right" ? photoNode : null}
       </header>
 
       {moduleOrder.map((moduleId) =>

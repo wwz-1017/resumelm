@@ -21,8 +21,7 @@ export type ResumePhotoSettings = {
   visible: boolean;
   width: number;
   height: number;
-  offsetX: number;
-  offsetY: number;
+  position: "left" | "right";
 };
 
 export type Education = {

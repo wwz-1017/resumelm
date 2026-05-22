@@ -986,6 +986,38 @@ button {
   border-bottom-color: var(--resume-accent-color);
 }
 
+.resume-head.photo-left {
+  flex-direction: row;
+}
+
+.resume-head.photo-right {
+  flex-direction: row;
+}
+
+.resume-head-content {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.resume-head.photo-left .resume-head-content {
+  justify-items: end;
+  text-align: right;
+}
+
+.resume-head.photo-right .resume-head-content {
+  justify-items: start;
+  text-align: left;
+}
+
+.resume-head.photo-left .resume-contact-line {
+  justify-content: flex-end;
+}
+
+.resume-head.photo-right .resume-contact-line {
+  justify-content: flex-start;
+}
+
 .resume-head h2 {
   margin: 0;
   color: var(--resume-name-color);
@@ -1097,56 +1129,15 @@ button {
   opacity: 1;
 }
 
-.photo-style-popover {
-  position: absolute;
-  top: calc(100% + 10px);
-  right: 0;
-  z-index: 8;
-  display: grid;
-  gap: 10px;
-  width: 220px;
-  padding: 12px;
-  border: 1px solid rgba(83, 107, 79, 0.22);
-  border-radius: 10px;
-  background: #fffefa;
-  box-shadow: 0 18px 34px rgba(31, 39, 34, 0.18);
-  color: var(--ink);
-}
-
-.photo-style-popover > div:first-child {
-  display: grid;
-  gap: 2px;
-}
-
-.photo-style-popover p {
-  margin: 0;
-  color: var(--muted);
-  font-size: 12px;
-  line-height: 1.45;
-}
-
-.photo-style-actions {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
-
-.photo-style-actions button {
-  min-height: 30px;
-  border: 1px solid rgba(83, 107, 79, 0.22);
-  border-radius: 8px;
-  background: #f6faf3;
-  color: var(--moss-dark);
-  cursor: pointer;
-  font-size: 12px;
-  font-weight: 700;
-}
-
 .resume-target {
   align-self: flex-end;
   color: var(--resume-accent-color);
   flex-wrap: wrap;
   font-weight: 800;
+}
+
+.resume-head.photo-right .resume-target {
+  align-self: flex-start;
 }
 
 .resume-section {
@@ -1461,7 +1452,7 @@ button {
   grid-column: 1;
   grid-row: 1 / span 8;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 14px;
   min-width: 0;
   width: 180px;
@@ -1471,11 +1462,16 @@ button {
   text-align: left;
 }
 
+.template-brick .resume-head.photo-left,
+.template-brick .resume-head.photo-right {
+  flex-direction: row;
+}
+
 .template-brick .resume-head h2 {
   color: var(--resume-name-color);
   line-height: 1.16;
   overflow-wrap: anywhere;
-  text-align: center;
+  text-align: inherit;
 }
 
 .template-brick .resume-head p {
@@ -1515,7 +1511,7 @@ button {
 }
 
 .template-brick .resume-photo {
-  order: -1;
+  order: 0;
   display: grid;
   place-items: center;
   width: 86px;
@@ -1583,7 +1579,7 @@ button {
   grid-column: 1;
   grid-row: 1 / span 8;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 18px;
   min-width: 0;
   min-height: 1123px;
@@ -1591,6 +1587,11 @@ button {
   border: 0;
   color: #ffffff;
   overflow: hidden;
+}
+
+.template-leftBlue .resume-head.photo-left,
+.template-leftBlue .resume-head.photo-right {
+  flex-direction: row;
 }
 
 .template-leftBlue .resume-head h2 {
@@ -1621,7 +1622,7 @@ button {
 }
 
 .template-leftBlue .resume-photo {
-  order: -1;
+  order: 0;
   display: grid;
   place-items: center;
   width: 92px;

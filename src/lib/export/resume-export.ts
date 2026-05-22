@@ -137,7 +137,7 @@ const getResumePreviewHtml = () => {
 
   const exportPaper = resumePaper.cloneNode(true) as HTMLElement;
   exportPaper
-    .querySelectorAll(".resume-edit-controls, .resume-hidden-placeholder, .resume-photo-remove, .resume-photo-resize, .photo-style-popover")
+    .querySelectorAll(".resume-edit-controls, .resume-hidden-placeholder, .resume-photo-remove, .resume-photo-resize")
     .forEach((node) => node.remove());
   exportPaper.querySelectorAll(".resume-module-frame").forEach((frame) => {
     frame.replaceWith(...Array.from(frame.childNodes));
