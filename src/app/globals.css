@@ -437,12 +437,23 @@ button {
   gap: 7px;
 }
 
+.section-title.is-hidden {
+  opacity: 0.62;
+}
+
 .section-title:first-child {
   margin-top: 0;
 }
 
+.section-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .tiny-action,
-.ghost-icon {
+.ghost-icon,
+.visibility-toggle {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -458,6 +469,23 @@ button {
   background: #f6faf3;
   color: var(--moss-dark);
   font-size: 12px;
+}
+
+.visibility-toggle {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(83, 107, 79, 0.24);
+  background: #fffefa;
+  color: var(--moss-dark);
+}
+
+.visibility-toggle:hover {
+  background: #f6faf3;
+}
+
+.visibility-toggle.is-off {
+  background: #f6f4ed;
+  color: var(--muted);
 }
 
 .ghost-icon {

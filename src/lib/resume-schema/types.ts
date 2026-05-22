@@ -110,6 +110,17 @@ export type ResumeStyleSettings = {
   accentColor: ResumeColorId;
 };
 
+export type ResumeVisibilitySettings = {
+  personalSummary: boolean;
+  strengths: boolean;
+  education: boolean;
+  internships: boolean;
+  projects: boolean;
+  campusExperience: boolean;
+  skills: boolean;
+  awards: boolean;
+};
+
 export type ResumeDocument = {
   schemaVersion: 1;
   id: string;
@@ -117,6 +128,7 @@ export type ResumeDocument = {
   profile: ResumeProfile;
   iconSettings?: ResumeIconSettings;
   styleSettings?: ResumeStyleSettings;
+  visibilitySettings?: ResumeVisibilitySettings;
   personalSummary: string;
   strengths: string[];
   education: Education[];

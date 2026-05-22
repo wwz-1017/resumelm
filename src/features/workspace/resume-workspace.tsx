@@ -17,6 +17,8 @@ import {
   ContactRound,
   Download,
   Dumbbell,
+  Eye,
+  EyeOff,
   FileText,
   FileUp,
   GraduationCap,
@@ -55,7 +57,7 @@ import { trackEvent } from "@/lib/analytics/track";
 import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { downloadResumeWord, printResumePdf } from "@/lib/export/resume-export";
 import { saveFeedback, type FeedbackTarget, type FeedbackVote } from "@/lib/feedback/store";
-import { createEmptyResume, normalizeIconSettings, normalizeStyleSettings } from "@/lib/resume-schema/defaults";
+import { createEmptyResume, normalizeIconSettings, normalizeStyleSettings, normalizeVisibilitySettings } from "@/lib/resume-schema/defaults";
 import type {
   Education,
   Experience,
@@ -64,7 +66,8 @@ import type {
   ResumeFontId,
   ResumeIconId,
   ResumeIconSettings,
-  ResumeStyleSettings
+  ResumeStyleSettings,
+  ResumeVisibilitySettings
 } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
 import type { ScoreDimension, ScoreReport } from "@/lib/scoring/types";
@@ -364,6 +367,7 @@ export function ResumeWorkspace() {
   const issues = validateResume(resume);
   const iconSettings = normalizeIconSettings(resume.iconSettings);
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
+  const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -485,6 +489,20 @@ export function ResumeWorkspace() {
     }));
   };
 
+  const toggleVisibility = (section: keyof ResumeVisibilitySettings) => {
+    setResume((current) => {
+      const currentVisibility = normalizeVisibilitySettings(current.visibilitySettings);
+
+      return {
+        ...current,
+        visibilitySettings: {
+          ...currentVisibility,
+          [section]: !currentVisibility[section]
+        }
+      };
+    });
+  };
+
   const updateEducation = (index: number, field: keyof Education, value: string) => {
     setResume((current) => ({
       ...current,
@@ -540,7 +558,12 @@ export function ResumeWorkspace() {
         return;
       }
 
-      setResume(parsed);
+      setResume({
+        ...parsed,
+        iconSettings: normalizeIconSettings(parsed.iconSettings),
+        styleSettings: normalizeStyleSettings(parsed.styleSettings),
+        visibilitySettings: normalizeVisibilitySettings(parsed.visibilitySettings)
+      });
       setImportError("");
       trackEvent("resume_imported", sessionId, { fileName: file.name });
     } catch {
@@ -789,11 +812,24 @@ export function ResumeWorkspace() {
               onUpload={uploadPhoto}
             />
 
-            <SectionHeading icon={<Sparkles size={15} />} title="个人评价" />
+            <SectionHeading
+              icon={<Sparkles size={15} />}
+              isVisible={visibilitySettings.personalSummary}
+              title="个人评价"
+              visibilityKey="personalSummary"
+              onToggleVisibility={toggleVisibility}
+            />
             <TextAreaField
               label="一句话总结"
               value={resume.personalSummary}
               onChange={(value) => setResume((current) => ({ ...current, personalSummary: value }))}
+            />
+            <SectionHeading
+              icon={<Heart size={15} />}
+              isVisible={visibilitySettings.strengths}
+              title="个人优势"
+              visibilityKey="strengths"
+              onToggleVisibility={toggleVisibility}
             />
             <TextAreaField
               label="个人优势，每行一条"
@@ -801,7 +837,15 @@ export function ResumeWorkspace() {
               onChange={(value) => setResume((current) => ({ ...current, strengths: splitLines(value) }))}
             />
 
-            <SectionHeading actionLabel="添加" icon={<GraduationCap size={15} />} title="教育经历" onAction={addEducation} />
+            <SectionHeading
+              actionLabel="添加"
+              icon={<GraduationCap size={15} />}
+              isVisible={visibilitySettings.education}
+              title="教育经历"
+              visibilityKey="education"
+              onAction={addEducation}
+              onToggleVisibility={toggleVisibility}
+            />
             {resume.education.map((item, index) => (
               <EditorBlock key={index} title={`教育经历 ${index + 1}`} onRemove={() => removeEducation(index)}>
                 <div className="field-grid two">
@@ -817,34 +861,56 @@ export function ResumeWorkspace() {
 
             <ExperienceEditor
               items={resume.internships}
+              isVisible={visibilitySettings.internships}
               section="internships"
               title="实习经历"
+              visibilityKey="internships"
               onAdd={addExperience}
               onRemove={removeExperience}
+              onToggleVisibility={toggleVisibility}
               onUpdate={updateExperience}
             />
             <ExperienceEditor
               items={resume.projects}
+              isVisible={visibilitySettings.projects}
               section="projects"
               title="项目经历"
+              visibilityKey="projects"
               onAdd={addExperience}
               onRemove={removeExperience}
+              onToggleVisibility={toggleVisibility}
               onUpdate={updateExperience}
             />
             <ExperienceEditor
               items={resume.campusExperience}
+              isVisible={visibilitySettings.campusExperience}
               section="campusExperience"
               title="校园经历"
+              visibilityKey="campusExperience"
               onAdd={addExperience}
               onRemove={removeExperience}
+              onToggleVisibility={toggleVisibility}
               onUpdate={updateExperience}
             />
 
-            <SectionHeading icon={<Sparkles size={15} />} title="技能与奖项" />
+            <SectionHeading
+              icon={<Tag size={15} />}
+              isVisible={visibilitySettings.skills}
+              title="技能"
+              visibilityKey="skills"
+              onToggleVisibility={toggleVisibility}
+            />
             <TextAreaField
               label="技能，每行一条"
               value={resume.skills.join("\n")}
               onChange={(value) => setResume((current) => ({ ...current, skills: splitLines(value) }))}
+            />
+            <SectionHeading
+              icon={<Award size={15} />}
+              isVisible={visibilitySettings.awards}
+              title="奖项"
+              visibilityKey="awards"
+              onToggleVisibility={toggleVisibility}
             />
             <TextAreaField
               label="奖项，每行一条"
@@ -1163,26 +1229,45 @@ function MetricCard({ label, value }: { label: string; value: number | string })
 function SectionHeading({
   actionLabel,
   icon,
+  isVisible,
   onAction,
-  title
+  onToggleVisibility,
+  title,
+  visibilityKey
 }: {
   actionLabel?: string;
   icon: React.ReactNode;
+  isVisible?: boolean;
   onAction?: () => void;
+  onToggleVisibility?: (section: keyof ResumeVisibilitySettings) => void;
   title: string;
+  visibilityKey?: keyof ResumeVisibilitySettings;
 }) {
   return (
-    <div className="section-title">
+    <div className={`section-title ${visibilityKey && !isVisible ? "is-hidden" : ""}`}>
       <span>
         {icon}
         {title}
       </span>
-      {onAction ? (
-        <button className="tiny-action" type="button" onClick={onAction}>
-          <Plus size={14} />
-          {actionLabel}
-        </button>
-      ) : null}
+      <div className="section-actions">
+        {visibilityKey ? (
+          <button
+            aria-label={isVisible ? `隐藏${title}` : `显示${title}`}
+            className={`visibility-toggle ${isVisible ? "" : "is-off"}`}
+            title={isVisible ? "隐藏模块" : "显示模块"}
+            type="button"
+            onClick={() => onToggleVisibility?.(visibilityKey)}
+          >
+            {isVisible ? <Eye size={15} /> : <EyeOff size={15} />}
+          </button>
+        ) : null}
+        {onAction ? (
+          <button className="tiny-action" type="button" onClick={onAction}>
+            <Plus size={14} />
+            {actionLabel}
+          </button>
+        ) : null}
+      </div>
     </div>
   );
 }
@@ -1319,23 +1404,37 @@ function RangeField({
 }
 
 function ExperienceEditor({
+  isVisible,
   items,
   onAdd,
   onRemove,
+  onToggleVisibility,
   onUpdate,
   section,
-  title
+  title,
+  visibilityKey
 }: {
+  isVisible: boolean;
   items: Experience[];
   onAdd: (section: ExperienceSection) => void;
   onRemove: (section: ExperienceSection, index: number) => void;
+  onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
   onUpdate: (section: ExperienceSection, index: number, field: keyof Experience, value: string) => void;
   section: ExperienceSection;
   title: string;
+  visibilityKey: keyof ResumeVisibilitySettings;
 }) {
   return (
     <>
-      <SectionHeading icon={<BriefcaseBusiness size={15} />} title={title} actionLabel="添加" onAction={() => onAdd(section)} />
+      <SectionHeading
+        actionLabel="添加"
+        icon={<BriefcaseBusiness size={15} />}
+        isVisible={isVisible}
+        title={title}
+        visibilityKey={visibilityKey}
+        onAction={() => onAdd(section)}
+        onToggleVisibility={onToggleVisibility}
+      />
       {items.length === 0 ? <p className="empty-line">暂无内容</p> : null}
       {items.map((item, index) => (
         <EditorBlock key={index} title={`${title} ${index + 1}`} onRemove={() => onRemove(section, index)}>
@@ -1360,6 +1459,7 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
   const awards = nonEmpty(resume.awards);
   const iconSettings = normalizeIconSettings(resume.iconSettings);
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
+  const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
   const iconEnabled = iconSettings.enabled;
   const contactItems = [
     { icon: iconSettings.phone, text: resume.profile.phone || "电话" },
@@ -1402,62 +1502,78 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
         </div>
       </header>
 
-      <ResumeSection iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title="个人评价">
-        {resume.personalSummary || "用 2-3 句话概括你的背景、能力和求职方向。"}
-      </ResumeSection>
+      {visibilitySettings.personalSummary ? (
+        <ResumeSection iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title="个人评价">
+          {resume.personalSummary || "用 2-3 句话概括你的背景、能力和求职方向。"}
+        </ResumeSection>
+      ) : null}
 
-      <TagSection
-        iconEnabled={iconEnabled}
-        iconId={iconSettings.strengths}
-        items={nonEmpty(resume.strengths).length ? nonEmpty(resume.strengths) : ["学习能力", "项目执行", "沟通协作"]}
-        title="个人优势"
-      />
+      {visibilitySettings.strengths ? (
+        <TagSection
+          iconEnabled={iconEnabled}
+          iconId={iconSettings.strengths}
+          items={nonEmpty(resume.strengths).length ? nonEmpty(resume.strengths) : ["学习能力", "项目执行", "沟通协作"]}
+          title="个人优势"
+        />
+      ) : null}
 
-      <section className="resume-section">
-        <h3>
-          <ResumeIcon enabled={iconEnabled} iconId={iconSettings.education} />
-          <span className="resume-inline-text">教育经历</span>
-        </h3>
-        {(resume.education.length ? resume.education : [blankEducation()]).map((item, index) => (
-          <div className="resume-item" key={index}>
-            <div className="resume-row">
-              <strong>{item.school || "学校名称"}</strong>
-              <span className="muted">{joinDateRange(item.startDate, item.endDate) || "起止时间"}</span>
+      {visibilitySettings.education ? (
+        <section className="resume-section">
+          <h3>
+            <ResumeIcon enabled={iconEnabled} iconId={iconSettings.education} />
+            <span className="resume-inline-text">教育经历</span>
+          </h3>
+          {(resume.education.length ? resume.education : [blankEducation()]).map((item, index) => (
+            <div className="resume-item" key={index}>
+              <div className="resume-row">
+                <strong>{item.school || "学校名称"}</strong>
+                <span className="muted">{joinDateRange(item.startDate, item.endDate) || "起止时间"}</span>
+              </div>
+              <p className="muted">{[item.degree, item.major].filter(Boolean).join(" · ") || "专业 / 学历"}</p>
+              <p>{item.highlights || "成绩、奖学金、课程或校园经历亮点。"}</p>
             </div>
-            <p className="muted">{[item.degree, item.major].filter(Boolean).join(" · ") || "专业 / 学历"}</p>
-            <p>{item.highlights || "成绩、奖学金、课程或校园经历亮点。"}</p>
-          </div>
-        ))}
-      </section>
+          ))}
+        </section>
+      ) : null}
 
-      <ExperiencePreview
-        fallback="实习经历会展示在这里。"
-        iconEnabled={iconEnabled}
-        iconId={iconSettings.internships}
-        items={internships}
-        title="实习经历"
-      />
-      <ExperiencePreview
-        fallback="描述你做了什么、如何做、带来了什么结果。"
-        iconEnabled={iconEnabled}
-        iconId={iconSettings.projects}
-        items={projects}
-        title="项目经历"
-      />
-      <ExperiencePreview
-        fallback="学生组织、社团、竞赛或志愿经历。"
-        iconEnabled={iconEnabled}
-        iconId={iconSettings.campusExperience}
-        items={campusExperience}
-        title="校园经历"
-      />
-      <TagSection
-        iconEnabled={iconEnabled}
-        iconId={iconSettings.skills}
-        items={skills.length ? skills : ["数据分析", "用户研究", "文档表达"]}
-        title="技能"
-      />
-      {awards.length ? <ListSection iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title="奖项" /> : null}
+      {visibilitySettings.internships ? (
+        <ExperiencePreview
+          fallback="实习经历会展示在这里。"
+          iconEnabled={iconEnabled}
+          iconId={iconSettings.internships}
+          items={internships}
+          title="实习经历"
+        />
+      ) : null}
+      {visibilitySettings.projects ? (
+        <ExperiencePreview
+          fallback="描述你做了什么、如何做、带来了什么结果。"
+          iconEnabled={iconEnabled}
+          iconId={iconSettings.projects}
+          items={projects}
+          title="项目经历"
+        />
+      ) : null}
+      {visibilitySettings.campusExperience ? (
+        <ExperiencePreview
+          fallback="学生组织、社团、竞赛或志愿经历。"
+          iconEnabled={iconEnabled}
+          iconId={iconSettings.campusExperience}
+          items={campusExperience}
+          title="校园经历"
+        />
+      ) : null}
+      {visibilitySettings.skills ? (
+        <TagSection
+          iconEnabled={iconEnabled}
+          iconId={iconSettings.skills}
+          items={skills.length ? skills : ["数据分析", "用户研究", "文档表达"]}
+          title="技能"
+        />
+      ) : null}
+      {visibilitySettings.awards && awards.length ? (
+        <ListSection iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title="奖项" />
+      ) : null}
     </article>
   );
 }

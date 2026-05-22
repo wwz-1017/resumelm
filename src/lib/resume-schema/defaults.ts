@@ -1,4 +1,12 @@
-import type { ResumeDocument, ResumeColorId, ResumeFontId, ResumeIconId, ResumeIconSettings, ResumeStyleSettings } from "./types";
+import type {
+  ResumeColorId,
+  ResumeDocument,
+  ResumeFontId,
+  ResumeIconId,
+  ResumeIconSettings,
+  ResumeStyleSettings,
+  ResumeVisibilitySettings
+} from "./types";
 
 const createId = () => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -22,6 +30,7 @@ export const createEmptyResume = (): ResumeDocument => ({
   },
   iconSettings: createDefaultIconSettings(),
   styleSettings: createDefaultStyleSettings(),
+  visibilitySettings: createDefaultVisibilitySettings(),
   personalSummary: "",
   strengths: ["", "", ""],
   education: [
@@ -136,5 +145,25 @@ export function normalizeStyleSettings(settings?: Partial<ResumeStyleSettings>):
     sectionTitleColor: pickOption(next.sectionTitleColor, colorIds, defaults.sectionTitleColor),
     bodyColor: pickOption(next.bodyColor, colorIds, defaults.bodyColor),
     accentColor: pickOption(next.accentColor, colorIds, defaults.accentColor)
+  };
+}
+
+export function createDefaultVisibilitySettings(): ResumeVisibilitySettings {
+  return {
+    personalSummary: true,
+    strengths: true,
+    education: true,
+    internships: true,
+    projects: true,
+    campusExperience: true,
+    skills: true,
+    awards: true
+  };
+}
+
+export function normalizeVisibilitySettings(settings?: Partial<ResumeVisibilitySettings>): ResumeVisibilitySettings {
+  return {
+    ...createDefaultVisibilitySettings(),
+    ...settings
   };
 }
