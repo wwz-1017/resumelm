@@ -1586,6 +1586,7 @@ function ResumePreview({
   const startPhotoResize = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.preventDefault();
     event.stopPropagation();
+    setIsPhotoStyleOpen(false);
 
     const startX = event.clientX;
     const startY = event.clientY;
@@ -1611,6 +1612,7 @@ function ResumePreview({
     if (event.button !== 0) return;
 
     event.preventDefault();
+    setIsPhotoStyleOpen(false);
 
     const startX = event.clientX;
     const startY = event.clientY;
@@ -1737,7 +1739,11 @@ function ResumePreview({
   };
 
   return (
-    <article className={`resume-paper template-${templateId}`} style={getResumeStyleVars(styleSettings)}>
+    <article
+      className={`resume-paper template-${templateId}`}
+      style={getResumeStyleVars(styleSettings)}
+      onClick={() => setIsPhotoStyleOpen(false)}
+    >
       <header className="resume-head">
         <div>
           <h2>{resume.profile.name || "你的姓名"}</h2>
@@ -1758,7 +1764,8 @@ function ResumePreview({
             }}
             onContextMenu={(event) => {
               event.preventDefault();
-              setIsPhotoStyleOpen((isOpen) => !isOpen);
+              event.stopPropagation();
+              setIsPhotoStyleOpen(true);
             }}
           >
             <button
@@ -1795,9 +1802,7 @@ function ResumePreview({
               <span className="resume-photo-resize" aria-hidden="true" onMouseDown={startPhotoResize} />
             </div>
             {isPhotoStyleOpen ? (
-              <PhotoStylePopover
-                onSettingsChange={onPhotoSettingsChange}
-              />
+              <PhotoStylePopover onSettingsChange={onPhotoSettingsChange} />
             ) : null}
           </div>
         ) : null}
