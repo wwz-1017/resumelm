@@ -37,13 +37,15 @@ import {
   saveResume
 } from "@/lib/storage/local-resume-store";
 
-type TemplateId = "classic" | "compact" | "project";
+type TemplateId = "useful" | "simple" | "graduate" | "brick" | "leftBlue";
 type ExperienceSection = "internships" | "projects" | "campusExperience";
 
 const templates: Array<{ id: TemplateId; label: string }> = [
-  { id: "classic", label: "标准" },
-  { id: "compact", label: "极简" },
-  { id: "project", label: "项目" }
+  { id: "useful", label: "好用蓝灰" },
+  { id: "simple", label: "简约金灰" },
+  { id: "graduate", label: "应届蓝线" },
+  { id: "brick", label: "砖红双栏" },
+  { id: "leftBlue", label: "深蓝左栏" }
 ];
 
 const feedbackReasons: Record<FeedbackVote, string[]> = {
@@ -87,7 +89,7 @@ export function ResumeWorkspace() {
   const [sessionId, setSessionId] = useState("");
   const [saveState, setSaveState] = useState("正在准备本地草稿");
   const [importError, setImportError] = useState("");
-  const [templateId, setTemplateId] = useState<TemplateId>("classic");
+  const [templateId, setTemplateId] = useState<TemplateId>("useful");
   const [aiTask, setAiTask] = useState<AiTask | null>(null);
   const [aiError, setAiError] = useState("");
   const [scoreReport, setScoreReport] = useState<ScoreReport | null>(null);
@@ -725,16 +727,18 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
   const campusExperience = resume.campusExperience.filter(hasExperienceContent);
   const skills = nonEmpty(resume.skills);
   const awards = nonEmpty(resume.awards);
+  const contactText =
+    [resume.profile.phone, resume.profile.email, resume.profile.city].filter(Boolean).join(" · ") || "电话 · 邮箱 · 城市";
 
   return (
     <article className={`resume-paper template-${templateId}`}>
       <header className="resume-head">
         <div>
           <h2>{resume.profile.name || "你的姓名"}</h2>
-          <p>
-            {[resume.profile.phone, resume.profile.email, resume.profile.city].filter(Boolean).join(" · ") ||
-              "电话 · 邮箱 · 城市"}
-          </p>
+          <p>{contactText}</p>
+        </div>
+        <div className="resume-photo" aria-hidden="true">
+          照片
         </div>
         <div className="resume-target">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</div>
       </header>
