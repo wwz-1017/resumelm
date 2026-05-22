@@ -2,7 +2,7 @@
 
 /* eslint-disable react-hooks/set-state-in-effect */
 
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import {
   Activity,
   Award,
@@ -395,6 +395,8 @@ export function ResumeWorkspace() {
   const [scoreError, setScoreError] = useState("");
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState("");
+  const [highlightedEditorModule, setHighlightedEditorModule] = useState<ResumeModuleId | null>(null);
+  const editorHighlightTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const issues = validateResume(resume);
   const iconSettings = normalizeIconSettings(resume.iconSettings);
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
@@ -416,6 +418,15 @@ export function ResumeWorkspace() {
     saveResume(resume);
     setSaveState(`已自动保存 ${new Date().toLocaleTimeString("zh-CN", { hour: "2-digit", minute: "2-digit" })}`);
   }, [resume, sessionId]);
+
+  useEffect(
+    () => () => {
+      if (editorHighlightTimer.current) {
+        clearTimeout(editorHighlightTimer.current);
+      }
+    },
+    []
+  );
 
   const updateProfile = (field: keyof ResumeDocument["profile"], value: string) => {
     setResume((current) => ({
@@ -515,6 +526,38 @@ export function ResumeWorkspace() {
       }
     }));
   };
+
+  const focusEditorModule = (moduleId: ResumeModuleId) => {
+    const target = document.querySelector<HTMLElement>(`[data-editor-module="${moduleId}"]`);
+    if (!target) return;
+
+    const form = target.closest<HTMLElement>(".form");
+    if (form) {
+      const formRect = form.getBoundingClientRect();
+      const targetRect = target.getBoundingClientRect();
+      const nextScrollTop = form.scrollTop + targetRect.top - formRect.top - form.clientHeight / 2 + targetRect.height / 2;
+
+      form.scrollTo({
+        top: Math.max(0, nextScrollTop),
+        behavior: "smooth"
+      });
+    } else {
+      target.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+
+    setHighlightedEditorModule(moduleId);
+
+    if (editorHighlightTimer.current) {
+      clearTimeout(editorHighlightTimer.current);
+    }
+
+    editorHighlightTimer.current = setTimeout(() => {
+      setHighlightedEditorModule((current) => (current === moduleId ? null : current));
+    }, 1800);
+  };
+
+  const getEditorModuleClassName = (moduleId: ResumeModuleId) =>
+    `editor-module-anchor ${highlightedEditorModule === moduleId ? "is-highlighted" : ""}`;
 
   const toggleVisibility = (section: keyof ResumeVisibilitySettings) => {
     setResume((current) => {
@@ -864,111 +907,128 @@ export function ResumeWorkspace() {
               onUpload={uploadPhoto}
             />
 
-            <SectionHeading
-              icon={<Sparkles size={15} />}
-              isVisible={visibilitySettings.personalSummary}
-              title="个人评价"
-              visibilityKey="personalSummary"
-              onToggleVisibility={toggleVisibility}
-            />
-            <TextAreaField
-              label="一句话总结"
-              value={resume.personalSummary}
-              onChange={(value) => setResume((current) => ({ ...current, personalSummary: value }))}
-            />
-            <SectionHeading
-              icon={<Heart size={15} />}
-              isVisible={visibilitySettings.strengths}
-              title="个人优势"
-              visibilityKey="strengths"
-              onToggleVisibility={toggleVisibility}
-            />
-            <TextAreaField
-              label="个人优势，每行一条"
-              value={resume.strengths.join("\n")}
-              onChange={(value) => setResume((current) => ({ ...current, strengths: splitLines(value) }))}
-            />
+            <div className={getEditorModuleClassName("personalSummary")} data-editor-module="personalSummary">
+              <SectionHeading
+                icon={<Sparkles size={15} />}
+                isVisible={visibilitySettings.personalSummary}
+                title="个人评价"
+                visibilityKey="personalSummary"
+                onToggleVisibility={toggleVisibility}
+              />
+              <TextAreaField
+                label="一句话总结"
+                value={resume.personalSummary}
+                onChange={(value) => setResume((current) => ({ ...current, personalSummary: value }))}
+              />
+            </div>
 
-            <SectionHeading
-              actionLabel="添加"
-              icon={<GraduationCap size={15} />}
-              isVisible={visibilitySettings.education}
-              title="教育经历"
-              visibilityKey="education"
-              onAction={addEducation}
-              onToggleVisibility={toggleVisibility}
-            />
-            {resume.education.map((item, index) => (
-              <EditorBlock key={index} title={`教育经历 ${index + 1}`} onRemove={() => removeEducation(index)}>
-                <div className="field-grid two">
-                  <TextField label="学校" value={item.school} onChange={(value) => updateEducation(index, "school", value)} />
-                  <TextField label="学历" value={item.degree} onChange={(value) => updateEducation(index, "degree", value)} />
-                  <TextField label="专业" value={item.major} onChange={(value) => updateEducation(index, "major", value)} />
-                  <TextField label="开始时间" value={item.startDate} onChange={(value) => updateEducation(index, "startDate", value)} />
-                  <TextField label="结束时间" value={item.endDate} onChange={(value) => updateEducation(index, "endDate", value)} />
-                </div>
-                <TextAreaField label="亮点" value={item.highlights} onChange={(value) => updateEducation(index, "highlights", value)} />
-              </EditorBlock>
-            ))}
+            <div className={getEditorModuleClassName("strengths")} data-editor-module="strengths">
+              <SectionHeading
+                icon={<Heart size={15} />}
+                isVisible={visibilitySettings.strengths}
+                title="个人优势"
+                visibilityKey="strengths"
+                onToggleVisibility={toggleVisibility}
+              />
+              <TextAreaField
+                label="个人优势，每行一条"
+                value={resume.strengths.join("\n")}
+                onChange={(value) => setResume((current) => ({ ...current, strengths: splitLines(value) }))}
+              />
+            </div>
 
-            <ExperienceEditor
-              items={resume.internships}
-              isVisible={visibilitySettings.internships}
-              section="internships"
-              title="实习经历"
-              visibilityKey="internships"
-              onAdd={addExperience}
-              onRemove={removeExperience}
-              onToggleVisibility={toggleVisibility}
-              onUpdate={updateExperience}
-            />
-            <ExperienceEditor
-              items={resume.projects}
-              isVisible={visibilitySettings.projects}
-              section="projects"
-              title="项目经历"
-              visibilityKey="projects"
-              onAdd={addExperience}
-              onRemove={removeExperience}
-              onToggleVisibility={toggleVisibility}
-              onUpdate={updateExperience}
-            />
-            <ExperienceEditor
-              items={resume.campusExperience}
-              isVisible={visibilitySettings.campusExperience}
-              section="campusExperience"
-              title="校园经历"
-              visibilityKey="campusExperience"
-              onAdd={addExperience}
-              onRemove={removeExperience}
-              onToggleVisibility={toggleVisibility}
-              onUpdate={updateExperience}
-            />
+            <div className={getEditorModuleClassName("education")} data-editor-module="education">
+              <SectionHeading
+                actionLabel="添加"
+                icon={<GraduationCap size={15} />}
+                isVisible={visibilitySettings.education}
+                title="教育经历"
+                visibilityKey="education"
+                onAction={addEducation}
+                onToggleVisibility={toggleVisibility}
+              />
+              {resume.education.map((item, index) => (
+                <EditorBlock key={index} title={`教育经历 ${index + 1}`} onRemove={() => removeEducation(index)}>
+                  <div className="field-grid two">
+                    <TextField label="学校" value={item.school} onChange={(value) => updateEducation(index, "school", value)} />
+                    <TextField label="学历" value={item.degree} onChange={(value) => updateEducation(index, "degree", value)} />
+                    <TextField label="专业" value={item.major} onChange={(value) => updateEducation(index, "major", value)} />
+                    <TextField label="开始时间" value={item.startDate} onChange={(value) => updateEducation(index, "startDate", value)} />
+                    <TextField label="结束时间" value={item.endDate} onChange={(value) => updateEducation(index, "endDate", value)} />
+                  </div>
+                  <TextAreaField label="亮点" value={item.highlights} onChange={(value) => updateEducation(index, "highlights", value)} />
+                </EditorBlock>
+              ))}
+            </div>
 
-            <SectionHeading
-              icon={<Tag size={15} />}
-              isVisible={visibilitySettings.skills}
-              title="技能"
-              visibilityKey="skills"
-              onToggleVisibility={toggleVisibility}
-            />
-            <TextAreaField
-              label="技能，每行一条"
-              value={resume.skills.join("\n")}
-              onChange={(value) => setResume((current) => ({ ...current, skills: splitLines(value) }))}
-            />
-            <SectionHeading
-              icon={<Award size={15} />}
-              isVisible={visibilitySettings.awards}
-              title="奖项"
-              visibilityKey="awards"
-              onToggleVisibility={toggleVisibility}
-            />
-            <TextAreaField
-              label="奖项，每行一条"
-              value={resume.awards.join("\n")}
-              onChange={(value) => setResume((current) => ({ ...current, awards: splitLines(value) }))}
-            />
+            <div className={getEditorModuleClassName("internships")} data-editor-module="internships">
+              <ExperienceEditor
+                items={resume.internships}
+                isVisible={visibilitySettings.internships}
+                section="internships"
+                title="实习经历"
+                visibilityKey="internships"
+                onAdd={addExperience}
+                onRemove={removeExperience}
+                onToggleVisibility={toggleVisibility}
+                onUpdate={updateExperience}
+              />
+            </div>
+            <div className={getEditorModuleClassName("projects")} data-editor-module="projects">
+              <ExperienceEditor
+                items={resume.projects}
+                isVisible={visibilitySettings.projects}
+                section="projects"
+                title="项目经历"
+                visibilityKey="projects"
+                onAdd={addExperience}
+                onRemove={removeExperience}
+                onToggleVisibility={toggleVisibility}
+                onUpdate={updateExperience}
+              />
+            </div>
+            <div className={getEditorModuleClassName("campusExperience")} data-editor-module="campusExperience">
+              <ExperienceEditor
+                items={resume.campusExperience}
+                isVisible={visibilitySettings.campusExperience}
+                section="campusExperience"
+                title="校园经历"
+                visibilityKey="campusExperience"
+                onAdd={addExperience}
+                onRemove={removeExperience}
+                onToggleVisibility={toggleVisibility}
+                onUpdate={updateExperience}
+              />
+            </div>
+
+            <div className={getEditorModuleClassName("skills")} data-editor-module="skills">
+              <SectionHeading
+                icon={<Tag size={15} />}
+                isVisible={visibilitySettings.skills}
+                title="技能"
+                visibilityKey="skills"
+                onToggleVisibility={toggleVisibility}
+              />
+              <TextAreaField
+                label="技能，每行一条"
+                value={resume.skills.join("\n")}
+                onChange={(value) => setResume((current) => ({ ...current, skills: splitLines(value) }))}
+              />
+            </div>
+            <div className={getEditorModuleClassName("awards")} data-editor-module="awards">
+              <SectionHeading
+                icon={<Award size={15} />}
+                isVisible={visibilitySettings.awards}
+                title="奖项"
+                visibilityKey="awards"
+                onToggleVisibility={toggleVisibility}
+              />
+              <TextAreaField
+                label="奖项，每行一条"
+                value={resume.awards.join("\n")}
+                onChange={(value) => setResume((current) => ({ ...current, awards: splitLines(value) }))}
+              />
+            </div>
 
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="目标 JD" />
             <TextField
@@ -1016,6 +1076,7 @@ export function ResumeWorkspace() {
             resume={resume}
             templateId={templateId}
             onPhotoSettingsChange={updatePhotoSettings}
+            onSelectModule={focusEditorModule}
             onSwapModules={swapModules}
             onToggleVisibility={toggleVisibility}
           />
@@ -1509,6 +1570,7 @@ function ExperienceEditor({
 function ResumePreview({
   photoSupported,
   onPhotoSettingsChange,
+  onSelectModule,
   onSwapModules,
   onToggleVisibility,
   resume,
@@ -1516,6 +1578,7 @@ function ResumePreview({
 }: {
   photoSupported: boolean;
   onPhotoSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
+  onSelectModule: (moduleId: ResumeModuleId) => void;
   onSwapModules: (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => void;
   onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
   resume: ResumeDocument;
@@ -1763,9 +1826,11 @@ function ResumePreview({
             className={`resume-module-frame ${draggingModule === moduleId ? "is-dragging" : ""} ${
               dragOverModule === moduleId && draggingModule !== moduleId ? "is-drop-target" : ""
             }`}
+            data-preview-module={moduleId}
             draggable
             key={moduleId}
             title="拖动这个模块框可以和其他模块交换位置"
+            onClick={() => onSelectModule(moduleId)}
             onDragEnd={() => {
               setDraggingModule(null);
               setDragOverModule(null);
@@ -1834,7 +1899,10 @@ function ResumeModuleControls({
         className={isVisible ? "" : "is-off"}
         title={isVisible ? "隐藏模块" : "显示模块"}
         type="button"
-        onClick={() => onToggleVisibility(moduleId)}
+        onClick={(event) => {
+          event.stopPropagation();
+          onToggleVisibility(moduleId);
+        }}
       >
         {isVisible ? <Eye size={13} /> : <EyeOff size={13} />}
       </button>

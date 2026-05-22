@@ -445,6 +445,25 @@ button {
   margin-top: 0;
 }
 
+.editor-module-anchor {
+  scroll-margin: 22px;
+  margin: 0 -8px;
+  padding: 0 8px;
+  border-radius: 12px;
+  transition:
+    background 0.24s ease,
+    box-shadow 0.24s ease,
+    transform 0.24s ease;
+}
+
+.editor-module-anchor.is-highlighted {
+  background: rgba(219, 89, 75, 0.08);
+  box-shadow:
+    0 0 0 2px rgba(219, 89, 75, 0.32),
+    0 14px 30px rgba(219, 89, 75, 0.18);
+  transform: translateY(-1px);
+}
+
 .section-actions {
   display: inline-flex;
   align-items: center;
