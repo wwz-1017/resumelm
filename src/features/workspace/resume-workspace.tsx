@@ -113,6 +113,9 @@ const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "minimalPm", label: "极简PM" }
 ];
 
+const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
+const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
+
 const fontOptions: Array<{ id: ResumeFontId; label: string; value: string }> = [
   { id: "microsoftYahei", label: "微软雅黑", value: '"Microsoft YaHei", "PingFang SC", sans-serif' },
   { id: "simsun", label: "宋体", value: '"SimSun", "Songti SC", serif' },
@@ -391,6 +394,7 @@ export function ResumeWorkspace() {
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
   const photoSettings = normalizePhotoSettings(resume.photoSettings);
+  const isPhotoSupported = templateSupportsPhoto(templateId);
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -867,6 +871,8 @@ export function ResumeWorkspace() {
             <PhotoUploadPanel
               photo={resume.profile.photo}
               photoSettings={photoSettings}
+              photoSupported={isPhotoSupported}
+              templateLabel={templates.find((template) => template.id === templateId)?.label ?? "当前模板"}
               onCropChange={updatePhotoCrop}
               onRemove={removePhoto}
               onSettingsChange={updatePhotoSettings}
@@ -1021,6 +1027,7 @@ export function ResumeWorkspace() {
             </div>
           </div>
           <ResumePreview
+            photoSupported={isPhotoSupported}
             resume={resume}
             templateId={templateId}
             onPhotoSettingsChange={updatePhotoSettings}
@@ -1377,7 +1384,9 @@ function PhotoUploadPanel({
   onSettingsChange,
   onUpload,
   photo,
-  photoSettings
+  photoSettings,
+  photoSupported,
+  templateLabel
 }: {
   onCropChange: (field: "x" | "y" | "zoom", value: number) => void;
   onRemove: () => void;
@@ -1385,7 +1394,24 @@ function PhotoUploadPanel({
   onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
   photo: ResumeDocument["profile"]["photo"];
   photoSettings: ResumePhotoSettings;
+  photoSupported: boolean;
+  templateLabel: string;
 }) {
+  if (!photoSupported) {
+    return (
+      <section className="photo-upload-panel is-disabled" aria-label="照片暂不可用">
+        <div className="photo-upload-head">
+          <div>
+            <span className="eyebrow">头像 / 照片</span>
+            <strong>当前模板暂不支持</strong>
+          </div>
+          <LayoutTemplate size={18} />
+        </div>
+        <p>{templateLabel} 暂时关闭照片功能。切换到好用蓝灰、简约金灰或应届蓝线后，可以继续上传和调整照片。</p>
+      </section>
+    );
+  }
+
   return (
     <section className="photo-upload-panel" aria-label="头像上传与裁剪">
       <div className="photo-upload-head">
@@ -1528,12 +1554,14 @@ function ExperienceEditor({
 }
 
 function ResumePreview({
+  photoSupported,
   onPhotoSettingsChange,
   onSwapModules,
   onToggleVisibility,
   resume,
   templateId
 }: {
+  photoSupported: boolean;
   onPhotoSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onSwapModules: (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => void;
   onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
@@ -1553,6 +1581,7 @@ function ResumePreview({
   const photoSettings = normalizePhotoSettings(resume.photoSettings);
   const moduleOrder = normalizeModuleOrder(resume.moduleOrder);
   const iconEnabled = iconSettings.enabled;
+  const isPhotoEnabled = photoSupported && photoSettings.visible;
   const contactItems = [
     { icon: iconSettings.phone, text: resume.profile.phone || "电话" },
     { icon: iconSettings.email, text: resume.profile.email || "邮箱" },
@@ -1619,7 +1648,7 @@ function ResumePreview({
       onToggleVisibility={onToggleVisibility}
     />
   );
-  const photoNode = photoSettings.visible ? (
+  const photoNode = isPhotoEnabled ? (
     <div className="resume-photo-wrap" title="拖动照片到左侧或右侧">
       <button
         aria-label="隐藏照片"
@@ -1755,8 +1784,8 @@ function ResumePreview({
 
   return (
     <article className={`resume-paper template-${templateId}`} style={getResumeStyleVars(styleSettings)}>
-      <header className={`resume-head photo-${photoSettings.position}`}>
-        {photoSettings.position === "left" ? photoNode : null}
+      <header className={`resume-head ${isPhotoEnabled ? `photo-${photoSettings.position}` : "photo-none"}`}>
+        {isPhotoEnabled && photoSettings.position === "left" ? photoNode : null}
         <div className="resume-head-content">
           <h2>{resume.profile.name || "你的姓名"}</h2>
           <p className="resume-contact-line">
@@ -1772,7 +1801,7 @@ function ResumePreview({
             <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</span>
           </div>
         </div>
-        {photoSettings.position === "right" ? photoNode : null}
+        {isPhotoEnabled && photoSettings.position === "right" ? photoNode : null}
       </header>
 
       {moduleOrder.map((moduleId) =>
