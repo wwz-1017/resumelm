@@ -4,34 +4,58 @@
 
 import { ChangeEvent, useEffect, useState } from "react";
 import {
+  Activity,
+  Award,
+  BadgeCheck,
+  BookOpen,
+  Bookmark,
   BriefcaseBusiness,
+  Building2,
+  Circle,
+  CircleUserRound,
+  Compass,
+  ContactRound,
   Download,
   Dumbbell,
   FileText,
   FileUp,
   GraduationCap,
   Heart,
+  Headphones,
+  IdCard,
+  Inbox,
   LayoutTemplate,
   Mail,
+  Map,
+  MapPinned,
   MapPin,
+  Medal,
   MessageSquare,
   Phone,
   Plus,
   RotateCcw,
   Save,
+  School,
+  Send,
+  Smartphone,
   Sparkles,
+  Star,
+  Tag,
   Target,
   ThumbsDown,
   ThumbsUp,
+  TrendingUp,
+  Trophy,
   Trash2,
-  User
+  User,
+  UserRound
 } from "lucide-react";
 import { getDashboardMetrics, type DashboardMetrics } from "@/lib/analytics/dashboard";
 import { trackEvent } from "@/lib/analytics/track";
 import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { downloadResumeWord, printResumePdf } from "@/lib/export/resume-export";
 import { saveFeedback, type FeedbackTarget, type FeedbackVote } from "@/lib/feedback/store";
-import { createDefaultIconSettings, createEmptyResume } from "@/lib/resume-schema/defaults";
+import { createEmptyResume, normalizeIconSettings } from "@/lib/resume-schema/defaults";
 import type { Education, Experience, ResumeDocument, ResumeIconId, ResumeIconSettings } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
 import type { ScoreDimension, ScoreReport } from "@/lib/scoring/types";
@@ -55,18 +79,92 @@ const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "minimalPm", label: "极简PM" }
 ];
 
-const iconOptions: Array<{ id: ResumeIconId; label: string; icon: React.ReactNode }> = [
-  { id: "none", label: "不放", icon: null },
-  { id: "user", label: "个人", icon: <User size={14} /> },
-  { id: "work", label: "工作", icon: <BriefcaseBusiness size={14} /> },
-  { id: "education", label: "教育", icon: <GraduationCap size={14} /> },
-  { id: "phone", label: "电话", icon: <Phone size={14} /> },
-  { id: "email", label: "邮箱", icon: <Mail size={14} /> },
-  { id: "address", label: "地址", icon: <MapPin size={14} /> },
-  { id: "sport", label: "运动", icon: <Dumbbell size={14} /> },
-  { id: "hobby", label: "爱好", icon: <Heart size={14} /> },
-  { id: "other", label: "其它", icon: <Sparkles size={14} /> }
-];
+const iconStyleOptions: Record<keyof Omit<ResumeIconSettings, "enabled">, Array<{ id: ResumeIconId; label: string }>> = {
+  phone: [
+    { id: "none", label: "不放" },
+    { id: "phone", label: "电话" },
+    { id: "mobile", label: "手机" },
+    { id: "hotline", label: "热线" },
+    { id: "headset", label: "客服耳机" }
+  ],
+  email: [
+    { id: "none", label: "不放" },
+    { id: "email", label: "信封" },
+    { id: "inbox", label: "收件箱" },
+    { id: "sendMail", label: "发送" },
+    { id: "mailBadge", label: "邮件认证" }
+  ],
+  city: [
+    { id: "none", label: "不放" },
+    { id: "pin", label: "定位" },
+    { id: "mapPin", label: "地图定位" },
+    { id: "map", label: "地图" },
+    { id: "compass", label: "罗盘" }
+  ],
+  targetRole: [
+    { id: "none", label: "不放" },
+    { id: "briefcase", label: "公文包" },
+    { id: "idCard", label: "工牌" },
+    { id: "building", label: "办公楼" },
+    { id: "trend", label: "趋势图" }
+  ],
+  personalSummary: [
+    { id: "none", label: "不放" },
+    { id: "user", label: "头像" },
+    { id: "maleUser", label: "男头像" },
+    { id: "femaleUser", label: "女头像" },
+    { id: "profileBadge", label: "证件头像" }
+  ],
+  strengths: [
+    { id: "none", label: "不放" },
+    { id: "heart", label: "爱心" },
+    { id: "star", label: "星标" },
+    { id: "badgeCheck", label: "认证" },
+    { id: "sparkles", label: "闪光" }
+  ],
+  education: [
+    { id: "none", label: "不放" },
+    { id: "graduation", label: "学士帽" },
+    { id: "book", label: "书本" },
+    { id: "school", label: "学校" },
+    { id: "medal", label: "奖章" }
+  ],
+  internships: [
+    { id: "none", label: "不放" },
+    { id: "briefcase", label: "公文包" },
+    { id: "idCard", label: "工牌" },
+    { id: "building", label: "公司" },
+    { id: "trend", label: "成长" }
+  ],
+  projects: [
+    { id: "none", label: "不放" },
+    { id: "sparkles", label: "项目亮点" },
+    { id: "bookmark", label: "书签" },
+    { id: "tag", label: "标签" },
+    { id: "dot", label: "圆点" }
+  ],
+  campusExperience: [
+    { id: "none", label: "不放" },
+    { id: "star", label: "星标" },
+    { id: "heart", label: "爱心" },
+    { id: "trophy", label: "奖杯" },
+    { id: "activity", label: "活动" }
+  ],
+  skills: [
+    { id: "none", label: "不放" },
+    { id: "tag", label: "标签" },
+    { id: "sparkles", label: "闪光" },
+    { id: "bookmark", label: "书签" },
+    { id: "dot", label: "圆点" }
+  ],
+  awards: [
+    { id: "none", label: "不放" },
+    { id: "award", label: "奖章" },
+    { id: "medal", label: "勋章" },
+    { id: "trophy", label: "奖杯" },
+    { id: "star", label: "星标" }
+  ]
+};
 
 const feedbackReasons: Record<FeedbackVote, string[]> = {
   up: ["表达更专业", "关键词更准确", "建议可执行", "导出体验顺畅"],
@@ -110,22 +208,80 @@ const getIconNode = (iconId: ResumeIconId, size = 14) => {
   switch (iconId) {
     case "user":
       return <User size={size} strokeWidth={strokeWidth} />;
+    case "maleUser":
+      return <UserRound size={size} strokeWidth={strokeWidth} />;
+    case "femaleUser":
+      return <CircleUserRound size={size} strokeWidth={strokeWidth} />;
+    case "profileBadge":
+      return <ContactRound size={size} strokeWidth={strokeWidth} />;
     case "work":
+    case "briefcase":
       return <BriefcaseBusiness size={size} strokeWidth={strokeWidth} />;
+    case "idCard":
+      return <IdCard size={size} strokeWidth={strokeWidth} />;
+    case "building":
+      return <Building2 size={size} strokeWidth={strokeWidth} />;
+    case "trend":
+      return <TrendingUp size={size} strokeWidth={strokeWidth} />;
     case "education":
+    case "graduation":
       return <GraduationCap size={size} strokeWidth={strokeWidth} />;
+    case "book":
+      return <BookOpen size={size} strokeWidth={strokeWidth} />;
+    case "school":
+      return <School size={size} strokeWidth={strokeWidth} />;
+    case "medal":
+      return <Medal size={size} strokeWidth={strokeWidth} />;
+    case "award":
+      return <Award size={size} strokeWidth={strokeWidth} />;
     case "phone":
       return <Phone size={size} strokeWidth={strokeWidth} />;
+    case "mobile":
+      return <Smartphone size={size} strokeWidth={strokeWidth} />;
+    case "hotline":
+      return <Phone size={size} strokeWidth={2.8} />;
+    case "headset":
+      return <Headphones size={size} strokeWidth={strokeWidth} />;
     case "email":
       return <Mail size={size} strokeWidth={strokeWidth} />;
+    case "inbox":
+      return <Inbox size={size} strokeWidth={strokeWidth} />;
+    case "sendMail":
+      return <Send size={size} strokeWidth={strokeWidth} />;
+    case "mailBadge":
+      return <BadgeCheck size={size} strokeWidth={strokeWidth} />;
     case "address":
+    case "pin":
       return <MapPin size={size} strokeWidth={strokeWidth} />;
+    case "mapPin":
+      return <MapPinned size={size} strokeWidth={strokeWidth} />;
+    case "map":
+      return <Map size={size} strokeWidth={strokeWidth} />;
+    case "compass":
+      return <Compass size={size} strokeWidth={strokeWidth} />;
     case "sport":
+    case "dumbbell":
       return <Dumbbell size={size} strokeWidth={strokeWidth} />;
+    case "trophy":
+      return <Trophy size={size} strokeWidth={strokeWidth} />;
+    case "activity":
+      return <Activity size={size} strokeWidth={strokeWidth} />;
     case "hobby":
+    case "heart":
       return <Heart size={size} strokeWidth={strokeWidth} />;
+    case "star":
+      return <Star size={size} strokeWidth={strokeWidth} />;
+    case "badgeCheck":
+      return <BadgeCheck size={size} strokeWidth={strokeWidth} />;
     case "other":
+    case "sparkles":
       return <Sparkles size={size} strokeWidth={strokeWidth} />;
+    case "bookmark":
+      return <Bookmark size={size} strokeWidth={strokeWidth} />;
+    case "tag":
+      return <Tag size={size} strokeWidth={strokeWidth} />;
+    case "dot":
+      return <Circle size={Math.max(8, size - 3)} fill="currentColor" strokeWidth={strokeWidth} />;
     case "none":
     default:
       return null;
@@ -156,7 +312,7 @@ export function ResumeWorkspace() {
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState("");
   const issues = validateResume(resume);
-  const iconSettings = { ...createDefaultIconSettings(), ...resume.iconSettings };
+  const iconSettings = normalizeIconSettings(resume.iconSettings);
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -187,8 +343,7 @@ export function ResumeWorkspace() {
     setResume((current) => ({
       ...current,
       iconSettings: {
-        ...createDefaultIconSettings(),
-        ...current.iconSettings,
+        ...normalizeIconSettings(current.iconSettings),
         ...nextSettings
       }
     }));
@@ -699,13 +854,13 @@ function IconSettingsPanel({
       <div className="icon-settings-grid">
         {fields.map((field) => (
           <label className="icon-select" key={field.key}>
-            <span>{field.label}</span>
+            <span>{field.label}样式</span>
             <select
               disabled={!settings.enabled}
               value={settings[field.key]}
               onChange={(event) => onChange({ [field.key]: event.target.value as ResumeIconId })}
             >
-              {iconOptions.map((option) => (
+              {iconStyleOptions[field.key].map((option) => (
                 <option key={option.id} value={option.id}>
                   {option.label}
                 </option>
@@ -859,7 +1014,7 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
   const campusExperience = resume.campusExperience.filter(hasExperienceContent);
   const skills = nonEmpty(resume.skills);
   const awards = nonEmpty(resume.awards);
-  const iconSettings = { ...createDefaultIconSettings(), ...resume.iconSettings };
+  const iconSettings = normalizeIconSettings(resume.iconSettings);
   const iconEnabled = iconSettings.enabled;
   const contactItems = [
     { icon: iconSettings.phone, text: resume.profile.phone || "电话" },

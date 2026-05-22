@@ -1,4 +1,4 @@
-import type { ResumeDocument, ResumeIconSettings } from "./types";
+import type { ResumeDocument, ResumeIconId, ResumeIconSettings } from "./types";
 
 const createId = () => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -56,15 +56,44 @@ export function createDefaultIconSettings(): ResumeIconSettings {
     enabled: false,
     phone: "phone",
     email: "email",
-    city: "address",
-    targetRole: "work",
+    city: "pin",
+    targetRole: "briefcase",
     personalSummary: "user",
-    strengths: "hobby",
-    education: "education",
-    internships: "work",
-    projects: "other",
-    campusExperience: "hobby",
-    skills: "other",
-    awards: "other"
+    strengths: "heart",
+    education: "graduation",
+    internships: "briefcase",
+    projects: "sparkles",
+    campusExperience: "star",
+    skills: "tag",
+    awards: "award"
+  };
+}
+
+export function normalizeIconSettings(settings?: Partial<ResumeIconSettings>): ResumeIconSettings {
+  const defaults = createDefaultIconSettings();
+  const next = { ...defaults, ...settings };
+  const legacyMap: Partial<Record<ResumeIconId, ResumeIconId>> = {
+    address: "pin",
+    work: "briefcase",
+    education: "graduation",
+    hobby: "heart",
+    other: "sparkles",
+    sport: "dumbbell"
+  };
+
+  return {
+    ...next,
+    phone: legacyMap[next.phone] ?? next.phone,
+    email: legacyMap[next.email] ?? next.email,
+    city: legacyMap[next.city] ?? next.city,
+    targetRole: legacyMap[next.targetRole] ?? next.targetRole,
+    personalSummary: legacyMap[next.personalSummary] ?? next.personalSummary,
+    strengths: legacyMap[next.strengths] ?? next.strengths,
+    education: legacyMap[next.education] ?? next.education,
+    internships: legacyMap[next.internships] ?? next.internships,
+    projects: legacyMap[next.projects] ?? next.projects,
+    campusExperience: legacyMap[next.campusExperience] ?? next.campusExperience,
+    skills: legacyMap[next.skills] ?? next.skills,
+    awards: legacyMap[next.awards] ?? next.awards
   };
 }

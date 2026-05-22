@@ -1,4 +1,4 @@
-import { createDefaultIconSettings, createEmptyResume } from "@/lib/resume-schema/defaults";
+import { createEmptyResume, normalizeIconSettings } from "@/lib/resume-schema/defaults";
 import type { ResumeDocument } from "@/lib/resume-schema/types";
 import { isResumeDocument } from "@/lib/resume-schema/validate";
 
@@ -28,7 +28,7 @@ export const loadResume = (): ResumeDocument => {
 
   try {
     const parsed = JSON.parse(raw);
-    return isResumeDocument(parsed) ? { ...parsed, iconSettings: parsed.iconSettings ?? createDefaultIconSettings() } : createEmptyResume();
+    return isResumeDocument(parsed) ? { ...parsed, iconSettings: normalizeIconSettings(parsed.iconSettings) } : createEmptyResume();
   } catch {
     return createEmptyResume();
   }
