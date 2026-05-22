@@ -6,11 +6,16 @@ import { ChangeEvent, useEffect, useState } from "react";
 import {
   BriefcaseBusiness,
   Download,
+  Dumbbell,
   FileText,
   FileUp,
   GraduationCap,
+  Heart,
   LayoutTemplate,
+  Mail,
+  MapPin,
   MessageSquare,
+  Phone,
   Plus,
   RotateCcw,
   Save,
@@ -18,15 +23,16 @@ import {
   Target,
   ThumbsDown,
   ThumbsUp,
-  Trash2
+  Trash2,
+  User
 } from "lucide-react";
 import { getDashboardMetrics, type DashboardMetrics } from "@/lib/analytics/dashboard";
 import { trackEvent } from "@/lib/analytics/track";
 import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { downloadResumeWord, printResumePdf } from "@/lib/export/resume-export";
 import { saveFeedback, type FeedbackTarget, type FeedbackVote } from "@/lib/feedback/store";
-import { createEmptyResume } from "@/lib/resume-schema/defaults";
-import type { Education, Experience, ResumeDocument } from "@/lib/resume-schema/types";
+import { createDefaultIconSettings, createEmptyResume } from "@/lib/resume-schema/defaults";
+import type { Education, Experience, ResumeDocument, ResumeIconId, ResumeIconSettings } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
 import type { ScoreDimension, ScoreReport } from "@/lib/scoring/types";
 import {
@@ -47,6 +53,19 @@ const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "brick", label: "砖红双栏" },
   { id: "leftBlue", label: "深蓝左栏" },
   { id: "minimalPm", label: "极简PM" }
+];
+
+const iconOptions: Array<{ id: ResumeIconId; label: string; icon: React.ReactNode }> = [
+  { id: "none", label: "不放", icon: null },
+  { id: "user", label: "个人", icon: <User size={14} /> },
+  { id: "work", label: "工作", icon: <BriefcaseBusiness size={14} /> },
+  { id: "education", label: "教育", icon: <GraduationCap size={14} /> },
+  { id: "phone", label: "电话", icon: <Phone size={14} /> },
+  { id: "email", label: "邮箱", icon: <Mail size={14} /> },
+  { id: "address", label: "地址", icon: <MapPin size={14} /> },
+  { id: "sport", label: "运动", icon: <Dumbbell size={14} /> },
+  { id: "hobby", label: "爱好", icon: <Heart size={14} /> },
+  { id: "other", label: "其它", icon: <Sparkles size={14} /> }
 ];
 
 const feedbackReasons: Record<FeedbackVote, string[]> = {
@@ -85,6 +104,44 @@ const nonEmpty = (items: string[]) => items.filter((item) => item.trim());
 const hasExperienceContent = (item: Experience) =>
   Boolean(item.title.trim() || item.organization.trim() || item.description.trim());
 
+const getIconNode = (iconId: ResumeIconId, size = 14) => {
+  const strokeWidth = 2;
+
+  switch (iconId) {
+    case "user":
+      return <User size={size} strokeWidth={strokeWidth} />;
+    case "work":
+      return <BriefcaseBusiness size={size} strokeWidth={strokeWidth} />;
+    case "education":
+      return <GraduationCap size={size} strokeWidth={strokeWidth} />;
+    case "phone":
+      return <Phone size={size} strokeWidth={strokeWidth} />;
+    case "email":
+      return <Mail size={size} strokeWidth={strokeWidth} />;
+    case "address":
+      return <MapPin size={size} strokeWidth={strokeWidth} />;
+    case "sport":
+      return <Dumbbell size={size} strokeWidth={strokeWidth} />;
+    case "hobby":
+      return <Heart size={size} strokeWidth={strokeWidth} />;
+    case "other":
+      return <Sparkles size={size} strokeWidth={strokeWidth} />;
+    case "none":
+    default:
+      return null;
+  }
+};
+
+function ResumeIcon({ enabled, iconId, size = 14 }: { enabled: boolean; iconId: ResumeIconId; size?: number }) {
+  if (!enabled || iconId === "none") return null;
+
+  return (
+    <span className="resume-icon" aria-hidden="true">
+      {getIconNode(iconId, size)}
+    </span>
+  );
+}
+
 export function ResumeWorkspace() {
   const [resume, setResume] = useState<ResumeDocument>(() => createEmptyResume());
   const [sessionId, setSessionId] = useState("");
@@ -99,6 +156,7 @@ export function ResumeWorkspace() {
   const [dashboardMetrics, setDashboardMetrics] = useState<DashboardMetrics | null>(null);
   const [feedbackNotice, setFeedbackNotice] = useState("");
   const issues = validateResume(resume);
+  const iconSettings = { ...createDefaultIconSettings(), ...resume.iconSettings };
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -121,6 +179,17 @@ export function ResumeWorkspace() {
       profile: {
         ...current.profile,
         [field]: value
+      }
+    }));
+  };
+
+  const updateIconSettings = (nextSettings: Partial<ResumeIconSettings>) => {
+    setResume((current) => ({
+      ...current,
+      iconSettings: {
+        ...createDefaultIconSettings(),
+        ...current.iconSettings,
+        ...nextSettings
       }
     }));
   };
@@ -410,6 +479,8 @@ export function ResumeWorkspace() {
 
             <FeedbackPanel onSubmit={submitFeedback} />
 
+            <IconSettingsPanel settings={iconSettings} onChange={updateIconSettings} />
+
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="基础信息" />
             <div className="field-grid two">
               <TextField label="姓名" value={resume.profile.name} onChange={(value) => updateProfile("name", value)} />
@@ -587,6 +658,66 @@ function FeedbackPanel({
   );
 }
 
+function IconSettingsPanel({
+  onChange,
+  settings
+}: {
+  onChange: (nextSettings: Partial<ResumeIconSettings>) => void;
+  settings: ResumeIconSettings;
+}) {
+  const fields: Array<{ key: keyof Omit<ResumeIconSettings, "enabled">; label: string }> = [
+    { key: "phone", label: "电话前" },
+    { key: "email", label: "邮箱前" },
+    { key: "city", label: "地址前" },
+    { key: "targetRole", label: "岗位前" },
+    { key: "personalSummary", label: "个人评价" },
+    { key: "strengths", label: "个人优势" },
+    { key: "education", label: "教育经历" },
+    { key: "internships", label: "实习经历" },
+    { key: "projects", label: "项目经历" },
+    { key: "campusExperience", label: "校园经历" },
+    { key: "skills", label: "技能" },
+    { key: "awards", label: "奖项" }
+  ];
+
+  return (
+    <section className="icon-settings-panel" aria-label="简历小图标">
+      <div className="icon-settings-head">
+        <div>
+          <span className="eyebrow">简历小图标</span>
+          <strong>{settings.enabled ? "已开启" : "未开启"}</strong>
+        </div>
+        <label className="switch-field">
+          <input
+            checked={settings.enabled}
+            type="checkbox"
+            onChange={(event) => onChange({ enabled: event.target.checked })}
+          />
+          使用图标
+        </label>
+      </div>
+      <div className="icon-settings-grid">
+        {fields.map((field) => (
+          <label className="icon-select" key={field.key}>
+            <span>{field.label}</span>
+            <select
+              disabled={!settings.enabled}
+              value={settings[field.key]}
+              onChange={(event) => onChange({ [field.key]: event.target.value as ResumeIconId })}
+            >
+              {iconOptions.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </label>
+        ))}
+      </div>
+    </section>
+  );
+}
+
 function DashboardPanel({ metrics }: { metrics: DashboardMetrics }) {
   return (
     <details className="dashboard-panel" aria-label="BI 看板">
@@ -728,28 +859,53 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
   const campusExperience = resume.campusExperience.filter(hasExperienceContent);
   const skills = nonEmpty(resume.skills);
   const awards = nonEmpty(resume.awards);
-  const contactText =
-    [resume.profile.phone, resume.profile.email, resume.profile.city].filter(Boolean).join(" · ") || "电话 · 邮箱 · 城市";
+  const iconSettings = { ...createDefaultIconSettings(), ...resume.iconSettings };
+  const iconEnabled = iconSettings.enabled;
+  const contactItems = [
+    { icon: iconSettings.phone, text: resume.profile.phone || "电话" },
+    { icon: iconSettings.email, text: resume.profile.email || "邮箱" },
+    { icon: iconSettings.city, text: resume.profile.city || "城市" }
+  ];
 
   return (
     <article className={`resume-paper template-${templateId}`}>
       <header className="resume-head">
         <div>
           <h2>{resume.profile.name || "你的姓名"}</h2>
-          <p>{contactText}</p>
+          <p className="resume-contact-line">
+            {contactItems.map((item, index) => (
+              <span className="resume-contact-item" key={`${item.icon}-${index}`}>
+                <ResumeIcon enabled={iconEnabled} iconId={item.icon} />
+                {item.text}
+              </span>
+            ))}
+          </p>
         </div>
         <div className="resume-photo" aria-hidden="true">
           照片
         </div>
-        <div className="resume-target">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</div>
+        <div className="resume-target">
+          <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
+          {resume.profile.targetRole || resume.targetJob.title || "目标岗位"}
+        </div>
       </header>
 
-      <ResumeSection title="个人评价">{resume.personalSummary || "用 2-3 句话概括你的背景、能力和求职方向。"}</ResumeSection>
+      <ResumeSection iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title="个人评价">
+        {resume.personalSummary || "用 2-3 句话概括你的背景、能力和求职方向。"}
+      </ResumeSection>
 
-      <TagSection items={nonEmpty(resume.strengths).length ? nonEmpty(resume.strengths) : ["学习能力", "项目执行", "沟通协作"]} title="个人优势" />
+      <TagSection
+        iconEnabled={iconEnabled}
+        iconId={iconSettings.strengths}
+        items={nonEmpty(resume.strengths).length ? nonEmpty(resume.strengths) : ["学习能力", "项目执行", "沟通协作"]}
+        title="个人优势"
+      />
 
       <section className="resume-section">
-        <h3>教育经历</h3>
+        <h3>
+          <ResumeIcon enabled={iconEnabled} iconId={iconSettings.education} />
+          教育经历
+        </h3>
         {(resume.education.length ? resume.education : [blankEducation()]).map((item, index) => (
           <div className="resume-item" key={index}>
             <div className="resume-row">
@@ -762,11 +918,34 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
         ))}
       </section>
 
-      <ExperiencePreview fallback="实习经历会展示在这里。" items={internships} title="实习经历" />
-      <ExperiencePreview fallback="描述你做了什么、如何做、带来了什么结果。" items={projects} title="项目经历" />
-      <ExperiencePreview fallback="学生组织、社团、竞赛或志愿经历。" items={campusExperience} title="校园经历" />
-      <TagSection items={skills.length ? skills : ["数据分析", "用户研究", "文档表达"]} title="技能" />
-      {awards.length ? <ListSection items={awards} title="奖项" /> : null}
+      <ExperiencePreview
+        fallback="实习经历会展示在这里。"
+        iconEnabled={iconEnabled}
+        iconId={iconSettings.internships}
+        items={internships}
+        title="实习经历"
+      />
+      <ExperiencePreview
+        fallback="描述你做了什么、如何做、带来了什么结果。"
+        iconEnabled={iconEnabled}
+        iconId={iconSettings.projects}
+        items={projects}
+        title="项目经历"
+      />
+      <ExperiencePreview
+        fallback="学生组织、社团、竞赛或志愿经历。"
+        iconEnabled={iconEnabled}
+        iconId={iconSettings.campusExperience}
+        items={campusExperience}
+        title="校园经历"
+      />
+      <TagSection
+        iconEnabled={iconEnabled}
+        iconId={iconSettings.skills}
+        items={skills.length ? skills : ["数据分析", "用户研究", "文档表达"]}
+        title="技能"
+      />
+      {awards.length ? <ListSection iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title="奖项" /> : null}
     </article>
   );
 }
@@ -848,19 +1027,47 @@ function KeywordGroup({ items, title }: { items: string[]; title: string }) {
   );
 }
 
-function ResumeSection({ children, title }: { children: React.ReactNode; title: string }) {
+function ResumeSection({
+  children,
+  iconEnabled,
+  iconId,
+  title
+}: {
+  children: React.ReactNode;
+  iconEnabled: boolean;
+  iconId: ResumeIconId;
+  title: string;
+}) {
   return (
     <section className="resume-section">
-      <h3>{title}</h3>
+      <h3>
+        <ResumeIcon enabled={iconEnabled} iconId={iconId} />
+        {title}
+      </h3>
       <p>{children}</p>
     </section>
   );
 }
 
-function ExperiencePreview({ fallback, items, title }: { fallback: string; items: Experience[]; title: string }) {
+function ExperiencePreview({
+  fallback,
+  iconEnabled,
+  iconId,
+  items,
+  title
+}: {
+  fallback: string;
+  iconEnabled: boolean;
+  iconId: ResumeIconId;
+  items: Experience[];
+  title: string;
+}) {
   return (
     <section className="resume-section">
-      <h3>{title}</h3>
+      <h3>
+        <ResumeIcon enabled={iconEnabled} iconId={iconId} />
+        {title}
+      </h3>
       {items.length === 0 ? <p>{fallback}</p> : null}
       {items.map((item, index) => (
         <div className="resume-item" key={`${title}-${index}`}>
@@ -876,10 +1083,23 @@ function ExperiencePreview({ fallback, items, title }: { fallback: string; items
   );
 }
 
-function TagSection({ items, title }: { items: string[]; title: string }) {
+function TagSection({
+  iconEnabled,
+  iconId,
+  items,
+  title
+}: {
+  iconEnabled: boolean;
+  iconId: ResumeIconId;
+  items: string[];
+  title: string;
+}) {
   return (
     <section className="resume-section">
-      <h3>{title}</h3>
+      <h3>
+        <ResumeIcon enabled={iconEnabled} iconId={iconId} />
+        {title}
+      </h3>
       <div className="skill-list">
         {items.map((item) => (
           <span key={item}>{item}</span>
@@ -889,10 +1109,23 @@ function TagSection({ items, title }: { items: string[]; title: string }) {
   );
 }
 
-function ListSection({ items, title }: { items: string[]; title: string }) {
+function ListSection({
+  iconEnabled,
+  iconId,
+  items,
+  title
+}: {
+  iconEnabled: boolean;
+  iconId: ResumeIconId;
+  items: string[];
+  title: string;
+}) {
   return (
     <section className="resume-section">
-      <h3>{title}</h3>
+      <h3>
+        <ResumeIcon enabled={iconEnabled} iconId={iconId} />
+        {title}
+      </h3>
       <ul className="resume-list">
         {items.map((item) => (
           <li key={item}>{item}</li>

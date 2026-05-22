@@ -23,11 +23,40 @@ export type Experience = {
   description: string;
 };
 
+export type ResumeIconId =
+  | "none"
+  | "user"
+  | "work"
+  | "education"
+  | "phone"
+  | "email"
+  | "address"
+  | "sport"
+  | "hobby"
+  | "other";
+
+export type ResumeIconSettings = {
+  enabled: boolean;
+  phone: ResumeIconId;
+  email: ResumeIconId;
+  city: ResumeIconId;
+  targetRole: ResumeIconId;
+  personalSummary: ResumeIconId;
+  strengths: ResumeIconId;
+  education: ResumeIconId;
+  internships: ResumeIconId;
+  projects: ResumeIconId;
+  campusExperience: ResumeIconId;
+  skills: ResumeIconId;
+  awards: ResumeIconId;
+};
+
 export type ResumeDocument = {
   schemaVersion: 1;
   id: string;
   updatedAt: string;
   profile: ResumeProfile;
+  iconSettings?: ResumeIconSettings;
   personalSummary: string;
   strengths: string[];
   education: Education[];

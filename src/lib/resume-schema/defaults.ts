@@ -1,4 +1,4 @@
-import type { ResumeDocument } from "./types";
+import type { ResumeDocument, ResumeIconSettings } from "./types";
 
 const createId = () => {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -19,6 +19,7 @@ export const createEmptyResume = (): ResumeDocument => ({
     city: "",
     targetRole: ""
   },
+  iconSettings: createDefaultIconSettings(),
   personalSummary: "",
   strengths: ["", "", ""],
   education: [
@@ -49,3 +50,21 @@ export const createEmptyResume = (): ResumeDocument => ({
     jdText: ""
   }
 });
+
+export function createDefaultIconSettings(): ResumeIconSettings {
+  return {
+    enabled: false,
+    phone: "phone",
+    email: "email",
+    city: "address",
+    targetRole: "work",
+    personalSummary: "user",
+    strengths: "hobby",
+    education: "education",
+    internships: "work",
+    projects: "other",
+    campusExperience: "hobby",
+    skills: "other",
+    awards: "other"
+  };
+}

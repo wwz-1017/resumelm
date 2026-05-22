@@ -107,10 +107,27 @@ const buildExportDocument = (resumeHtml: string) => `<!doctype html>
 <html>
   <head>
     <meta charset="utf-8" />
-    <style>${exportStyles}</style>
+    <style>${getExportStyles()}</style>
   </head>
   <body>${resumeHtml}</body>
 </html>`;
+
+const getExportStyles = () => {
+  const runtimeStyles = Array.from(document.styleSheets)
+    .map((sheet) => {
+      try {
+        return Array.from(sheet.cssRules)
+          .map((rule) => rule.cssText)
+          .join("\n");
+      } catch {
+        return "";
+      }
+    })
+    .filter(Boolean)
+    .join("\n");
+
+  return `${exportStyles}\n${runtimeStyles}`;
+};
 
 const getResumePreviewHtml = () => {
   const resumePaper = document.querySelector<HTMLElement>(".resume-paper");

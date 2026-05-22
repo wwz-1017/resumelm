@@ -311,6 +311,69 @@ button {
   color: #fff;
 }
 
+.icon-settings-panel {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 18px;
+  padding: 14px;
+  border: 1px solid #d9e1d4;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #fbfaf4, #eef5eb);
+}
+
+.icon-settings-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.icon-settings-head > div {
+  display: grid;
+  gap: 2px;
+}
+
+.switch-field {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  color: var(--moss-dark);
+  font-size: 13px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.switch-field input {
+  accent-color: var(--moss-dark);
+}
+
+.icon-settings-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.icon-select {
+  display: grid;
+  gap: 5px;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.icon-select select {
+  width: 100%;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 8px 9px;
+  background: #fffefa;
+  color: var(--ink);
+}
+
+.icon-select select:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
 .section-title {
   display: flex;
   align-items: center;
@@ -766,6 +829,32 @@ button {
 .resume-head p {
   margin: 8px 0 0;
   color: var(--muted);
+}
+
+.resume-contact-line,
+.resume-contact-item,
+.resume-target,
+.resume-section h3,
+.resume-icon {
+  display: inline-flex;
+  align-items: center;
+}
+
+.resume-contact-line {
+  flex-wrap: wrap;
+  gap: 6px 12px;
+}
+
+.resume-contact-item,
+.resume-target,
+.resume-section h3 {
+  gap: 6px;
+}
+
+.resume-icon {
+  flex: 0 0 auto;
+  color: currentColor;
+  line-height: 0;
 }
 
 .resume-photo {
