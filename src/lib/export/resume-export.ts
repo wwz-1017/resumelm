@@ -135,7 +135,10 @@ const getResumePreviewHtml = () => {
     throw new Error("Resume preview is not available");
   }
 
-  return resumePaper.outerHTML;
+  const exportPaper = resumePaper.cloneNode(true) as HTMLElement;
+  exportPaper.querySelectorAll(".resume-edit-controls, .resume-hidden-placeholder").forEach((node) => node.remove());
+
+  return exportPaper.outerHTML;
 };
 
 export const downloadResumeWord = (name: string) => {

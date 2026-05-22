@@ -388,7 +388,6 @@ export function ResumeWorkspace() {
   const iconSettings = normalizeIconSettings(resume.iconSettings);
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
-  const moduleOrder = normalizeModuleOrder(resume.moduleOrder);
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -837,13 +836,6 @@ export function ResumeWorkspace() {
 
             <StyleSettingsPanel settings={styleSettings} onChange={updateStyleSettings} />
 
-            <ModuleOrderPanel
-              moduleOrder={moduleOrder}
-              visibilitySettings={visibilitySettings}
-              onMove={moveModule}
-              onToggleVisibility={toggleVisibility}
-            />
-
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="基础信息" />
             <div className="field-grid two">
               <TextField label="姓名" value={resume.profile.name} onChange={(value) => updateProfile("name", value)} />
@@ -1006,7 +998,12 @@ export function ResumeWorkspace() {
               ))}
             </div>
           </div>
-          <ResumePreview resume={resume} templateId={templateId} />
+          <ResumePreview
+            resume={resume}
+            templateId={templateId}
+            onMoveModule={moveModule}
+            onToggleVisibility={toggleVisibility}
+          />
         </section>
       </div>
     </main>
@@ -1201,71 +1198,6 @@ function StyleSettingsPanel({
           options={colorOptions}
           onChange={(value) => onChange({ accentColor: value as ResumeColorId })}
         />
-      </div>
-    </section>
-  );
-}
-
-function ModuleOrderPanel({
-  moduleOrder,
-  onMove,
-  onToggleVisibility,
-  visibilitySettings
-}: {
-  moduleOrder: ResumeModuleId[];
-  onMove: (moduleId: ResumeModuleId, direction: "up" | "down") => void;
-  onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
-  visibilitySettings: ResumeVisibilitySettings;
-}) {
-  return (
-    <section className="module-order-panel" aria-label="模块顺序">
-      <div className="module-order-head">
-        <div>
-          <span className="eyebrow">模块顺序</span>
-          <strong>上移 / 下移控制预览位置</strong>
-        </div>
-        <LayoutTemplate size={18} />
-      </div>
-      <div className="module-order-list">
-        {moduleOrder.map((moduleId, index) => {
-          const isVisible = visibilitySettings[moduleId];
-
-          return (
-            <div className={`module-order-row ${isVisible ? "" : "is-hidden"}`} key={moduleId}>
-              <span className="module-order-index">{index + 1}</span>
-              <strong>{moduleLabels[moduleId]}</strong>
-              <div className="module-order-actions">
-                <button
-                  aria-label={`上移${moduleLabels[moduleId]}`}
-                  disabled={index === 0}
-                  title="上移模块"
-                  type="button"
-                  onClick={() => onMove(moduleId, "up")}
-                >
-                  <ArrowUp size={14} />
-                </button>
-                <button
-                  aria-label={`下移${moduleLabels[moduleId]}`}
-                  disabled={index === moduleOrder.length - 1}
-                  title="下移模块"
-                  type="button"
-                  onClick={() => onMove(moduleId, "down")}
-                >
-                  <ArrowDown size={14} />
-                </button>
-                <button
-                  aria-label={isVisible ? `隐藏${moduleLabels[moduleId]}` : `显示${moduleLabels[moduleId]}`}
-                  className={isVisible ? "" : "is-off"}
-                  title={isVisible ? "隐藏模块" : "显示模块"}
-                  type="button"
-                  onClick={() => onToggleVisibility(moduleId)}
-                >
-                  {isVisible ? <Eye size={14} /> : <EyeOff size={14} />}
-                </button>
-              </div>
-            </div>
-          );
-        })}
       </div>
     </section>
   );
@@ -1563,7 +1495,17 @@ function ExperienceEditor({
   );
 }
 
-function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templateId: TemplateId }) {
+function ResumePreview({
+  onMoveModule,
+  onToggleVisibility,
+  resume,
+  templateId
+}: {
+  onMoveModule: (moduleId: ResumeModuleId, direction: "up" | "down") => void;
+  onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
+  resume: ResumeDocument;
+  templateId: TemplateId;
+}) {
   const internships = resume.internships.filter(hasExperienceContent);
   const projects = resume.projects.filter(hasExperienceContent);
   const campusExperience = resume.campusExperience.filter(hasExperienceContent);
@@ -1579,22 +1521,38 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
     { icon: iconSettings.email, text: resume.profile.email || "邮箱" },
     { icon: iconSettings.city, text: resume.profile.city || "城市" }
   ];
+  const getModuleControls = (moduleId: ResumeModuleId) => (
+    <ResumeModuleControls
+      isFirst={moduleOrder.indexOf(moduleId) === 0}
+      isLast={moduleOrder.indexOf(moduleId) === moduleOrder.length - 1}
+      isVisible={visibilitySettings[moduleId]}
+      moduleId={moduleId}
+      onMove={onMoveModule}
+      onToggleVisibility={onToggleVisibility}
+    />
+  );
   const sectionRenderers: Record<ResumeModuleId, React.ReactNode> = {
     personalSummary: visibilitySettings.personalSummary ? (
-      <ResumeSection iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title="个人评价">
+      <ResumeSection controls={getModuleControls("personalSummary")} iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title="个人评价">
         {resume.personalSummary || "用 2-3 句话概括你的背景、能力和求职方向。"}
       </ResumeSection>
-    ) : null,
+    ) : (
+      <HiddenModulePlaceholder controls={getModuleControls("personalSummary")} moduleId="personalSummary" />
+    ),
     strengths: visibilitySettings.strengths ? (
       <TagSection
+        controls={getModuleControls("strengths")}
         iconEnabled={iconEnabled}
         iconId={iconSettings.strengths}
         items={nonEmpty(resume.strengths).length ? nonEmpty(resume.strengths) : ["学习能力", "项目执行", "沟通协作"]}
         title="个人优势"
       />
-    ) : null,
+    ) : (
+      <HiddenModulePlaceholder controls={getModuleControls("strengths")} moduleId="strengths" />
+    ),
     education: visibilitySettings.education ? (
       <section className="resume-section">
+        {getModuleControls("education")}
         <h3>
           <ResumeIcon enabled={iconEnabled} iconId={iconSettings.education} />
           <span className="resume-inline-text">教育经历</span>
@@ -1610,46 +1568,64 @@ function ResumePreview({ resume, templateId }: { resume: ResumeDocument; templat
           </div>
         ))}
       </section>
-    ) : null,
+    ) : (
+      <HiddenModulePlaceholder controls={getModuleControls("education")} moduleId="education" />
+    ),
     internships: visibilitySettings.internships ? (
       <ExperiencePreview
+        controls={getModuleControls("internships")}
         fallback="实习经历会展示在这里。"
         iconEnabled={iconEnabled}
         iconId={iconSettings.internships}
         items={internships}
         title="实习经历"
       />
-    ) : null,
+    ) : (
+      <HiddenModulePlaceholder controls={getModuleControls("internships")} moduleId="internships" />
+    ),
     projects: visibilitySettings.projects ? (
       <ExperiencePreview
+        controls={getModuleControls("projects")}
         fallback="描述你做了什么、如何做、带来了什么结果。"
         iconEnabled={iconEnabled}
         iconId={iconSettings.projects}
         items={projects}
         title="项目经历"
       />
-    ) : null,
+    ) : (
+      <HiddenModulePlaceholder controls={getModuleControls("projects")} moduleId="projects" />
+    ),
     campusExperience: visibilitySettings.campusExperience ? (
       <ExperiencePreview
+        controls={getModuleControls("campusExperience")}
         fallback="学生组织、社团、竞赛或志愿经历。"
         iconEnabled={iconEnabled}
         iconId={iconSettings.campusExperience}
         items={campusExperience}
         title="校园经历"
       />
-    ) : null,
+    ) : (
+      <HiddenModulePlaceholder controls={getModuleControls("campusExperience")} moduleId="campusExperience" />
+    ),
     skills: visibilitySettings.skills ? (
       <TagSection
+        controls={getModuleControls("skills")}
         iconEnabled={iconEnabled}
         iconId={iconSettings.skills}
         items={skills.length ? skills : ["数据分析", "用户研究", "文档表达"]}
         title="技能"
       />
-    ) : null,
+    ) : (
+      <HiddenModulePlaceholder controls={getModuleControls("skills")} moduleId="skills" />
+    ),
     awards:
-      visibilitySettings.awards && awards.length ? (
-        <ListSection iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title="奖项" />
-      ) : null
+      visibilitySettings.awards ? (
+        awards.length ? (
+          <ListSection controls={getModuleControls("awards")} iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title="奖项" />
+        ) : null
+      ) : (
+        <HiddenModulePlaceholder controls={getModuleControls("awards")} moduleId="awards" />
+      )
   };
 
   return (
@@ -1712,6 +1688,53 @@ const dimensionMaxScores: Record<ScoreDimension, number> = {
   readability: 5
 };
 
+function ResumeModuleControls({
+  isFirst,
+  isLast,
+  isVisible,
+  moduleId,
+  onMove,
+  onToggleVisibility
+}: {
+  isFirst: boolean;
+  isLast: boolean;
+  isVisible: boolean;
+  moduleId: ResumeModuleId;
+  onMove: (moduleId: ResumeModuleId, direction: "up" | "down") => void;
+  onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
+}) {
+  const label = moduleLabels[moduleId];
+
+  return (
+    <div className="resume-edit-controls" aria-label={`${label}模块控制`}>
+      <button aria-label={`上移${label}`} disabled={isFirst} title="上移模块" type="button" onClick={() => onMove(moduleId, "up")}>
+        <ArrowUp size={13} />
+      </button>
+      <button aria-label={`下移${label}`} disabled={isLast} title="下移模块" type="button" onClick={() => onMove(moduleId, "down")}>
+        <ArrowDown size={13} />
+      </button>
+      <button
+        aria-label={isVisible ? `隐藏${label}` : `显示${label}`}
+        className={isVisible ? "" : "is-off"}
+        title={isVisible ? "隐藏模块" : "显示模块"}
+        type="button"
+        onClick={() => onToggleVisibility(moduleId)}
+      >
+        {isVisible ? <Eye size={13} /> : <EyeOff size={13} />}
+      </button>
+    </div>
+  );
+}
+
+function HiddenModulePlaceholder({ controls, moduleId }: { controls: React.ReactNode; moduleId: ResumeModuleId }) {
+  return (
+    <section className="resume-section resume-hidden-placeholder">
+      {controls}
+      <span>{moduleLabels[moduleId]}已隐藏，点击眼睛恢复</span>
+    </section>
+  );
+}
+
 function ScoreReportView({ report }: { report: ScoreReport }) {
   const dimensions = Object.entries(report.dimensionScores) as Array<[ScoreDimension, number]>;
 
@@ -1773,17 +1796,20 @@ function KeywordGroup({ items, title }: { items: string[]; title: string }) {
 
 function ResumeSection({
   children,
+  controls,
   iconEnabled,
   iconId,
   title
 }: {
   children: React.ReactNode;
+  controls?: React.ReactNode;
   iconEnabled: boolean;
   iconId: ResumeIconId;
   title: string;
 }) {
   return (
     <section className="resume-section">
+      {controls}
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
         <span className="resume-inline-text">{title}</span>
@@ -1794,12 +1820,14 @@ function ResumeSection({
 }
 
 function ExperiencePreview({
+  controls,
   fallback,
   iconEnabled,
   iconId,
   items,
   title
 }: {
+  controls?: React.ReactNode;
   fallback: string;
   iconEnabled: boolean;
   iconId: ResumeIconId;
@@ -1808,6 +1836,7 @@ function ExperiencePreview({
 }) {
   return (
     <section className="resume-section">
+      {controls}
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
         <span className="resume-inline-text">{title}</span>
@@ -1828,11 +1857,13 @@ function ExperiencePreview({
 }
 
 function TagSection({
+  controls,
   iconEnabled,
   iconId,
   items,
   title
 }: {
+  controls?: React.ReactNode;
   iconEnabled: boolean;
   iconId: ResumeIconId;
   items: string[];
@@ -1840,6 +1871,7 @@ function TagSection({
 }) {
   return (
     <section className="resume-section">
+      {controls}
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
         <span className="resume-inline-text">{title}</span>
@@ -1854,11 +1886,13 @@ function TagSection({
 }
 
 function ListSection({
+  controls,
   iconEnabled,
   iconId,
   items,
   title
 }: {
+  controls?: React.ReactNode;
   iconEnabled: boolean;
   iconId: ResumeIconId;
   items: string[];
@@ -1866,6 +1900,7 @@ function ListSection({
 }) {
   return (
     <section className="resume-section">
+      {controls}
       <h3>
         <ResumeIcon enabled={iconEnabled} iconId={iconId} />
         <span className="resume-inline-text">{title}</span>
