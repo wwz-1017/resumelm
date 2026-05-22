@@ -470,26 +470,6 @@ export function ResumeWorkspace() {
     event.target.value = "";
   };
 
-  const updatePhotoCrop = (field: "x" | "y" | "zoom", value: number) => {
-    setResume((current) => {
-      if (!current.profile.photo) return current;
-
-      return {
-        ...current,
-        profile: {
-          ...current.profile,
-          photo: {
-            ...current.profile.photo,
-            crop: {
-              ...current.profile.photo.crop,
-              [field]: value
-            }
-          }
-        }
-      };
-    });
-  };
-
   const removePhoto = () => {
     setResume((current) => ({
       ...current,
@@ -873,7 +853,6 @@ export function ResumeWorkspace() {
               photoSettings={photoSettings}
               photoSupported={isPhotoSupported}
               templateLabel={templates.find((template) => template.id === templateId)?.label ?? "当前模板"}
-              onCropChange={updatePhotoCrop}
               onRemove={removePhoto}
               onSettingsChange={updatePhotoSettings}
               onUpload={uploadPhoto}
@@ -1379,7 +1358,6 @@ function TextAreaField({ label, onChange, value }: { label: string; onChange: (v
 }
 
 function PhotoUploadPanel({
-  onCropChange,
   onRemove,
   onSettingsChange,
   onUpload,
@@ -1388,7 +1366,6 @@ function PhotoUploadPanel({
   photoSupported,
   templateLabel
 }: {
-  onCropChange: (field: "x" | "y" | "zoom", value: number) => void;
   onRemove: () => void;
   onSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onUpload: (event: ChangeEvent<HTMLInputElement>) => void;
@@ -1432,47 +1409,11 @@ function PhotoUploadPanel({
         </button>
       ) : null}
       {photo ? (
-        <div className="photo-crop-box">
-          <div className="photo-crop-preview">
-            {/* eslint-disable-next-line @next/next/no-img-element -- Local data URLs cannot be optimized by next/image. */}
-            <img
-              alt="头像裁剪预览"
-              src={photo.dataUrl}
-              style={{
-                objectPosition: `${photo.crop.x}% ${photo.crop.y}%`,
-                transform: `scale(${photo.crop.zoom})`
-              }}
-            />
-          </div>
-          <div className="photo-crop-controls">
-            <RangeField
-              label="左右位置"
-              max={100}
-              min={0}
-              step={1}
-              value={photo.crop.x}
-              onChange={(value) => onCropChange("x", value)}
-            />
-            <RangeField
-              label="上下位置"
-              max={100}
-              min={0}
-              step={1}
-              value={photo.crop.y}
-              onChange={(value) => onCropChange("y", value)}
-            />
-            <RangeField
-              label="缩放"
-              max={1.8}
-              min={1}
-              step={0.05}
-              value={photo.crop.zoom}
-              onChange={(value) => onCropChange("zoom", value)}
-            />
-            <button className="secondary-button" type="button" onClick={onRemove}>
-              删除图片
-            </button>
-          </div>
+        <div className="photo-upload-status">
+          <span>{photo.fileName}</span>
+          <button className="secondary-button" type="button" onClick={onRemove}>
+            删除图片
+          </button>
         </div>
       ) : null}
     </section>
