@@ -1454,8 +1454,8 @@ button {
 .template-brick .resume-head {
   grid-column: 1;
   grid-row: 1 / span 8;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr;
   gap: 14px;
   min-width: 0;
   width: 180px;
@@ -1465,9 +1465,18 @@ button {
   text-align: left;
 }
 
-.template-brick .resume-head.photo-left,
-.template-brick .resume-head.photo-right {
-  flex-direction: row;
+.template-brick .resume-head-content {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  justify-items: stretch;
+  min-height: 520px;
+  text-align: left;
+}
+
+.template-brick .resume-head.photo-none .resume-head-content {
+  justify-items: stretch;
+  text-align: left;
 }
 
 .template-brick .resume-head h2 {
@@ -1479,7 +1488,10 @@ button {
 
 .template-brick .resume-head p {
   display: grid;
-  gap: 8px;
+  align-content: center;
+  gap: 14px;
+  min-height: 260px;
+  margin-top: 36px;
   font-size: 12px;
   line-height: 1.6;
 }
@@ -1496,8 +1508,8 @@ button {
 .template-brick .resume-target {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 6px;
-  align-items: start;
+  column-gap: 8px;
+  align-items: center;
   justify-content: start;
   justify-items: start;
   text-align: left;
@@ -1528,6 +1540,7 @@ button {
 }
 
 .template-brick .resume-target {
+  order: -1;
   align-self: stretch;
   color: var(--resume-accent-color);
 }
@@ -1581,8 +1594,8 @@ button {
 .template-leftBlue .resume-head {
   grid-column: 1;
   grid-row: 1 / span 8;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: auto 1fr;
   gap: 18px;
   min-width: 0;
   min-height: 1123px;
@@ -1592,9 +1605,18 @@ button {
   overflow: hidden;
 }
 
-.template-leftBlue .resume-head.photo-left,
-.template-leftBlue .resume-head.photo-right {
-  flex-direction: row;
+.template-leftBlue .resume-head-content {
+  display: grid;
+  grid-template-rows: auto auto 1fr;
+  align-content: start;
+  justify-items: stretch;
+  min-height: 640px;
+  text-align: left;
+}
+
+.template-leftBlue .resume-head.photo-none .resume-head-content {
+  justify-items: stretch;
+  text-align: left;
 }
 
 .template-leftBlue .resume-head h2 {
@@ -1616,12 +1638,32 @@ button {
 }
 
 .template-leftBlue .resume-target {
+  order: -1;
   align-self: flex-start;
+}
+
+.template-leftBlue .resume-contact-item,
+.template-leftBlue .resume-target {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  column-gap: 10px;
+  align-items: center;
+  justify-content: start;
+  justify-items: start;
+  text-align: left;
+}
+
+.template-leftBlue .resume-inline-text {
+  justify-self: start;
+  text-align: left;
 }
 
 .template-leftBlue .resume-contact-line {
   display: grid;
-  gap: 8px;
+  align-content: center;
+  gap: 22px;
+  min-height: 330px;
+  margin-top: 64px;
 }
 
 .template-leftBlue .resume-photo {
