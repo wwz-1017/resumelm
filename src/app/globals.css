@@ -1965,7 +1965,7 @@ button {
 }
 
 .snapshot-graduate .snapshot-header {
-  margin-top: 10px;
+  margin-top: clamp(22px, 7cqw, 56px);
 }
 
 .snapshot-graduate .snapshot-name,
