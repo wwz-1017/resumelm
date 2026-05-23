@@ -1617,7 +1617,7 @@ button {
 
 .template-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
   gap: 12px;
 }
 
@@ -1691,6 +1691,7 @@ button {
 
 .template-snapshot {
   position: relative;
+  container-type: inline-size;
   display: block;
   aspect-ratio: 210 / 297;
   overflow: hidden;
@@ -1722,11 +1723,11 @@ button {
   position: relative;
   display: grid;
   align-content: start;
-  gap: 4px;
+  gap: 5px;
   width: 100%;
   height: 100%;
   overflow: hidden;
-  padding: 10%;
+  padding: clamp(14px, 7cqw, 52px);
   background: #fffefa;
 }
 
@@ -1740,14 +1741,14 @@ button {
 .snapshot-header {
   position: relative;
   grid-template-columns: minmax(0, 1fr);
-  min-height: 36px;
+  min-height: clamp(38px, 12cqw, 90px);
   overflow: hidden;
-  padding-bottom: 5px;
+  padding-bottom: clamp(5px, 1.5cqw, 12px);
   border-bottom: 3px solid var(--moss-dark);
 }
 
 .template-snapshot.has-photo .snapshot-header {
-  grid-template-columns: minmax(0, 1fr) clamp(20px, 23%, 42px);
+  grid-template-columns: minmax(0, 1fr) clamp(26px, 24%, 54px);
   grid-template-areas:
     "name photo"
     "target photo"
@@ -1761,7 +1762,7 @@ button {
   grid-area: name;
   width: auto;
   color: var(--moss-dark);
-  font-size: 13px;
+  font-size: clamp(14px, 4.4cqw, 32px);
   font-weight: 900;
   line-height: 1;
   overflow-wrap: anywhere;
@@ -1773,7 +1774,7 @@ button {
   grid-area: target;
   overflow: hidden;
   color: #5e6a61;
-  font-size: 5px;
+  font-size: clamp(5.6px, 1.55cqw, 12px);
   font-weight: 700;
   line-height: 1.2;
   overflow-wrap: anywhere;
@@ -1787,7 +1788,7 @@ button {
 }
 
 .snapshot-sections {
-  gap: 3px;
+  gap: 4px;
 }
 
 .snapshot-section {
@@ -1803,7 +1804,7 @@ button {
   width: fit-content;
   overflow: hidden;
   color: var(--moss-dark);
-  font-size: 6px;
+  font-size: clamp(8px, 2cqw, 14px);
   font-weight: 900;
   line-height: 1;
   overflow-wrap: anywhere;
@@ -1811,8 +1812,8 @@ button {
 
 .snapshot-section-title::before {
   content: "";
-  width: 2.2px;
-  height: 2.2px;
+  width: clamp(1.6px, 0.5cqw, 3.2px);
+  height: clamp(1.6px, 0.5cqw, 3.2px);
   flex: 0 0 auto;
   border-radius: 999px;
   background: currentColor;
@@ -1831,16 +1832,16 @@ button {
   gap: 1px;
   overflow: hidden;
   color: #343c36;
-  font-size: 4.4px;
+  font-size: clamp(6.6px, 1.8cqw, 12.5px);
   font-weight: 600;
-  line-height: 1.25;
+  line-height: 1.34;
 }
 
 .snapshot-section-copy span {
   position: relative;
   display: block;
   overflow: hidden;
-  padding-left: 5px;
+  padding-left: clamp(5px, 1.25cqw, 9px);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
@@ -1850,8 +1851,8 @@ button {
   position: absolute;
   top: 0.48em;
   left: 1px;
-  width: 1.2px;
-  height: 1.2px;
+  width: clamp(0.8px, 0.28cqw, 2px);
+  height: clamp(0.8px, 0.28cqw, 2px);
   border-radius: 999px;
   background: currentColor;
 }
@@ -1979,7 +1980,7 @@ button {
 .snapshot-brick .snapshot-paper {
   grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
   column-gap: 6%;
-  padding: 10%;
+  padding: clamp(14px, 7cqw, 52px);
   background:
     linear-gradient(90deg, #f2eeee 0 36%, #fffefa 36%);
   border-top: 5px solid #d46a54;
@@ -2033,7 +2034,7 @@ button {
 .snapshot-leftBlue .snapshot-paper {
   grid-template-columns: minmax(0, 34%) minmax(0, 1fr);
   column-gap: 6%;
-  padding: 10%;
+  padding: clamp(14px, 7cqw, 52px);
   background:
     linear-gradient(90deg, #294864 0 36%, #fffefa 36%);
 }
@@ -2090,7 +2091,7 @@ button {
 
 .snapshot-minimalPm .snapshot-paper {
   gap: 6px;
-  padding: 11%;
+  padding: clamp(16px, 8cqw, 58px);
   background: #ffffff;
 }
 
