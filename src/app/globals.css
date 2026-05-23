@@ -2706,14 +2706,14 @@ button {
   display: grid;
   grid-template-rows: auto auto 1fr;
   align-content: start;
-  justify-items: stretch;
+  justify-items: center;
   min-height: 520px;
-  text-align: left;
+  text-align: center;
 }
 
 .template-brick .resume-head.photo-none .resume-head-content {
-  justify-items: stretch;
-  text-align: left;
+  justify-items: center;
+  text-align: center;
 }
 
 .template-brick .resume-head h2 {
@@ -2742,13 +2742,12 @@ button {
 
 .template-brick .resume-contact-item,
 .template-brick .resume-target {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 8px;
   align-items: center;
-  justify-content: start;
-  justify-items: start;
-  text-align: left;
+  justify-content: center;
+  text-align: center;
 }
 
 .template-brick .resume-contact-item .resume-icon,
@@ -2757,8 +2756,8 @@ button {
 }
 
 .template-brick .resume-inline-text {
-  justify-self: start;
-  text-align: left;
+  flex: 0 1 auto;
+  text-align: center;
 }
 
 .template-brick .resume-photo {
@@ -2777,11 +2776,8 @@ button {
 
 .template-brick .resume-target {
   order: -1;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
   align-self: stretch;
-  justify-self: start;
+  justify-self: center;
   color: var(--resume-accent-color);
 }
 
@@ -2849,14 +2845,14 @@ button {
   display: grid;
   grid-template-rows: auto auto 1fr;
   align-content: start;
-  justify-items: stretch;
+  justify-items: center;
   min-height: 640px;
-  text-align: left;
+  text-align: center;
 }
 
 .template-leftBlue .resume-head.photo-none .resume-head-content {
-  justify-items: stretch;
-  text-align: left;
+  justify-items: center;
+  text-align: center;
 }
 
 .template-leftBlue .resume-head h2 {
@@ -2879,25 +2875,27 @@ button {
   order: -1;
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 6px 8px;
   align-self: flex-start;
-  justify-self: start;
+  justify-self: center;
+  justify-content: center;
   width: 100%;
+  text-align: center;
 }
 
 .template-leftBlue .resume-contact-item {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr);
-  column-gap: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 10px;
+  width: 100%;
   align-items: center;
-  justify-content: start;
-  justify-items: start;
-  text-align: left;
+  justify-content: center;
+  text-align: center;
 }
 
 .template-leftBlue .resume-inline-text {
-  justify-self: start;
-  text-align: left;
+  flex: 0 1 auto;
+  text-align: center;
 }
 
 .template-leftBlue .resume-contact-line {
@@ -3028,61 +3026,49 @@ button {
 }
 
 .template-brick.header-align-center .resume-head-content,
-.template-leftBlue.header-align-center .resume-head-content {
+.template-brick.header-align-left .resume-head-content,
+.template-brick.header-align-right .resume-head-content,
+.template-leftBlue.header-align-center .resume-head-content,
+.template-leftBlue.header-align-left .resume-head-content,
+.template-leftBlue.header-align-right .resume-head-content {
   justify-items: center;
   text-align: center;
 }
 
-.template-brick.header-align-left .resume-head-content,
-.template-leftBlue.header-align-left .resume-head-content {
-  justify-items: start;
-  text-align: left;
-}
-
-.template-brick.header-align-right .resume-head-content,
-.template-leftBlue.header-align-right .resume-head-content {
-  justify-items: end;
-  text-align: right;
-}
-
 .template-brick.header-align-center .resume-contact-line,
-.template-leftBlue.header-align-center .resume-contact-line {
+.template-brick.header-align-left .resume-contact-line,
+.template-brick.header-align-right .resume-contact-line,
+.template-leftBlue.header-align-center .resume-contact-line,
+.template-leftBlue.header-align-left .resume-contact-line,
+.template-leftBlue.header-align-right .resume-contact-line {
   justify-items: center;
 }
 
-.template-brick.header-align-right .resume-contact-line,
-.template-leftBlue.header-align-right .resume-contact-line {
-  justify-items: end;
-}
-
 .template-brick.header-align-center .resume-contact-item,
+.template-brick.header-align-left .resume-contact-item,
+.template-brick.header-align-right .resume-contact-item,
 .template-brick.header-align-center .resume-target,
+.template-brick.header-align-left .resume-target,
+.template-brick.header-align-right .resume-target,
 .template-leftBlue.header-align-center .resume-contact-item,
-.template-leftBlue.header-align-center .resume-target {
+.template-leftBlue.header-align-left .resume-contact-item,
+.template-leftBlue.header-align-right .resume-contact-item,
+.template-leftBlue.header-align-center .resume-target,
+.template-leftBlue.header-align-left .resume-target,
+.template-leftBlue.header-align-right .resume-target {
   justify-self: center;
   justify-content: center;
   width: 100%;
   text-align: center;
 }
 
-.template-brick.header-align-right .resume-contact-item,
-.template-brick.header-align-right .resume-target,
-.template-leftBlue.header-align-right .resume-contact-item,
-.template-leftBlue.header-align-right .resume-target {
-  justify-content: end;
-  text-align: right;
-}
-
 .template-brick.header-align-center .resume-inline-text,
-.template-leftBlue.header-align-center .resume-inline-text {
-  justify-self: center;
-  text-align: center;
-}
-
+.template-brick.header-align-left .resume-inline-text,
 .template-brick.header-align-right .resume-inline-text,
+.template-leftBlue.header-align-center .resume-inline-text,
+.template-leftBlue.header-align-left .resume-inline-text,
 .template-leftBlue.header-align-right .resume-inline-text {
-  justify-self: end;
-  text-align: right;
+  text-align: center;
 }
 
 .notice {
