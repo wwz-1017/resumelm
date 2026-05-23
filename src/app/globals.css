@@ -1741,10 +1741,12 @@ button {
 .snapshot-header {
   position: relative;
   grid-template-columns: minmax(0, 1fr);
+  justify-items: center;
   min-height: clamp(38px, 12cqw, 90px);
   overflow: hidden;
   padding-bottom: clamp(5px, 1.5cqw, 12px);
   border-bottom: 3px solid var(--moss-dark);
+  text-align: center;
 }
 
 .template-snapshot.has-photo .snapshot-header {
@@ -1759,7 +1761,6 @@ button {
 
 .snapshot-name {
   display: block;
-  grid-area: name;
   width: auto;
   color: var(--moss-dark);
   font-size: clamp(14px, 4.4cqw, 32px);
@@ -1771,7 +1772,6 @@ button {
 .snapshot-target,
 .snapshot-contact {
   display: block;
-  grid-area: target;
   overflow: hidden;
   color: #5e6a61;
   font-size: clamp(5.6px, 1.55cqw, 12px);
@@ -1782,9 +1782,26 @@ button {
 }
 
 .snapshot-contact {
-  grid-area: contact;
   color: #8a948d;
   font-weight: 600;
+}
+
+.template-snapshot.has-photo .snapshot-name {
+  grid-area: name;
+  justify-self: stretch;
+  text-align: center;
+}
+
+.template-snapshot.has-photo .snapshot-target {
+  grid-area: target;
+  justify-self: stretch;
+  text-align: center;
+}
+
+.template-snapshot.has-photo .snapshot-contact {
+  grid-area: contact;
+  justify-self: stretch;
+  text-align: center;
 }
 
 .snapshot-sections {
@@ -3050,7 +3067,9 @@ button {
 .template-brick.header-align-center .resume-target,
 .template-leftBlue.header-align-center .resume-contact-item,
 .template-leftBlue.header-align-center .resume-target {
+  justify-self: center;
   justify-content: center;
+  width: fit-content;
   text-align: center;
 }
 
