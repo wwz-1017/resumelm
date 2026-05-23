@@ -2088,6 +2088,80 @@ function ResumePreview({
         <HiddenModulePlaceholder controls={getModuleControls("awards")} moduleId="awards" />
       )
   };
+  const simpleSidebarModuleIds: ResumeModuleId[] = ["strengths", "skills", "awards"];
+  const renderModuleFrame = (moduleId: ResumeModuleId) =>
+    sectionRenderers[moduleId] ? (
+      <div
+        className={`resume-module-frame ${draggingModule === moduleId ? "is-dragging" : ""} ${
+          dragOverModule === moduleId && draggingModule !== moduleId ? "is-drop-target" : ""
+        }`}
+        data-preview-module={moduleId}
+        draggable
+        key={moduleId}
+        title="拖动这个模块框可以和其他模块交换位置"
+        onClick={() => onSelectModule(moduleId)}
+        onDragEnd={() => {
+          setDraggingModule(null);
+          setDragOverModule(null);
+        }}
+        onDragOver={(event) => {
+          event.preventDefault();
+          setDragOverModule(moduleId);
+        }}
+        onDragStart={(event) => {
+          event.dataTransfer.effectAllowed = "move";
+          event.dataTransfer.setData("text/plain", moduleId);
+          setDraggingModule(moduleId);
+        }}
+        onDrop={(event) => {
+          event.preventDefault();
+          const sourceModuleId = event.dataTransfer.getData("text/plain") as ResumeModuleId;
+          onSwapModules(sourceModuleId, moduleId);
+          setDraggingModule(null);
+          setDragOverModule(null);
+        }}
+      >
+        {sectionRenderers[moduleId]}
+      </div>
+    ) : null;
+
+  if (templateId === "simple") {
+    const sidebarModules = moduleOrder.filter((moduleId) => simpleSidebarModuleIds.includes(moduleId));
+    const mainModules = moduleOrder.filter((moduleId) => !simpleSidebarModuleIds.includes(moduleId));
+
+    return (
+      <article className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`} style={getResumeStyleVars(styleSettings)}>
+        <header className={`resume-head ${isPhotoEnabled ? `photo-${photoSettings.position}` : "photo-none"}`}>
+          {isPhotoEnabled ? photoNode : null}
+          <div className="resume-head-content">
+            <h2>{resume.profile.name || "你的姓名"}</h2>
+            <div className="resume-target">
+              <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
+              <span className="resume-target-label">目标岗位</span>
+              <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "产品经理"}</span>
+            </div>
+          </div>
+        </header>
+
+        <aside className="simple-sidebar-panel" aria-label="简约金灰侧栏信息">
+          <section className="simple-profile-card">
+            <h3>个人信息</h3>
+            <div className="simple-contact-list">
+              {contactItems.map((item, index) => (
+                <span className="resume-contact-item" key={`${item.icon}-${index}`}>
+                  <ResumeIcon enabled={iconEnabled} iconId={item.icon} size={18} />
+                  <span className="resume-inline-text">{item.text}</span>
+                </span>
+              ))}
+            </div>
+          </section>
+          {sidebarModules.map(renderModuleFrame)}
+        </aside>
+
+        <div className="simple-main-column">{mainModules.map(renderModuleFrame)}</div>
+      </article>
+    );
+  }
 
   return (
     <article className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`} style={getResumeStyleVars(styleSettings)}>
@@ -2112,42 +2186,7 @@ function ResumePreview({
         {isPhotoEnabled && photoSettings.position === "right" ? photoNode : null}
       </header>
 
-      {moduleOrder.map((moduleId) =>
-        sectionRenderers[moduleId] ? (
-          <div
-            className={`resume-module-frame ${draggingModule === moduleId ? "is-dragging" : ""} ${
-              dragOverModule === moduleId && draggingModule !== moduleId ? "is-drop-target" : ""
-            }`}
-            data-preview-module={moduleId}
-            draggable
-            key={moduleId}
-            title="拖动这个模块框可以和其他模块交换位置"
-            onClick={() => onSelectModule(moduleId)}
-            onDragEnd={() => {
-              setDraggingModule(null);
-              setDragOverModule(null);
-            }}
-            onDragOver={(event) => {
-              event.preventDefault();
-              setDragOverModule(moduleId);
-            }}
-            onDragStart={(event) => {
-              event.dataTransfer.effectAllowed = "move";
-              event.dataTransfer.setData("text/plain", moduleId);
-              setDraggingModule(moduleId);
-            }}
-            onDrop={(event) => {
-              event.preventDefault();
-              const sourceModuleId = event.dataTransfer.getData("text/plain") as ResumeModuleId;
-              onSwapModules(sourceModuleId, moduleId);
-              setDraggingModule(null);
-              setDragOverModule(null);
-            }}
-          >
-            {sectionRenderers[moduleId]}
-          </div>
-        ) : null
-      )}
+      {moduleOrder.map(renderModuleFrame)}
     </article>
   );
 }
