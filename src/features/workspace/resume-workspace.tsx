@@ -60,6 +60,8 @@ import type { AiGatewayResponse, AiTask } from "@/lib/ai/types";
 import { downloadResumeWord, printResumePdf } from "@/lib/export/resume-export";
 import { saveFeedback, type FeedbackTarget, type FeedbackVote } from "@/lib/feedback/store";
 import {
+  createDefaultIconSettings,
+  createDefaultStyleSettings,
   createEmptyResume,
   normalizeIconSettings,
   normalizeModuleOrder,
@@ -125,43 +127,6 @@ const templateDescriptions: Record<TemplateId, string> = {
 
 const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
 const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
-
-const snapshotSectionSamples: Record<ResumeModuleId, string[]> = {
-  personalSummary: [
-    "围绕校招产品方向，熟悉用户调研、需求分析、原型设计和版本复盘，能将模糊需求转化为清晰方案并协同推进。",
-    "具备较强的信息整理和表达能力，能够结合岗位 JD 梳理经历重点，突出与目标岗位相关的项目成果。"
-  ],
-  strengths: [
-    "学习能力强，能快速拆解业务问题并推进落地，善于在复杂任务中明确优先级和关键交付节点。",
-    "沟通表达清晰，善于跨团队收集反馈，能够将用户诉求、业务目标和技术实现转化为可执行方案。"
-  ],
-  education: [
-    "某某大学 · 工商管理本科 · 主修市场研究、数据分析、产品管理、商业分析和消费者行为相关课程。",
-    "课程项目覆盖用户访谈、问卷分析、竞品研究和商业策划，具备基础数据处理与结构化汇报能力。"
-  ],
-  internships: [
-    "互联网产品实习生 · 负责竞品分析、需求文档和功能验收，协同设计、研发推动核心功能迭代上线。",
-    "跟踪核心指标，整理用户反馈与使用路径，沉淀版本复盘和优化建议，提升页面转化与使用体验。",
-    "参与活动页、后台工具和数据看板需求梳理，输出流程图、原型说明和上线验收清单。"
-  ],
-  projects: [
-    "校园求职工具项目 · 负责用户访谈、需求拆解和流程设计，围绕简历生成、评分和导出体验完成原型迭代。",
-    "整理 120+ 份反馈，提炼高频痛点并优化核心页面转化，推动模板选择和内容填写链路更加清晰。",
-    "输出原型、流程图和上线验收清单，协调成员按阶段完成设计、开发、测试和复盘。"
-  ],
-  campusExperience: [
-    "学生会项目负责人，组织校级活动与跨部门协作，统筹排期、物料、宣传和现场执行。",
-    "沉淀活动流程 SOP，优化报名、签到和反馈收集环节，提升参与体验和团队协同效率。"
-  ],
-  skills: [
-    "Axure / Figma / Excel / SQL / 数据分析 / 用户研究 / 竞品分析 / PRD / 需求管理",
-    "熟悉产品调研、信息架构、流程图绘制、原型设计和跨团队沟通协作。"
-  ],
-  awards: [
-    "校级奖学金 · 创新创业竞赛优秀奖 · 优秀学生干部 · 校园活动最佳组织奖",
-    "多次参与课程项目和校园实践，具备稳定交付、复盘总结和公开表达经验。"
-  ]
-};
 
 const fontOptions: Array<{ id: ResumeFontId; label: string; value: string }> = [
   { id: "microsoftYahei", label: "微软雅黑", value: '"Microsoft YaHei", "PingFang SC", sans-serif' },
@@ -312,6 +277,71 @@ const nonEmpty = (items: string[]) => items.filter((item) => item.trim());
 
 const hasExperienceContent = (item: Experience) =>
   Boolean(item.title.trim() || item.organization.trim() || item.description.trim());
+
+const createTemplatePreviewResume = (): ResumeDocument => ({
+  ...createEmptyResume(),
+  profile: {
+    name: "XXX",
+    phone: "188-0000-0000",
+    email: "xxx@email.com",
+    city: "北京市",
+    targetRole: "产品经理",
+    photo: undefined
+  },
+  iconSettings: {
+    ...createDefaultIconSettings(),
+    enabled: true
+  },
+  styleSettings: {
+    ...createDefaultStyleSettings(),
+    bodySize: 13
+  },
+  personalSummary: "校招产品方向，熟悉用户调研、需求分析与原型设计，能将模糊需求转化为清晰方案并协同推进。",
+  strengths: ["学习能力强，能快速拆解业务问题并推进落地。", "沟通表达清晰，善于跨团队收集反馈。"],
+  education: [
+    {
+      school: "某某大学",
+      degree: "本科",
+      major: "工商管理",
+      startDate: "2022.09",
+      endDate: "2026.06",
+      highlights: "主修市场研究、数据分析、产品管理课程，参与多项课程项目。"
+    }
+  ],
+  internships: [
+    {
+      title: "产品经理实习生",
+      organization: "互联网产品团队",
+      startDate: "2025.06",
+      endDate: "2025.09",
+      description: "负责竞品分析、需求文档和功能验收，协同设计、研发推动核心功能迭代上线。"
+    }
+  ],
+  projects: [
+    {
+      title: "校园求职工具项目",
+      organization: "课程项目",
+      startDate: "2025.03",
+      endDate: "2025.06",
+      description: "负责用户访谈、需求拆解和流程设计，整理 120+ 份反馈并优化核心页面转化。"
+    }
+  ],
+  campusExperience: [
+    {
+      title: "学生会项目负责人",
+      organization: "校学生会",
+      startDate: "2023.09",
+      endDate: "2024.06",
+      description: "组织校级活动与跨部门协作，统筹排期、物料、宣传和现场执行。"
+    }
+  ],
+  skills: ["Axure", "Figma", "Excel", "SQL", "用户研究", "竞品分析", "PRD"],
+  awards: ["校级奖学金", "创新创业竞赛优秀奖", "优秀学生干部"],
+  targetJob: {
+    title: "产品经理",
+    jdText: ""
+  }
+});
 
 const maxPhotoSize = 2 * 1024 * 1024;
 
@@ -1341,58 +1371,23 @@ function TemplateGallery({
 }
 
 function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
-  const hasPhoto = templateSupportsPhoto(templateId);
-  const sectionTitles: ResumeModuleId[] = [
-    "personalSummary",
-    "strengths",
-    "education",
-    "internships",
-    "projects",
-    "campusExperience",
-    "skills",
-    "awards"
-  ];
+  const previewResume = createTemplatePreviewResume();
 
   return (
-    <span
-      className={`template-snapshot snapshot-${templateId} ${hasPhoto ? "has-photo" : "no-photo"}`}
-      aria-hidden="true"
-    >
-      <span className="snapshot-paper">
-        <span className="snapshot-header">
-          {hasPhoto ? (
-            <span className="snapshot-photo">
-              <span className="snapshot-suit">
-                <span className="snapshot-suit-head" />
-                <span className="snapshot-suit-body">
-                  <span className="snapshot-suit-shirt" />
-                  <span className="snapshot-suit-tie" />
-                </span>
-              </span>
-            </span>
-          ) : null}
-          <span className="snapshot-name">XXX</span>
-          {hasPhoto ? (
-            <>
-              <span className="snapshot-target">目标岗位 产品经理</span>
-              <span className="snapshot-contact">电话 · 邮箱 · 城市</span>
-            </>
-          ) : null}
-        </span>
-        <span className="snapshot-sections">
-          {sectionTitles.map((sectionId, index) => (
-            <span className={`snapshot-section ${index === 0 ? "snapshot-section-primary" : ""}`} key={sectionId}>
-              <span className="snapshot-section-title">{moduleLabels[sectionId]}</span>
-              <span className="snapshot-section-copy">
-                {snapshotSectionSamples[sectionId].map((sample) => (
-                  <span key={sample}>{sample}</span>
-                ))}
-              </span>
-            </span>
-          ))}
-        </span>
-      </span>
-    </span>
+    <div className="template-snapshot" aria-hidden="true">
+      <div className="template-snapshot-canvas">
+        <ResumePreview
+          isStaticPreview
+          photoSupported={templateSupportsPhoto(templateId)}
+          resume={previewResume}
+          templateId={templateId}
+          onPhotoSettingsChange={() => undefined}
+          onSelectModule={() => undefined}
+          onSwapModules={() => undefined}
+          onToggleVisibility={() => undefined}
+        />
+      </div>
+    </div>
   );
 }
 
@@ -1860,6 +1855,7 @@ function ExperienceEditor({
 
 function ResumePreview({
   photoSupported,
+  isStaticPreview = false,
   onPhotoSettingsChange,
   onSelectModule,
   onSwapModules,
@@ -1868,6 +1864,7 @@ function ResumePreview({
   templateId
 }: {
   photoSupported: boolean;
+  isStaticPreview?: boolean;
   onPhotoSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onSelectModule: (moduleId: ResumeModuleId) => void;
   onSwapModules: (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => void;
@@ -1949,23 +1946,27 @@ function ResumePreview({
     window.addEventListener("mouseup", handleUp);
   };
   const getModuleControls = (moduleId: ResumeModuleId) => (
-    <ResumeModuleControls
-      isVisible={visibilitySettings[moduleId]}
-      moduleId={moduleId}
-      onToggleVisibility={onToggleVisibility}
-    />
+    isStaticPreview ? null : (
+      <ResumeModuleControls
+        isVisible={visibilitySettings[moduleId]}
+        moduleId={moduleId}
+        onToggleVisibility={onToggleVisibility}
+      />
+    )
   );
   const photoNode = isPhotoEnabled ? (
     <div className="resume-photo-wrap" title="拖动照片到左侧或右侧">
-      <button
-        aria-label="隐藏照片"
-        className="resume-photo-remove"
-        title="隐藏照片"
-        type="button"
-        onClick={() => onPhotoSettingsChange({ visible: false })}
-      >
-        <X size={13} />
-      </button>
+      {isStaticPreview ? null : (
+        <button
+          aria-label="隐藏照片"
+          className="resume-photo-remove"
+          title="隐藏照片"
+          type="button"
+          onClick={() => onPhotoSettingsChange({ visible: false })}
+        >
+          <X size={13} />
+        </button>
+      )}
       <div
         className="resume-photo"
         aria-label={resume.profile.photo ? "简历头像" : "照片占位"}
@@ -1973,7 +1974,7 @@ function ResumePreview({
           width: photoSettings.width,
           height: photoSettings.height
         }}
-        onMouseDown={startPhotoMove}
+        onMouseDown={isStaticPreview ? undefined : startPhotoMove}
       >
         {resume.profile.photo ? (
           /* eslint-disable-next-line @next/next/no-img-element -- Resume exports need a plain img with the local data URL. */
@@ -1988,7 +1989,7 @@ function ResumePreview({
         ) : (
           "照片"
         )}
-        <span className="resume-photo-resize" aria-hidden="true" onMouseDown={startPhotoResize} />
+        {isStaticPreview ? null : <span className="resume-photo-resize" aria-hidden="true" onMouseDown={startPhotoResize} />}
       </div>
     </div>
   ) : null;
@@ -2096,24 +2097,28 @@ function ResumePreview({
           dragOverModule === moduleId && draggingModule !== moduleId ? "is-drop-target" : ""
         }`}
         data-preview-module={moduleId}
-        draggable
+        draggable={!isStaticPreview}
         key={moduleId}
         title="拖动这个模块框可以和其他模块交换位置"
-        onClick={() => onSelectModule(moduleId)}
+        onClick={isStaticPreview ? undefined : () => onSelectModule(moduleId)}
         onDragEnd={() => {
+          if (isStaticPreview) return;
           setDraggingModule(null);
           setDragOverModule(null);
         }}
         onDragOver={(event) => {
+          if (isStaticPreview) return;
           event.preventDefault();
           setDragOverModule(moduleId);
         }}
         onDragStart={(event) => {
+          if (isStaticPreview) return;
           event.dataTransfer.effectAllowed = "move";
           event.dataTransfer.setData("text/plain", moduleId);
           setDraggingModule(moduleId);
         }}
         onDrop={(event) => {
+          if (isStaticPreview) return;
           event.preventDefault();
           const sourceModuleId = event.dataTransfer.getData("text/plain") as ResumeModuleId;
           onSwapModules(sourceModuleId, moduleId);
