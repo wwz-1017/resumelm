@@ -1330,73 +1330,175 @@ button {
   position: relative;
   display: grid;
   align-content: start;
-  gap: 8px;
+  gap: 7px;
   width: 100%;
   height: 100%;
-  padding: 14%;
+  padding: 11%;
   background: #fffefa;
 }
 
 .snapshot-header,
 .snapshot-section {
   display: grid;
-  gap: 5px;
+  gap: 4px;
   min-width: 0;
 }
 
 .snapshot-header {
-  padding-bottom: 8px;
+  position: relative;
+  min-height: 38px;
+  padding-bottom: 7px;
   border-bottom: 3px solid var(--moss-dark);
 }
 
-.snapshot-name,
-.snapshot-subtitle,
-.snapshot-section span {
+.snapshot-name {
   display: block;
-  height: 6px;
+  width: 66%;
+  color: var(--moss-dark);
+  font-size: 13px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.snapshot-target,
+.snapshot-contact {
+  display: block;
+  max-width: 72%;
+  overflow: hidden;
+  color: #5e6a61;
+  font-size: 5px;
+  font-weight: 700;
+  line-height: 1.2;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snapshot-contact {
+  color: #8a948d;
+  font-weight: 600;
+}
+
+.snapshot-section-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  width: fit-content;
+  max-width: 78%;
+  color: var(--moss-dark);
+  font-size: 6px;
+  font-weight: 900;
+  line-height: 1;
+}
+
+.snapshot-section-title::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.snapshot-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  color: #333b35;
+  font-size: 5px;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.snapshot-line {
+  display: block;
+  width: 74%;
+  height: 3px;
   border-radius: 999px;
   background: #cbd4c7;
 }
 
-.snapshot-name {
-  width: 56%;
-  height: 10px;
-  background: var(--moss-dark);
+.snapshot-line.is-long {
+  width: 92%;
 }
 
-.snapshot-subtitle {
-  width: 42%;
+.snapshot-line.is-medium {
+  width: 78%;
 }
 
-.snapshot-section span:nth-child(1) {
-  width: 62%;
-  background: #9fb29d;
+.snapshot-line.is-short {
+  width: 54%;
 }
 
-.snapshot-section span:nth-child(2) {
-  width: 88%;
-}
-
-.snapshot-section span:nth-child(3) {
-  width: 74%;
-}
-
-.snapshot-section span:nth-child(4) {
-  width: 66%;
+.snapshot-section-primary .snapshot-section-title {
+  color: #536b4f;
 }
 
 .snapshot-section-short {
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .snapshot-photo {
   position: absolute;
-  top: 10%;
-  right: 11%;
-  width: 20%;
+  top: 0;
+  right: 0;
+  display: grid;
+  place-items: end center;
+  width: 22%;
   aspect-ratio: 3 / 4;
-  border: 2px solid rgba(255, 255, 255, 0.86);
-  background: linear-gradient(135deg, #d8e8ee, #97a9b1);
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent 50%),
+    linear-gradient(135deg, #d8e8ee, #9cabb0);
+}
+
+.snapshot-suit {
+  position: relative;
+  display: grid;
+  justify-items: center;
+  align-content: end;
+  width: 100%;
+  height: 100%;
+  padding-top: 9%;
+}
+
+.snapshot-suit-head {
+  width: 34%;
+  aspect-ratio: 1;
+  border-radius: 999px;
+  background: linear-gradient(135deg, #f0d2ba, #c8a082);
+  box-shadow: inset 0 -3px 0 rgba(93, 67, 53, 0.12);
+}
+
+.snapshot-suit-body {
+  position: absolute;
+  right: 9%;
+  bottom: -3%;
+  left: 9%;
+  height: 52%;
+  border-radius: 999px 999px 6px 6px;
+  background:
+    linear-gradient(135deg, transparent 0 44%, #ffffff 45% 55%, transparent 56%),
+    linear-gradient(90deg, #1f3038 0 48%, #16252d 52%);
+}
+
+.snapshot-suit-shirt {
+  position: absolute;
+  top: 0;
+  left: 36%;
+  width: 28%;
+  height: 62%;
+  clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 100%);
+  background: #f8f8f4;
+}
+
+.snapshot-suit-tie {
+  position: absolute;
+  top: 16%;
+  left: 45%;
+  width: 10%;
+  height: 42%;
+  clip-path: polygon(50% 0, 100% 18%, 72% 100%, 28% 100%, 0 18%);
+  background: #b5473d;
 }
 
 .snapshot-simple .snapshot-paper {
@@ -1408,7 +1510,11 @@ button {
 }
 
 .snapshot-simple .snapshot-name,
-.snapshot-simple .snapshot-section span:nth-child(1) {
+.snapshot-simple .snapshot-section-title {
+  color: #9b7c32;
+}
+
+.snapshot-simple .snapshot-section-title::before {
   background: #9b7c32;
 }
 
@@ -1420,7 +1526,11 @@ button {
 }
 
 .snapshot-graduate .snapshot-name,
-.snapshot-graduate .snapshot-section span:nth-child(1) {
+.snapshot-graduate .snapshot-section-title {
+  color: #294864;
+}
+
+.snapshot-graduate .snapshot-section-title::before {
   background: #294864;
 }
 
@@ -1437,15 +1547,26 @@ button {
 .snapshot-brick .snapshot-header {
   grid-row: 1 / span 3;
   border-bottom: 0;
-  padding-top: 45%;
+  align-content: center;
+  min-height: 100%;
+  padding-top: 42%;
 }
 
 .snapshot-brick .snapshot-section {
   grid-column: 2;
 }
 
+.snapshot-brick .snapshot-target,
+.snapshot-brick .snapshot-contact {
+  max-width: 100%;
+}
+
 .snapshot-brick .snapshot-name,
-.snapshot-brick .snapshot-section span:nth-child(1) {
+.snapshot-brick .snapshot-section-title {
+  color: #d46a54;
+}
+
+.snapshot-brick .snapshot-section-title::before {
   background: #d46a54;
 }
 
@@ -1460,19 +1581,27 @@ button {
 .snapshot-leftBlue .snapshot-header {
   grid-row: 1 / span 3;
   border-bottom: 0;
-  padding-top: 52%;
+  align-content: center;
+  min-height: 100%;
+  padding-top: 48%;
 }
 
-.snapshot-leftBlue .snapshot-header span {
-  background: rgba(255, 255, 255, 0.72);
+.snapshot-leftBlue .snapshot-name,
+.snapshot-leftBlue .snapshot-target,
+.snapshot-leftBlue .snapshot-contact {
+  max-width: 100%;
+  color: rgba(255, 255, 255, 0.9);
 }
 
 .snapshot-leftBlue .snapshot-section {
   grid-column: 2;
 }
 
-.snapshot-leftBlue .snapshot-name,
-.snapshot-leftBlue .snapshot-section span:nth-child(1) {
+.snapshot-leftBlue .snapshot-section-title {
+  color: #294864;
+}
+
+.snapshot-leftBlue .snapshot-section-title::before {
   background: #294864;
 }
 
@@ -1489,7 +1618,11 @@ button {
 }
 
 .snapshot-minimalPm .snapshot-name,
-.snapshot-minimalPm .snapshot-section span:nth-child(1) {
+.snapshot-minimalPm .snapshot-section-title {
+  color: #111111;
+}
+
+.snapshot-minimalPm .snapshot-section-title::before {
   background: #111111;
 }
 
