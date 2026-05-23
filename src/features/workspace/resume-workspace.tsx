@@ -1968,7 +1968,7 @@ function HiddenModulePlaceholder({ controls, moduleId }: { controls: React.React
   return (
     <section className="resume-section resume-hidden-placeholder">
       {controls}
-      <span>{moduleLabels[moduleId]}已隐藏，点击眼睛恢复</span>
+      <span>{moduleLabels[moduleId]}已隐藏，导出模板后不会显示，点击眼睛恢复</span>
     </section>
   );
 }
