@@ -1788,12 +1788,12 @@ button {
 }
 
 .snapshot-sections {
-  gap: 4px;
+  gap: clamp(5px, 1.35cqw, 10px);
 }
 
 .snapshot-section {
   align-content: start;
-  gap: 1px;
+  gap: clamp(2px, 0.55cqw, 5px);
   overflow: hidden;
 }
 
@@ -1806,7 +1806,7 @@ button {
   color: var(--moss-dark);
   font-size: clamp(8px, 2cqw, 14px);
   font-weight: 900;
-  line-height: 1;
+  line-height: 1.08;
   overflow-wrap: anywhere;
 }
 
@@ -1829,12 +1829,12 @@ button {
 
 .snapshot-section-copy {
   display: grid;
-  gap: 1px;
+  gap: clamp(1px, 0.35cqw, 3px);
   overflow: hidden;
   color: #343c36;
   font-size: clamp(6.6px, 1.8cqw, 12.5px);
   font-weight: 600;
-  line-height: 1.34;
+  line-height: 1.52;
 }
 
 .snapshot-section-copy span {
@@ -2005,7 +2005,7 @@ button {
 .snapshot-brick .snapshot-sections {
   grid-column: 2;
   align-content: start;
-  gap: 4px;
+  gap: clamp(5px, 1.2cqw, 9px);
 }
 
 .snapshot-brick .snapshot-target,
@@ -2078,7 +2078,7 @@ button {
 .snapshot-leftBlue .snapshot-sections {
   grid-column: 2;
   align-content: start;
-  gap: 4px;
+  gap: clamp(5px, 1.2cqw, 9px);
 }
 
 .snapshot-leftBlue .snapshot-section-title {
