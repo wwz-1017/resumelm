@@ -1205,6 +1205,16 @@ function TemplateGallery({
 
 function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
   const hasPhoto = templateSupportsPhoto(templateId);
+  const sectionTitles: ResumeModuleId[] = [
+    "personalSummary",
+    "strengths",
+    "education",
+    "internships",
+    "projects",
+    "campusExperience",
+    "skills",
+    "awards"
+  ];
 
   return (
     <span
@@ -1225,31 +1235,20 @@ function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
             </span>
           ) : null}
           <span className="snapshot-name">武文卓</span>
-          <span className="snapshot-target">目标岗位 产品经理</span>
-          <span className="snapshot-contact">电话 · 邮箱 · 城市</span>
+          {hasPhoto ? (
+            <>
+              <span className="snapshot-target">目标岗位 产品经理</span>
+              <span className="snapshot-contact">电话 · 邮箱 · 城市</span>
+            </>
+          ) : null}
         </span>
-        <span className="snapshot-section snapshot-section-primary">
-          <span className="snapshot-section-title">教育经历</span>
-          <span className="snapshot-row">
-            <span>学校名称</span>
-            <span>起止时间</span>
-          </span>
-          <span className="snapshot-line is-long" />
-          <span className="snapshot-line" />
-        </span>
-        <span className="snapshot-section">
-          <span className="snapshot-section-title">项目经历</span>
-          <span className="snapshot-row">
-            <span>校招项目</span>
-            <span>负责人</span>
-          </span>
-          <span className="snapshot-line is-long" />
-          <span className="snapshot-line is-medium" />
-        </span>
-        <span className="snapshot-section snapshot-section-short">
-          <span className="snapshot-section-title">技能</span>
-          <span className="snapshot-line is-short" />
-          <span className="snapshot-line is-medium" />
+        <span className="snapshot-sections">
+          {sectionTitles.map((sectionId, index) => (
+            <span className={`snapshot-section ${index === 0 ? "snapshot-section-primary" : ""}`} key={sectionId}>
+              <span className="snapshot-section-title">{moduleLabels[sectionId]}</span>
+              <span className="snapshot-line" />
+            </span>
+          ))}
         </span>
       </span>
     </span>
