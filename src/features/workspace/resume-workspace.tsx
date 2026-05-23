@@ -114,6 +114,15 @@ const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "minimalPm", label: "极简PM" }
 ];
 
+const templateDescriptions: Record<TemplateId, string> = {
+  useful: "蓝灰稳重，适合通用校招投递",
+  simple: "金灰简洁，信息密度适中",
+  graduate: "蓝线清爽，突出应届生经历",
+  brick: "砖红双栏，适合强调个人信息",
+  leftBlue: "深蓝左栏，视觉识别更强",
+  minimalPm: "极简 PM，适合产品/运营方向"
+};
+
 const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
 const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
 
@@ -798,44 +807,45 @@ export function ResumeWorkspace() {
 
   return (
     <main className="app-shell">
+      <header className="editor-topbar">
+        <div className="editor-brand">
+          <div>
+            <span className="eyebrow">ResumeLM</span>
+            <h1>AI 校招简历编辑器</h1>
+          </div>
+          <p>匿名开放使用，左侧填写内容，右侧实时预览产出。</p>
+        </div>
+        <div className="editor-actions" aria-label="简历操作">
+          <span className="session-chip" title={sessionId || "匿名会话生成中"}>
+            <Sparkles size={14} />
+            匿名草稿
+          </span>
+          <button className="primary-button" type="button" onClick={exportPdf}>
+            <Download size={17} />
+            导出 PDF
+          </button>
+          <button className="secondary-button" type="button" onClick={exportWord}>
+            <FileText size={17} />
+            导出 Word
+          </button>
+          <button className="primary-button" type="button" onClick={exportResume}>
+            <Download size={17} />
+            导出 JSON
+          </button>
+          <label className="icon-button" title="导入 JSON">
+            <FileUp size={18} />
+            <input accept="application/json" hidden type="file" onChange={importJson} />
+          </label>
+          <button className="icon-button" type="button" title="新建草稿" onClick={createResumeDraft}>
+            <RotateCcw size={18} />
+          </button>
+          <button className="icon-button" type="button" title={saveState} onClick={saveResumeDraft}>
+            <Save size={18} />
+          </button>
+        </div>
+      </header>
       <div className="workspace">
         <aside className="sidebar">
-          <header className="brand">
-            <div>
-              <h1>ResumeLM</h1>
-              <p>匿名开放的校招简历工作台，草稿默认保存在当前浏览器。</p>
-            </div>
-            <span className="session-chip" title={sessionId || "匿名会话生成中"}>
-              <Sparkles size={14} />
-              匿名草稿
-            </span>
-          </header>
-
-          <div className="toolbar" aria-label="简历操作">
-            <button className="primary-button" type="button" onClick={exportPdf}>
-              <Download size={17} />
-              导出 PDF
-            </button>
-            <button className="secondary-button" type="button" onClick={exportWord}>
-              <FileText size={17} />
-              导出 Word
-            </button>
-            <button className="primary-button" type="button" onClick={exportResume}>
-              <Download size={17} />
-              导出 JSON
-            </button>
-            <label className="icon-button" title="导入 JSON">
-              <FileUp size={18} />
-              <input accept="application/json" hidden type="file" onChange={importJson} />
-            </label>
-            <button className="icon-button" type="button" title="新建草稿" onClick={createResumeDraft}>
-              <RotateCcw size={18} />
-            </button>
-            <button className="icon-button" type="button" title={saveState} onClick={saveResumeDraft}>
-              <Save size={18} />
-            </button>
-          </div>
-
           {importError ? <p className="notice">{importError}</p> : null}
 
           {aiError ? <p className="notice">{aiError}</p> : null}
@@ -1054,23 +1064,12 @@ export function ResumeWorkspace() {
           {scoreReport ? <ScoreReportView report={scoreReport} /> : null}
           <div className="preview-toolbar">
             <div>
-              <span className="eyebrow">模板预览</span>
+              <span className="eyebrow">实时预览</span>
               <strong>{templates.find((template) => template.id === templateId)?.label}</strong>
             </div>
-            <div className="segmented" aria-label="选择模板">
-              {templates.map((template) => (
-                <button
-                  className={template.id === templateId ? "active" : ""}
-                  key={template.id}
-                  type="button"
-                  onClick={() => setTemplateId(template.id)}
-                >
-                  <LayoutTemplate size={14} />
-                  {template.label}
-                </button>
-              ))}
-            </div>
+            <p>点击右侧简历模块可定位左侧表单，拖动模块可调整顺序。</p>
           </div>
+          <TemplateGallery activeTemplateId={templateId} onSelect={setTemplateId} />
           <ResumePreview
             photoSupported={isPhotoSupported}
             resume={resume}
@@ -1083,6 +1082,79 @@ export function ResumeWorkspace() {
         </section>
       </div>
     </main>
+  );
+}
+
+function TemplateGallery({
+  activeTemplateId,
+  onSelect
+}: {
+  activeTemplateId: TemplateId;
+  onSelect: (templateId: TemplateId) => void;
+}) {
+  return (
+    <section className="template-gallery" aria-label="模板图库">
+      <div className="template-gallery-head">
+        <div>
+          <span className="eyebrow">模板图库</span>
+          <strong>看图选择版式</strong>
+        </div>
+        <LayoutTemplate size={18} />
+      </div>
+      <div className="template-card-grid">
+        {templates.map((template) => {
+          const isActive = template.id === activeTemplateId;
+
+          return (
+            <button
+              aria-pressed={isActive}
+              className={`template-card ${isActive ? "is-active" : ""}`}
+              key={template.id}
+              type="button"
+              onClick={() => onSelect(template.id)}
+            >
+              <TemplateSnapshot templateId={template.id} />
+              <span className="template-card-copy">
+                <strong>{template.label}</strong>
+                <span>{templateDescriptions[template.id]}</span>
+              </span>
+              {isActive ? <span className="template-card-badge">当前使用</span> : null}
+            </button>
+          );
+        })}
+      </div>
+    </section>
+  );
+}
+
+function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
+  const hasPhoto = templateSupportsPhoto(templateId);
+
+  return (
+    <span className={`template-snapshot snapshot-${templateId}`} aria-hidden="true">
+      <span className="snapshot-paper">
+        <span className="snapshot-header">
+          {hasPhoto ? <span className="snapshot-photo" /> : null}
+          <span className="snapshot-name" />
+          <span className="snapshot-subtitle" />
+        </span>
+        <span className="snapshot-section snapshot-section-primary">
+          <span />
+          <span />
+          <span />
+        </span>
+        <span className="snapshot-section">
+          <span />
+          <span />
+          <span />
+          <span />
+        </span>
+        <span className="snapshot-section snapshot-section-short">
+          <span />
+          <span />
+        </span>
+      </span>
+    </span>
   );
 }
 
