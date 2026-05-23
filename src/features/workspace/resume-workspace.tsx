@@ -1867,7 +1867,8 @@ function ResumePreview({
           </p>
           <div className="resume-target">
             <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
-            <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "目标岗位"}</span>
+            <span className="resume-target-label">目标岗位</span>
+            <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "产品经理"}</span>
           </div>
         </div>
         {isPhotoEnabled && photoSettings.position === "right" ? photoNode : null}
