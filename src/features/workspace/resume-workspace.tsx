@@ -1987,7 +1987,11 @@ function ResumePreview({
             }}
           />
         ) : (
-          "照片"
+          <span className="resume-default-avatar" aria-hidden="true">
+            <span className="resume-default-avatar-head" />
+            <span className="resume-default-avatar-mouth">3</span>
+            <span className="resume-default-avatar-body" />
+          </span>
         )}
         {isStaticPreview ? null : <span className="resume-photo-resize" aria-hidden="true" onMouseDown={startPhotoResize} />}
       </div>
