@@ -1389,7 +1389,7 @@ button {
   position: relative;
   display: grid;
   align-content: start;
-  gap: 5px;
+  gap: 4px;
   width: 100%;
   height: 100%;
   overflow: hidden;
@@ -1454,13 +1454,13 @@ button {
 }
 
 .snapshot-sections {
-  gap: 4px;
+  gap: 3px;
 }
 
 .snapshot-section {
-  grid-template-columns: minmax(0, auto) minmax(18px, 1fr);
-  align-items: center;
-  gap: 4px;
+  align-content: start;
+  gap: 1px;
+  overflow: hidden;
 }
 
 .snapshot-section-title {
@@ -1490,6 +1490,36 @@ button {
   height: 2px;
   border-radius: 999px;
   background: #cbd4c7;
+}
+
+.snapshot-section-copy {
+  display: grid;
+  gap: 1px;
+  overflow: hidden;
+  color: #343c36;
+  font-size: 4.4px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.snapshot-section-copy span {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  padding-left: 7px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.snapshot-section-copy span::before {
+  content: "";
+  position: absolute;
+  top: 0.48em;
+  left: 1px;
+  width: 2px;
+  height: 2px;
+  border-radius: 999px;
+  background: currentColor;
 }
 
 .snapshot-line.is-long {
@@ -1634,7 +1664,7 @@ button {
 .snapshot-brick .snapshot-sections {
   grid-column: 2;
   align-content: start;
-  gap: 5px;
+  gap: 4px;
 }
 
 .snapshot-brick .snapshot-target,
@@ -1701,7 +1731,7 @@ button {
 .snapshot-leftBlue .snapshot-sections {
   grid-column: 2;
   align-content: start;
-  gap: 5px;
+  gap: 4px;
 }
 
 .snapshot-leftBlue .snapshot-section-title {

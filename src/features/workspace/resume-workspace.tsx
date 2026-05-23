@@ -128,6 +128,17 @@ const gallerySwatches = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#ef4444", 
 const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
 const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
 
+const snapshotSectionSamples: Record<ResumeModuleId, string[]> = {
+  personalSummary: ["校招产品方向，熟悉用户调研、需求分析与原型设计。"],
+  strengths: ["学习能力强，能快速拆解业务问题并推进落地。"],
+  education: ["某某大学 · 工商管理本科", "主修市场研究、数据分析、产品管理课程。"],
+  internships: ["互联网产品实习生 · 负责竞品分析与需求文档。", "协同设计、研发推动功能迭代上线。"],
+  projects: ["校园求职工具项目 · 负责用户访谈和流程设计。", "整理 120+ 份反馈，优化核心页面转化。"],
+  campusExperience: ["学生会项目负责人，组织校级活动与跨部门协作。"],
+  skills: ["Axure / Figma / Excel / SQL / 数据分析"],
+  awards: ["校级奖学金 · 创新创业竞赛优秀奖"]
+};
+
 const fontOptions: Array<{ id: ResumeFontId; label: string; value: string }> = [
   { id: "microsoftYahei", label: "微软雅黑", value: '"Microsoft YaHei", "PingFang SC", sans-serif' },
   { id: "simsun", label: "宋体", value: '"SimSun", "Songti SC", serif' },
@@ -1266,7 +1277,11 @@ function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
           {sectionTitles.map((sectionId, index) => (
             <span className={`snapshot-section ${index === 0 ? "snapshot-section-primary" : ""}`} key={sectionId}>
               <span className="snapshot-section-title">{moduleLabels[sectionId]}</span>
-              <span className="snapshot-line" />
+              <span className="snapshot-section-copy">
+                {snapshotSectionSamples[sectionId].map((sample) => (
+                  <span key={sample}>{sample}</span>
+                ))}
+              </span>
             </span>
           ))}
         </span>
