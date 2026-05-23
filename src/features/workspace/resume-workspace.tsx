@@ -123,6 +123,8 @@ const templateDescriptions: Record<TemplateId, string> = {
   minimalPm: "极简 PM，适合产品/运营方向"
 };
 
+const gallerySwatches = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#ef4444", "#475569", "#020617"];
+
 const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
 const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
 
@@ -1112,28 +1114,46 @@ function TemplateStartScreen({
 }) {
   return (
     <section className="template-start-screen" aria-label="选择简历模板">
-      <div className="template-start-hero">
-        <div>
-          <span className="eyebrow">ResumeLM</span>
-          <h1>先选一个模板，再开始写简历</h1>
-          <p>为校招场景准备的 AI 简历工作台。模板只是版式入口，进入后仍可继续切换、编辑、评分和导出。</p>
+      <aside className="template-start-sidebar" aria-label="主导航">
+        <div className="template-brand">
+          <span className="template-brand-mark">R</span>
+          <strong>ResumeLM</strong>
         </div>
-        <div className="template-start-badges" aria-label="产品能力">
-          <span>匿名开放</span>
-          <span>本地保存</span>
-          <span>AI 优化</span>
-          <span>PDF / Word 导出</span>
-        </div>
-      </div>
+        <nav className="template-start-nav" aria-label="模板功能">
+          <span>
+            <FileText size={18} />
+            简历
+          </span>
+          <span className="is-active">
+            <LayoutTemplate size={18} />
+            模板
+          </span>
+          <span>
+            <Sparkles size={18} />
+            AI 配置
+          </span>
+          <span>
+            <Activity size={18} />
+            数据看板
+          </span>
+        </nav>
+      </aside>
 
-      <div className="template-start-section">
-        <div className="template-start-section-head">
+      <div className="template-start-main">
+        <header className="template-start-toolbar">
           <div>
             <span className="eyebrow">模板图库</span>
-            <strong>看图选择适合你的第一版简历</strong>
+            <h1>模板</h1>
+            <p>选择一张版式缩略图进入工作台，草稿内容会保留，进入后仍可继续切换模板。</p>
           </div>
-          <p>点击任意模板进入工作台，草稿内容会保留。</p>
-        </div>
+          <div className="template-swatch-bar" aria-label="模板色系">
+            <span className="template-swatch-label">Tpl</span>
+            {gallerySwatches.map((swatch) => (
+              <span className="template-swatch" key={swatch} style={{ background: swatch }} />
+            ))}
+          </div>
+        </header>
+
         <div className="template-start-grid">
           {templates.map((template) => {
             const isActive = template.id === activeTemplateId;
@@ -1151,7 +1171,7 @@ function TemplateStartScreen({
                   <strong>{template.label}</strong>
                   <span>{templateDescriptions[template.id]}</span>
                 </span>
-                <span className="template-start-card-action">{isActive ? "继续使用" : "使用此模板"}</span>
+                {isActive ? <span className="template-start-card-action">当前模板</span> : null}
               </button>
             );
           })}
