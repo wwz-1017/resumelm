@@ -107,7 +107,7 @@ const moduleLabels: Record<ResumeModuleId, string> = {
 
 const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "useful", label: "好用蓝灰" },
-  { id: "simple", label: "简约金灰" },
+  { id: "simple", label: "简约天蓝" },
   { id: "graduate", label: "应届蓝线" },
   { id: "brick", label: "砖红双栏" },
   { id: "leftBlue", label: "深蓝左栏" },
@@ -116,7 +116,7 @@ const templates: Array<{ id: TemplateId; label: string }> = [
 
 const templateDescriptions: Record<TemplateId, string> = {
   useful: "蓝灰稳重，适合通用校招投递",
-  simple: "金灰简洁，信息密度适中",
+  simple: "天蓝横幅，左栏信息清晰",
   graduate: "蓝线清爽，突出应届生经历",
   brick: "砖红双栏，适合强调个人信息",
   leftBlue: "深蓝左栏，视觉识别更强",
@@ -2143,7 +2143,7 @@ function ResumePreview({
           </div>
         </header>
 
-        <aside className="simple-sidebar-panel" aria-label="简约金灰侧栏信息">
+        <aside className="simple-sidebar-panel" aria-label="简约天蓝侧栏信息">
           <section className="simple-profile-card">
             <h3>个人信息</h3>
             <div className="simple-contact-list">
