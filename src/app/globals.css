@@ -480,44 +480,6 @@ button {
   line-height: 1.65;
 }
 
-.template-swatch-bar {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 10px 14px;
-  border: 1px solid #ebe7df;
-  border-radius: 999px;
-  background: #ffffff;
-  box-shadow: 0 10px 32px rgba(20, 20, 18, 0.06);
-}
-
-.template-swatch-label,
-.template-swatch {
-  display: inline-grid;
-  place-items: center;
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-}
-
-.template-swatch-label {
-  border: 1px solid #d9dfe8;
-  background: #f7f8fa;
-  color: #6b7280;
-  font-size: 12px;
-  font-weight: 800;
-}
-
-.template-swatch {
-  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.08);
-}
-
-.template-swatch:nth-child(5) {
-  box-shadow:
-    0 0 0 4px #ffffff,
-    0 0 0 7px #111111;
-}
-
 .template-start-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(310px, 1fr));
@@ -3280,12 +3242,6 @@ button {
   .template-start-toolbar {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .template-swatch-bar {
-    align-self: flex-start;
-    flex-wrap: wrap;
-    border-radius: 18px;
   }
 
   .template-start-grid {

@@ -123,8 +123,6 @@ const templateDescriptions: Record<TemplateId, string> = {
   minimalPm: "极简 PM，适合产品/运营方向"
 };
 
-const gallerySwatches = ["#3b82f6", "#10b981", "#8b5cf6", "#f97316", "#ef4444", "#475569", "#020617"];
-
 const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
 const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
 
@@ -1171,12 +1169,6 @@ function TemplateStartScreen({
             <span className="eyebrow">模板图库</span>
             <h1>模板</h1>
             <p>选择一张版式缩略图进入工作台，草稿内容会保留，进入后仍可继续切换模板。</p>
-          </div>
-          <div className="template-swatch-bar" aria-label="模板色系">
-            <span className="template-swatch-label">Tpl</span>
-            {gallerySwatches.map((swatch) => (
-              <span className="template-swatch" key={swatch} style={{ background: swatch }} />
-            ))}
           </div>
         </header>
 
