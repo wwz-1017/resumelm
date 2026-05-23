@@ -397,6 +397,7 @@ export function ResumeWorkspace() {
   const [saveState, setSaveState] = useState("正在准备本地草稿");
   const [importError, setImportError] = useState("");
   const [templateId, setTemplateId] = useState<TemplateId>("useful");
+  const [isTemplateStartVisible, setIsTemplateStartVisible] = useState(true);
   const [aiTask, setAiTask] = useState<AiTask | null>(null);
   const [aiError, setAiError] = useState("");
   const [scoreReport, setScoreReport] = useState<ScoreReport | null>(null);
@@ -805,6 +806,19 @@ export function ResumeWorkspace() {
     setFeedbackNotice("反馈已记录，感谢你帮我们校准产品。");
   };
 
+  const startWithTemplate = (nextTemplateId: TemplateId) => {
+    setTemplateId(nextTemplateId);
+    setIsTemplateStartVisible(false);
+  };
+
+  if (isTemplateStartVisible) {
+    return (
+      <main className="app-shell is-template-start">
+        <TemplateStartScreen activeTemplateId={templateId} onSelect={startWithTemplate} />
+      </main>
+    );
+  }
+
   return (
     <main className="app-shell">
       <header className="editor-topbar">
@@ -820,6 +834,10 @@ export function ResumeWorkspace() {
             <Sparkles size={14} />
             匿名草稿
           </span>
+          <button className="secondary-button" type="button" onClick={() => setIsTemplateStartVisible(true)}>
+            <LayoutTemplate size={17} />
+            选择模板
+          </button>
           <button className="primary-button" type="button" onClick={exportPdf}>
             <Download size={17} />
             导出 PDF
@@ -1082,6 +1100,64 @@ export function ResumeWorkspace() {
         </section>
       </div>
     </main>
+  );
+}
+
+function TemplateStartScreen({
+  activeTemplateId,
+  onSelect
+}: {
+  activeTemplateId: TemplateId;
+  onSelect: (templateId: TemplateId) => void;
+}) {
+  return (
+    <section className="template-start-screen" aria-label="选择简历模板">
+      <div className="template-start-hero">
+        <div>
+          <span className="eyebrow">ResumeLM</span>
+          <h1>先选一个模板，再开始写简历</h1>
+          <p>为校招场景准备的 AI 简历工作台。模板只是版式入口，进入后仍可继续切换、编辑、评分和导出。</p>
+        </div>
+        <div className="template-start-badges" aria-label="产品能力">
+          <span>匿名开放</span>
+          <span>本地保存</span>
+          <span>AI 优化</span>
+          <span>PDF / Word 导出</span>
+        </div>
+      </div>
+
+      <div className="template-start-section">
+        <div className="template-start-section-head">
+          <div>
+            <span className="eyebrow">模板图库</span>
+            <strong>看图选择适合你的第一版简历</strong>
+          </div>
+          <p>点击任意模板进入工作台，草稿内容会保留。</p>
+        </div>
+        <div className="template-start-grid">
+          {templates.map((template) => {
+            const isActive = template.id === activeTemplateId;
+
+            return (
+              <button
+                aria-pressed={isActive}
+                className={`template-start-card ${isActive ? "is-active" : ""}`}
+                key={template.id}
+                type="button"
+                onClick={() => onSelect(template.id)}
+              >
+                <TemplateSnapshot templateId={template.id} />
+                <span className="template-start-card-copy">
+                  <strong>{template.label}</strong>
+                  <span>{templateDescriptions[template.id]}</span>
+                </span>
+                <span className="template-start-card-action">{isActive ? "继续使用" : "使用此模板"}</span>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </section>
   );
 }
 
