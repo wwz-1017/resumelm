@@ -1353,7 +1353,7 @@ function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
               </span>
             </span>
           ) : null}
-          <span className="snapshot-name">武文卓</span>
+          <span className="snapshot-name">XXX</span>
           {hasPhoto ? (
             <>
               <span className="snapshot-target">目标岗位 产品经理</span>

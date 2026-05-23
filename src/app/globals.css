@@ -1901,60 +1901,78 @@ button {
   width: 100%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
-  border: 2px solid rgba(255, 255, 255, 0.9);
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.25), transparent 50%),
-    linear-gradient(135deg, #d8e8ee, #9cabb0);
+  border: 2px solid rgba(255, 255, 255, 0.92);
+  background: #f4f4f3;
 }
 
 .snapshot-suit {
   position: relative;
-  display: grid;
-  justify-items: center;
-  align-content: end;
   width: 100%;
   height: 100%;
-  padding-top: 9%;
 }
 
 .snapshot-suit-head {
-  width: 34%;
+  position: absolute;
+  top: 15%;
+  left: 50%;
+  width: 42%;
   aspect-ratio: 1;
+  transform: translateX(-50%);
   border-radius: 999px;
-  background: linear-gradient(135deg, #f0d2ba, #c8a082);
-  box-shadow: inset 0 -3px 0 rgba(93, 67, 53, 0.12);
+  background: #b7bab5;
+}
+
+.snapshot-suit-head::before,
+.snapshot-suit-head::after {
+  content: "";
+  position: absolute;
+  top: 38%;
+  width: 22%;
+  height: 4%;
+  border-radius: 999px;
+  background: #ffffff;
+}
+
+.snapshot-suit-head::before {
+  left: 20%;
+}
+
+.snapshot-suit-head::after {
+  right: 20%;
 }
 
 .snapshot-suit-body {
   position: absolute;
-  right: 9%;
-  bottom: -3%;
-  left: 9%;
-  height: 52%;
-  border-radius: 999px 999px 6px 6px;
-  background:
-    linear-gradient(135deg, transparent 0 44%, #ffffff 45% 55%, transparent 56%),
-    linear-gradient(90deg, #1f3038 0 48%, #16252d 52%);
+  right: -8%;
+  bottom: -8%;
+  left: -8%;
+  height: 44%;
+  border-radius: 56% 56% 10% 10% / 58% 58% 8% 8%;
+  background: #b7bab5;
 }
 
 .snapshot-suit-shirt {
   position: absolute;
-  top: 0;
-  left: 36%;
-  width: 28%;
-  height: 62%;
-  clip-path: polygon(0 0, 100% 0, 70% 100%, 30% 100%);
-  background: #f8f8f4;
+  top: 50%;
+  left: 50%;
+  width: 16%;
+  height: 16%;
+  transform: translateX(-50%);
+  border-radius: 36% 36% 44% 44%;
+  background: #b7bab5;
 }
 
 .snapshot-suit-tie {
   position: absolute;
-  top: 16%;
-  left: 45%;
-  width: 10%;
-  height: 42%;
-  clip-path: polygon(50% 0, 100% 18%, 72% 100%, 28% 100%, 0 18%);
-  background: #b5473d;
+  top: 45%;
+  left: 49%;
+  width: 8%;
+  height: 16%;
+  border: solid #ffffff;
+  border-width: 0 3px 3px 0;
+  border-radius: 40%;
+  transform: translateX(-50%) rotate(-35deg);
+  background: transparent;
 }
 
 .snapshot-simple .snapshot-paper {
