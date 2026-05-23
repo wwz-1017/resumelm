@@ -1207,7 +1207,10 @@ function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
   const hasPhoto = templateSupportsPhoto(templateId);
 
   return (
-    <span className={`template-snapshot snapshot-${templateId}`} aria-hidden="true">
+    <span
+      className={`template-snapshot snapshot-${templateId} ${hasPhoto ? "has-photo" : "no-photo"}`}
+      aria-hidden="true"
+    >
       <span className="snapshot-paper">
         <span className="snapshot-header">
           {hasPhoto ? (

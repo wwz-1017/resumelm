@@ -157,7 +157,7 @@ button {
 
 .template-start-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 18px;
 }
 
@@ -196,6 +196,8 @@ button {
 }
 
 .template-start-card .template-snapshot {
+  width: 100%;
+  max-width: 100%;
   border-radius: 18px;
 }
 
@@ -1250,7 +1252,7 @@ button {
 
 .template-card-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(138px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(168px, 1fr));
   gap: 12px;
 }
 
@@ -1271,6 +1273,11 @@ button {
     border-color 0.18s ease,
     box-shadow 0.18s ease,
     transform 0.18s ease;
+}
+
+.template-card .template-snapshot {
+  width: 100%;
+  max-width: 100%;
 }
 
 .template-card:hover,
@@ -1326,6 +1333,13 @@ button {
   box-shadow: inset 0 0 0 1px rgba(45, 55, 48, 0.08);
 }
 
+.template-snapshot,
+.template-snapshot * {
+  box-sizing: border-box;
+  min-width: 0;
+  max-width: 100%;
+}
+
 .snapshot-paper {
   position: relative;
   display: grid;
@@ -1333,6 +1347,7 @@ button {
   gap: 7px;
   width: 100%;
   height: 100%;
+  overflow: hidden;
   padding: 11%;
   background: #fffefa;
 }
@@ -1346,34 +1361,49 @@ button {
 
 .snapshot-header {
   position: relative;
+  grid-template-columns: minmax(0, 1fr);
   min-height: 38px;
+  overflow: hidden;
   padding-bottom: 7px;
   border-bottom: 3px solid var(--moss-dark);
 }
 
+.template-snapshot.has-photo .snapshot-header {
+  grid-template-columns: minmax(0, 1fr) clamp(18px, 22%, 42px);
+  grid-template-areas:
+    "name photo"
+    "target photo"
+    "contact photo";
+  column-gap: 6px;
+  align-items: start;
+}
+
 .snapshot-name {
   display: block;
-  width: 66%;
+  grid-area: name;
+  width: auto;
   color: var(--moss-dark);
   font-size: 13px;
   font-weight: 900;
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .snapshot-target,
 .snapshot-contact {
   display: block;
-  max-width: 72%;
+  grid-area: target;
   overflow: hidden;
   color: #5e6a61;
   font-size: 5px;
   font-weight: 700;
   line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  overflow-wrap: anywhere;
+  white-space: normal;
 }
 
 .snapshot-contact {
+  grid-area: contact;
   color: #8a948d;
   font-weight: 600;
 }
@@ -1383,11 +1413,12 @@ button {
   align-items: center;
   gap: 3px;
   width: fit-content;
-  max-width: 78%;
+  overflow: hidden;
   color: var(--moss-dark);
   font-size: 6px;
   font-weight: 900;
   line-height: 1;
+  overflow-wrap: anywhere;
 }
 
 .snapshot-section-title::before {
@@ -1402,10 +1433,18 @@ button {
   display: flex;
   justify-content: space-between;
   gap: 5px;
+  overflow: hidden;
   color: #333b35;
   font-size: 5px;
   font-weight: 800;
   line-height: 1.1;
+}
+
+.snapshot-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .snapshot-line {
@@ -1437,12 +1476,10 @@ button {
 }
 
 .snapshot-photo {
-  position: absolute;
-  top: 0;
-  right: 0;
+  grid-area: photo;
   display: grid;
   place-items: end center;
-  width: 22%;
+  width: 100%;
   aspect-ratio: 3 / 4;
   overflow: hidden;
   border: 2px solid rgba(255, 255, 255, 0.9);
@@ -1535,11 +1572,11 @@ button {
 }
 
 .snapshot-brick .snapshot-paper {
-  grid-template-columns: 32% 1fr;
-  column-gap: 8%;
+  grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+  column-gap: 6%;
   padding: 10%;
   background:
-    linear-gradient(90deg, #f2eeee 0 34%, #fffefa 34%);
+    linear-gradient(90deg, #f2eeee 0 42%, #fffefa 42%);
   border-top: 5px solid #d46a54;
   border-bottom: 5px solid #d46a54;
 }
@@ -1549,6 +1586,7 @@ button {
   border-bottom: 0;
   align-content: center;
   min-height: 100%;
+  max-width: 100%;
   padding-top: 42%;
 }
 
@@ -1566,16 +1604,25 @@ button {
   color: #d46a54;
 }
 
+.snapshot-brick .snapshot-name {
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: center;
+  text-overflow: clip;
+  white-space: nowrap;
+}
+
 .snapshot-brick .snapshot-section-title::before {
   background: #d46a54;
 }
 
 .snapshot-leftBlue .snapshot-paper {
-  grid-template-columns: 32% 1fr;
-  column-gap: 8%;
+  grid-template-columns: minmax(0, 40%) minmax(0, 1fr);
+  column-gap: 6%;
   padding: 10%;
   background:
-    linear-gradient(90deg, #294864 0 34%, #fffefa 34%);
+    linear-gradient(90deg, #294864 0 42%, #fffefa 42%);
 }
 
 .snapshot-leftBlue .snapshot-header {
@@ -1583,6 +1630,7 @@ button {
   border-bottom: 0;
   align-content: center;
   min-height: 100%;
+  max-width: 100%;
   padding-top: 48%;
 }
 
@@ -1591,6 +1639,15 @@ button {
 .snapshot-leftBlue .snapshot-contact {
   max-width: 100%;
   color: rgba(255, 255, 255, 0.9);
+}
+
+.snapshot-leftBlue .snapshot-name {
+  overflow: hidden;
+  font-size: 10px;
+  line-height: 1.15;
+  text-align: center;
+  text-overflow: clip;
+  white-space: nowrap;
 }
 
 .snapshot-leftBlue .snapshot-section {
