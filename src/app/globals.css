@@ -2194,11 +2194,18 @@ button {
 }
 
 .resume-head h2 {
+  width: 100%;
   margin: 0;
+  overflow: hidden;
   color: var(--resume-name-color);
   font-family: var(--resume-heading-font);
   font-size: var(--resume-name-size);
   letter-spacing: 0;
+  line-height: 1.08;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
 }
 
 .resume-head p {
@@ -2711,8 +2718,6 @@ button {
 
 .template-brick .resume-head h2 {
   color: var(--resume-name-color);
-  line-height: 1.16;
-  overflow-wrap: anywhere;
   text-align: inherit;
 }
 
@@ -2730,6 +2735,7 @@ button {
 .template-brick .resume-target {
   max-width: 100%;
   min-width: 0;
+  width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -2771,7 +2777,8 @@ button {
 
 .template-brick .resume-target {
   order: -1;
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-self: stretch;
   justify-self: start;
@@ -2855,8 +2862,6 @@ button {
 .template-leftBlue .resume-head h2 {
   font-family: var(--resume-heading-font);
   color: #ffffff;
-  line-height: 1.2;
-  overflow-wrap: anywhere;
 }
 
 .template-leftBlue .resume-head p,
@@ -2872,10 +2877,12 @@ button {
 
 .template-leftBlue .resume-target {
   order: -1;
-  display: inline-flex;
+  display: flex;
+  flex-wrap: wrap;
   gap: 6px;
   align-self: flex-start;
   justify-self: start;
+  width: 100%;
 }
 
 .template-leftBlue .resume-contact-item {
@@ -3054,7 +3061,7 @@ button {
 .template-leftBlue.header-align-center .resume-target {
   justify-self: center;
   justify-content: center;
-  width: fit-content;
+  width: 100%;
   text-align: center;
 }
 
