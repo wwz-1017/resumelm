@@ -1808,6 +1808,7 @@ button {
 
 .snapshot-section-copy {
   display: grid;
+  width: 100%;
   gap: clamp(1px, 0.35cqw, 3px);
   overflow: hidden;
   color: #343c36;
@@ -1818,11 +1819,15 @@ button {
 
 .snapshot-section-copy span {
   position: relative;
-  display: block;
+  display: -webkit-box;
+  width: 100%;
   overflow: hidden;
   padding-left: clamp(5px, 1.25cqw, 9px);
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  text-overflow: clip;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .snapshot-section-copy span::before {
