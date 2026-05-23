@@ -410,6 +410,7 @@ export function ResumeWorkspace() {
   const [saveState, setSaveState] = useState("正在准备本地草稿");
   const [importError, setImportError] = useState("");
   const [templateId, setTemplateId] = useState<TemplateId>("useful");
+  const [isIntroVisible, setIsIntroVisible] = useState(true);
   const [isTemplateStartVisible, setIsTemplateStartVisible] = useState(true);
   const [aiTask, setAiTask] = useState<AiTask | null>(null);
   const [aiError, setAiError] = useState("");
@@ -821,8 +822,22 @@ export function ResumeWorkspace() {
 
   const startWithTemplate = (nextTemplateId: TemplateId) => {
     setTemplateId(nextTemplateId);
+    setIsIntroVisible(false);
     setIsTemplateStartVisible(false);
   };
+
+  const openTemplateLibrary = () => {
+    setIsIntroVisible(false);
+    setIsTemplateStartVisible(true);
+  };
+
+  if (isIntroVisible) {
+    return (
+      <main className="app-shell is-intro">
+        <IntroScreen onStart={openTemplateLibrary} />
+      </main>
+    );
+  }
 
   if (isTemplateStartVisible) {
     return (
@@ -1187,6 +1202,79 @@ function TemplateStartScreen({
             );
           })}
         </div>
+      </div>
+    </section>
+  );
+}
+
+function IntroScreen({ onStart }: { onStart: () => void }) {
+  return (
+    <section className="intro-screen" aria-label="ResumeLM 产品介绍">
+      <nav className="intro-nav" aria-label="首页导航">
+        <div className="intro-brand">
+          <span className="template-brand-mark">R</span>
+          <strong>ResumeLM</strong>
+        </div>
+        <div className="intro-nav-links">
+          <span>AI 简历</span>
+          <span>模板库</span>
+          <span>ATS 评分</span>
+        </div>
+        <button className="intro-nav-button" type="button" onClick={onStart}>
+          开始使用
+        </button>
+      </nav>
+
+      <div className="intro-hero">
+        <div className="intro-hero-copy">
+          <span className="intro-kicker">为校招准备的 AI 简历工作台</span>
+          <h1>从第一份简历，到更像大厂候选人的表达。</h1>
+          <p>
+            ResumeLM 帮大学生把经历整理成清晰、有重点、可投递的简历。无需登录，打开即可选模板、写内容、AI 优化、评分并导出。
+          </p>
+          <div className="intro-actions">
+            <button className="intro-primary" type="button" onClick={onStart}>
+              <Sparkles size={18} />
+              开始制作简历
+            </button>
+            <button className="intro-secondary" type="button" onClick={onStart}>
+              查看模板库
+            </button>
+          </div>
+        </div>
+        <div className="intro-showcase" aria-hidden="true">
+          <div className="intro-orbit is-one" />
+          <div className="intro-orbit is-two" />
+          <div className="intro-resume-card">
+            <TemplateSnapshot templateId="useful" />
+          </div>
+          <div className="intro-floating-card is-score">
+            <strong>92</strong>
+            <span>ATS 匹配分</span>
+          </div>
+          <div className="intro-floating-card is-ai">
+            <Sparkles size={15} />
+            <span>AI 润色完成</span>
+          </div>
+        </div>
+      </div>
+
+      <div className="intro-feature-grid">
+        <article>
+          <span>01</span>
+          <h2>先选模板，再进入编辑。</h2>
+          <p>像大厂官网一样用图判断风格，避免只看名字选择模板。</p>
+        </article>
+        <article>
+          <span>02</span>
+          <h2>AI 帮你把经历写具体。</h2>
+          <p>把普通经历改成成果导向表达，补齐关键词和岗位匹配建议。</p>
+        </article>
+        <article>
+          <span>03</span>
+          <h2>本地保存，低门槛开放。</h2>
+          <p>第一版不强制登录，草稿自动保存在浏览器，随时导出 JSON 备份。</p>
+        </article>
       </div>
     </section>
   );

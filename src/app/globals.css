@@ -60,6 +60,326 @@ button {
   background: #faf9f6;
 }
 
+.app-shell.is-intro {
+  display: block;
+  height: 100vh;
+  min-height: 640px;
+  overflow-y: auto;
+  padding: 0;
+  background:
+    radial-gradient(circle at 78% 12%, rgba(216, 232, 238, 0.9), transparent 30%),
+    radial-gradient(circle at 12% 18%, rgba(226, 184, 87, 0.24), transparent 32%),
+    linear-gradient(135deg, #fffefa 0%, #f4f7f1 52%, #eef6f8 100%);
+}
+
+.intro-screen {
+  position: relative;
+  min-height: 100vh;
+  overflow: hidden;
+  padding: 22px clamp(18px, 4vw, 58px) 58px;
+}
+
+.intro-screen::before,
+.intro-screen::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  border-radius: 999px;
+  filter: blur(2px);
+  opacity: 0.72;
+  animation: introFloat 10s ease-in-out infinite alternate;
+}
+
+.intro-screen::before {
+  top: 16%;
+  right: 9%;
+  width: 210px;
+  height: 210px;
+  background: rgba(59, 130, 246, 0.12);
+}
+
+.intro-screen::after {
+  bottom: 16%;
+  left: 12%;
+  width: 180px;
+  height: 180px;
+  background: rgba(212, 106, 84, 0.12);
+  animation-delay: -3s;
+}
+
+.intro-nav,
+.intro-hero,
+.intro-feature-grid {
+  position: relative;
+  z-index: 1;
+}
+
+.intro-nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 12px 14px;
+  border: 1px solid rgba(217, 222, 212, 0.72);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.68);
+  box-shadow: 0 18px 54px rgba(45, 55, 48, 0.08);
+  backdrop-filter: blur(22px);
+  animation: introReveal 0.7s ease both;
+}
+
+.intro-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding-left: 4px;
+  color: #111111;
+  font-size: 17px;
+  font-weight: 900;
+}
+
+.intro-nav-links {
+  display: flex;
+  gap: clamp(14px, 3vw, 34px);
+  color: #5d665f;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.intro-nav-button,
+.intro-secondary,
+.intro-primary {
+  cursor: pointer;
+  transition:
+    box-shadow 0.2s ease,
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+
+.intro-nav-button {
+  padding: 10px 16px;
+  border-radius: 999px;
+  background: #111111;
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.intro-hero {
+  display: grid;
+  grid-template-columns: minmax(0, 0.95fr) minmax(360px, 0.8fr);
+  align-items: center;
+  gap: clamp(28px, 6vw, 96px);
+  max-width: 1280px;
+  min-height: calc(100vh - 130px);
+  margin: 0 auto;
+  padding: 64px 0 42px;
+}
+
+.intro-hero-copy {
+  display: grid;
+  gap: 24px;
+  animation: introReveal 0.85s ease 0.08s both;
+}
+
+.intro-kicker {
+  width: fit-content;
+  padding: 9px 13px;
+  border: 1px solid rgba(83, 107, 79, 0.14);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.62);
+  color: var(--moss-dark);
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.intro-hero h1 {
+  max-width: 860px;
+  margin: 0;
+  color: #111111;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(46px, 7.2vw, 104px);
+  line-height: 0.96;
+  letter-spacing: -0.075em;
+}
+
+.intro-hero p {
+  max-width: 680px;
+  margin: 0;
+  color: #59645d;
+  font-size: clamp(16px, 1.7vw, 21px);
+  line-height: 1.85;
+}
+
+.intro-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.intro-primary,
+.intro-secondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
+  font-size: 15px;
+  font-weight: 900;
+}
+
+.intro-primary {
+  background: #111111;
+  color: #ffffff;
+  box-shadow: 0 18px 40px rgba(17, 17, 17, 0.18);
+}
+
+.intro-secondary {
+  border: 1px solid rgba(45, 55, 48, 0.16);
+  background: rgba(255, 255, 255, 0.7);
+  color: #1e2722;
+}
+
+.intro-primary:hover,
+.intro-secondary:hover,
+.intro-nav-button:hover {
+  transform: translateY(-2px);
+}
+
+.intro-showcase {
+  position: relative;
+  display: grid;
+  place-items: center;
+  min-height: 620px;
+  animation: introReveal 0.9s ease 0.18s both;
+}
+
+.intro-orbit {
+  position: absolute;
+  border-radius: 999px;
+  animation: introPulse 7s ease-in-out infinite alternate;
+}
+
+.intro-orbit.is-one {
+  width: 460px;
+  height: 460px;
+  border: 1px solid rgba(83, 107, 79, 0.12);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.42), transparent 64%);
+}
+
+.intro-orbit.is-two {
+  width: 330px;
+  height: 330px;
+  border: 1px dashed rgba(212, 106, 84, 0.22);
+  animation-delay: -2s;
+}
+
+.intro-resume-card {
+  position: relative;
+  z-index: 2;
+  width: min(360px, 72vw);
+  transform: rotate(-2deg);
+  filter: drop-shadow(0 34px 70px rgba(45, 55, 48, 0.18));
+}
+
+.intro-resume-card .template-snapshot {
+  border-radius: 24px;
+}
+
+.intro-floating-card {
+  position: absolute;
+  z-index: 3;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 14px;
+  border: 1px solid rgba(217, 222, 212, 0.74);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.76);
+  color: #1e2722;
+  font-weight: 900;
+  box-shadow: 0 18px 44px rgba(45, 55, 48, 0.12);
+  backdrop-filter: blur(18px);
+  animation: introFloat 4.8s ease-in-out infinite alternate;
+}
+
+.intro-floating-card strong {
+  color: var(--moss-dark);
+  font-size: 28px;
+  line-height: 1;
+}
+
+.intro-floating-card span {
+  color: #5e6a61;
+  font-size: 12px;
+}
+
+.intro-floating-card.is-score {
+  top: 16%;
+  right: 4%;
+}
+
+.intro-floating-card.is-ai {
+  bottom: 18%;
+  left: 2%;
+  animation-delay: -1.8s;
+}
+
+.intro-feature-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  max-width: 1280px;
+  margin: -22px auto 0;
+}
+
+.intro-feature-grid article {
+  min-height: 210px;
+  padding: 24px;
+  border: 1px solid rgba(217, 222, 212, 0.74);
+  border-radius: 28px;
+  background:
+    linear-gradient(135deg, rgba(255, 255, 255, 0.78), rgba(255, 255, 255, 0.42)),
+    radial-gradient(circle at 100% 0, rgba(216, 232, 238, 0.5), transparent 38%);
+  box-shadow: 0 20px 60px rgba(45, 55, 48, 0.08);
+  backdrop-filter: blur(18px);
+  animation: introReveal 0.75s ease both;
+}
+
+.intro-feature-grid article:nth-child(2) {
+  animation-delay: 0.08s;
+}
+
+.intro-feature-grid article:nth-child(3) {
+  animation-delay: 0.16s;
+}
+
+.intro-feature-grid span {
+  color: var(--coral);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+}
+
+.intro-feature-grid h2 {
+  margin: 28px 0 10px;
+  color: #111111;
+  font-size: clamp(22px, 2vw, 32px);
+  line-height: 1.16;
+  letter-spacing: -0.05em;
+}
+
+.intro-feature-grid p {
+  margin: 0;
+  color: #657269;
+  font-size: 14px;
+  line-height: 1.75;
+}
+
 .template-start-screen {
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -2773,6 +3093,38 @@ button {
   line-height: 1.5;
 }
 
+@keyframes introReveal {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes introFloat {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+
+  to {
+    transform: translate3d(0, -14px, 0);
+  }
+}
+
+@keyframes introPulse {
+  from {
+    transform: scale(0.96) rotate(0deg);
+  }
+
+  to {
+    transform: scale(1.04) rotate(8deg);
+  }
+}
+
 @media print {
   .resume-module-frame {
     margin-top: 24px;
@@ -2793,6 +3145,63 @@ button {
     min-height: 100vh;
     overflow: visible;
     padding: 14px;
+  }
+
+  .app-shell.is-intro {
+    height: auto;
+    min-height: 100vh;
+    padding: 0;
+  }
+
+  .intro-screen {
+    padding: 14px;
+  }
+
+  .intro-nav {
+    align-items: stretch;
+    border-radius: 24px;
+    flex-direction: column;
+  }
+
+  .intro-nav-links {
+    display: none;
+  }
+
+  .intro-nav-button {
+    width: 100%;
+  }
+
+  .intro-hero {
+    grid-template-columns: 1fr;
+    min-height: auto;
+    padding: 46px 0 28px;
+  }
+
+  .intro-hero h1 {
+    font-size: clamp(42px, 16vw, 68px);
+  }
+
+  .intro-showcase {
+    min-height: 460px;
+  }
+
+  .intro-resume-card {
+    width: min(310px, 86vw);
+  }
+
+  .intro-floating-card.is-score {
+    top: 8%;
+    right: 0;
+  }
+
+  .intro-floating-card.is-ai {
+    bottom: 8%;
+    left: 0;
+  }
+
+  .intro-feature-grid {
+    grid-template-columns: 1fr;
+    margin-top: 0;
   }
 
   .app-shell.is-template-start {
