@@ -3063,6 +3063,18 @@ button {
   text-align: left;
 }
 
+.template-brick .resume-head-content,
+.template-brick .resume-contact-line,
+.template-brick .resume-contact-item,
+.template-brick .resume-target,
+.template-leftBlue .resume-head-content,
+.template-leftBlue .resume-contact-line,
+.template-leftBlue .resume-contact-item,
+.template-leftBlue .resume-target {
+  width: 100%;
+  max-width: 100%;
+}
+
 .template-brick .resume-head-content {
   display: grid;
   grid-template-rows: auto auto 1fr;
@@ -3082,6 +3094,14 @@ button {
   text-align: inherit;
 }
 
+.template-brick .resume-target-label,
+.template-leftBlue .resume-target-label {
+  min-width: 0;
+  overflow: hidden;
+  text-align: center;
+  text-overflow: ellipsis;
+}
+
 .template-brick .resume-head p {
   display: grid;
   align-content: center;
@@ -3094,9 +3114,10 @@ button {
 
 .template-brick .resume-contact-item,
 .template-brick .resume-target {
+  flex-wrap: nowrap;
   max-width: 100%;
   min-width: 0;
-  width: 100%;
+  overflow: hidden;
   overflow-wrap: anywhere;
   word-break: break-word;
 }
@@ -3104,7 +3125,6 @@ button {
 .template-brick .resume-contact-item,
 .template-brick .resume-target {
   display: flex;
-  flex-wrap: wrap;
   gap: 6px 8px;
   align-items: center;
   justify-content: center;
@@ -3118,7 +3138,11 @@ button {
 
 .template-brick .resume-inline-text {
   flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .template-brick .resume-photo {
@@ -3235,28 +3259,34 @@ button {
 .template-leftBlue .resume-target {
   order: -1;
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px 8px;
   align-self: flex-start;
   justify-self: center;
   justify-content: center;
   width: 100%;
+  overflow: hidden;
   text-align: center;
 }
 
 .template-leftBlue .resume-contact-item {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 6px 10px;
   width: 100%;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   text-align: center;
 }
 
 .template-leftBlue .resume-inline-text {
   flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
   text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .template-leftBlue .resume-contact-line {
