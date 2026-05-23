@@ -129,14 +129,14 @@ const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
 const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
 
 const snapshotSectionSamples: Record<ResumeModuleId, string[]> = {
-  personalSummary: ["校招产品方向，熟悉用户调研、需求分析与原型设计。"],
-  strengths: ["学习能力强，能快速拆解业务问题并推进落地。"],
+  personalSummary: ["校招产品方向，熟悉用户调研、需求分析与原型设计。", "能将模糊需求转化为清晰方案并协同推进。"],
+  strengths: ["学习能力强，能快速拆解业务问题并推进落地。", "沟通表达清晰，善于跨团队收集反馈。"],
   education: ["某某大学 · 工商管理本科", "主修市场研究、数据分析、产品管理课程。"],
-  internships: ["互联网产品实习生 · 负责竞品分析与需求文档。", "协同设计、研发推动功能迭代上线。"],
-  projects: ["校园求职工具项目 · 负责用户访谈和流程设计。", "整理 120+ 份反馈，优化核心页面转化。"],
-  campusExperience: ["学生会项目负责人，组织校级活动与跨部门协作。"],
-  skills: ["Axure / Figma / Excel / SQL / 数据分析"],
-  awards: ["校级奖学金 · 创新创业竞赛优秀奖"]
+  internships: ["互联网产品实习生 · 负责竞品分析与需求文档。", "协同设计、研发推动功能迭代上线。", "跟踪核心指标，沉淀版本复盘与优化建议。"],
+  projects: ["校园求职工具项目 · 负责用户访谈和流程设计。", "整理 120+ 份反馈，优化核心页面转化。", "输出原型、流程图和上线验收清单。"],
+  campusExperience: ["学生会项目负责人，组织校级活动与跨部门协作。", "统筹排期、物料和现场执行，提升参与体验。"],
+  skills: ["Axure / Figma / Excel / SQL / 数据分析", "用户研究 / 竞品分析 / PRD / 需求管理"],
+  awards: ["校级奖学金 · 创新创业竞赛优秀奖", "优秀学生干部 · 校园活动最佳组织奖"]
 };
 
 const fontOptions: Array<{ id: ResumeFontId; label: string; value: string }> = [
