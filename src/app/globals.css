@@ -617,9 +617,11 @@ button {
   display: grid;
   grid-template-columns: minmax(280px, 36vw) minmax(0, 1fr);
   gap: 12px;
+  height: 100%;
   min-height: 0;
   max-width: 1680px;
   margin: 0 auto;
+  overflow: hidden;
   width: 100%;
 }
 
@@ -1246,8 +1248,15 @@ button {
 .preview-shell {
   min-height: 0;
   overflow-y: auto;
+  overflow-anchor: none;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
   border-radius: 14px;
   padding: 14px;
+}
+
+.preview-shell * {
+  overflow-anchor: none;
 }
 
 .score-report {
@@ -3054,13 +3063,14 @@ button {
   grid-row: 1 / span 8;
   display: grid;
   grid-template-rows: auto 1fr;
-  gap: 14px;
+  gap: 18px;
   min-width: 0;
+  min-height: 1123px;
   width: 180px;
-  padding: 0 16px;
+  padding: 38px 16px;
   border: 0;
   overflow: hidden;
-  text-align: left;
+  text-align: center;
 }
 
 .template-brick .resume-head-content,
@@ -3080,6 +3090,9 @@ button {
   grid-template-rows: auto auto 1fr;
   align-content: start;
   justify-items: center;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
   min-height: 520px;
   text-align: center;
 }
@@ -3090,16 +3103,24 @@ button {
 }
 
 .template-brick .resume-head h2 {
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
   color: var(--resume-name-color);
   text-align: inherit;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .template-brick .resume-target-label,
 .template-leftBlue .resume-target-label {
+  display: block;
+  flex: 0 0 auto;
   min-width: 0;
   overflow: hidden;
   text-align: center;
   text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .template-brick .resume-head p {
@@ -3128,16 +3149,19 @@ button {
   gap: 6px 8px;
   align-items: center;
   justify-content: center;
+  width: 100%;
   text-align: center;
 }
 
 .template-brick .resume-contact-item .resume-icon,
 .template-brick .resume-target .resume-icon {
+  flex: 0 0 auto;
   margin-top: 2px;
 }
 
 .template-brick .resume-inline-text {
-  flex: 0 1 auto;
+  flex: 1 1 0;
+  max-width: 100%;
   min-width: 0;
   overflow: hidden;
   text-align: center;
