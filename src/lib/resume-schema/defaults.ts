@@ -1,5 +1,6 @@
 import type {
   ResumeColorId,
+  ResumeDecorationSettings,
   ResumeDocument,
   ResumeFontId,
   ResumeHeaderAlignment,
@@ -8,6 +9,8 @@ import type {
   ResumeModuleId,
   ResumePhotoSettings,
   ResumeStyleSettings,
+  ResumeTemplateColorId,
+  ResumeTemplateSettings,
   ResumeVisibilitySettings
 } from "./types";
 
@@ -35,6 +38,8 @@ export const createEmptyResume = (): ResumeDocument => ({
   styleSettings: createDefaultStyleSettings(),
   visibilitySettings: createDefaultVisibilitySettings(),
   photoSettings: createDefaultPhotoSettings(),
+  decorationSettings: createDefaultDecorationSettings(),
+  templateSettings: createDefaultTemplateSettings(),
   moduleOrder: createDefaultModuleOrder(),
   personalSummary: "",
   strengths: ["", "", ""],
@@ -207,5 +212,39 @@ export function normalizePhotoSettings(settings?: Partial<ResumePhotoSettings>):
     width: Math.min(180, Math.max(56, Number.isFinite(next.width) ? next.width : defaults.width)),
     height: Math.min(220, Math.max(70, Number.isFinite(next.height) ? next.height : defaults.height)),
     position: next.position === "left" || next.position === "right" ? next.position : defaults.position
+  };
+}
+
+export function createDefaultDecorationSettings(): ResumeDecorationSettings {
+  return {
+    offsetX: 0,
+    offsetY: 0
+  };
+}
+
+export function normalizeDecorationSettings(settings?: Partial<ResumeDecorationSettings>): ResumeDecorationSettings {
+  const defaults = createDefaultDecorationSettings();
+  const next = { ...defaults, ...settings };
+
+  return {
+    offsetX: Math.min(900, Math.max(-900, Number.isFinite(next.offsetX) ? next.offsetX : defaults.offsetX)),
+    offsetY: Math.min(900, Math.max(-900, Number.isFinite(next.offsetY) ? next.offsetY : defaults.offsetY))
+  };
+}
+
+export function createDefaultTemplateSettings(): ResumeTemplateSettings {
+  return {
+    color: "original"
+  };
+}
+
+const templateColorIds: ResumeTemplateColorId[] = ["original", "rose", "darkBlue", "skyBlue", "darkGray", "taupe", "orange"];
+
+export function normalizeTemplateSettings(settings?: Partial<ResumeTemplateSettings>): ResumeTemplateSettings {
+  const defaults = createDefaultTemplateSettings();
+  const next = { ...defaults, ...settings };
+
+  return {
+    color: pickOption(next.color, templateColorIds, defaults.color)
   };
 }

@@ -63,16 +63,19 @@ import {
   createDefaultIconSettings,
   createDefaultStyleSettings,
   createEmptyResume,
+  normalizeDecorationSettings,
   normalizeIconSettings,
   normalizeModuleOrder,
   normalizePhotoSettings,
   normalizeStyleSettings,
+  normalizeTemplateSettings,
   normalizeVisibilitySettings
 } from "@/lib/resume-schema/defaults";
 import type {
   Education,
   Experience,
   ResumeColorId,
+  ResumeDecorationSettings,
   ResumeDocument,
   ResumeFontId,
   ResumeHeaderAlignment,
@@ -81,6 +84,8 @@ import type {
   ResumeModuleId,
   ResumePhotoSettings,
   ResumeStyleSettings,
+  ResumeTemplateColorId,
+  ResumeTemplateSettings,
   ResumeVisibilitySettings
 } from "@/lib/resume-schema/types";
 import { isResumeDocument, validateResume } from "@/lib/resume-schema/validate";
@@ -129,6 +134,28 @@ const templateDescriptions: Record<TemplateId, string> = {
   leftBlue: "深蓝左栏，视觉识别更强",
   minimalPm: "极简 PM，适合产品/运营方向"
 };
+
+const colorCustomizableTemplateIds: TemplateId[] = ["useful", "simple", "graduate", "leftBlue"];
+const templateSupportsColor = (templateId: TemplateId) => colorCustomizableTemplateIds.includes(templateId);
+
+const templateOriginalColors: Record<TemplateId, string> = {
+  useful: "#5f7591",
+  simple: "#4798bf",
+  graduate: "#294864",
+  brick: "#174b68",
+  leftBlue: "#294864",
+  minimalPm: "#111111"
+};
+
+const templateColorOptions: Array<{ id: ResumeTemplateColorId; label: string; value: string | null }> = [
+  { id: "original", label: "原色", value: null },
+  { id: "rose", label: "玫瑰红", value: "#c84d64" },
+  { id: "darkBlue", label: "深蓝", value: "#294864" },
+  { id: "skyBlue", label: "天蓝", value: "#4798bf" },
+  { id: "darkGray", label: "深灰", value: "#4f5a54" },
+  { id: "taupe", label: "浅褐", value: "#9b7a5f" },
+  { id: "orange", label: "橙黄", value: "#e49b21" }
+];
 
 const defaultTemplateModuleConfig: TemplateModuleConfig = {
   modules: ["personalSummary", "strengths", "education", "internships", "projects", "campusExperience", "skills", "awards"],
@@ -384,7 +411,14 @@ const getFontValue = (fontId: ResumeFontId) => fontOptions.find((option) => opti
 
 const getColorValue = (colorId: ResumeColorId) => colorOptions.find((option) => option.id === colorId)?.value ?? colorOptions[0].value;
 
-const getResumeStyleVars = (settings: ResumeStyleSettings) =>
+const getTemplateColorValue = (templateId: TemplateId, settings?: ResumeTemplateSettings) => {
+  const normalizedSettings = normalizeTemplateSettings(settings);
+  const option = templateColorOptions.find((item) => item.id === normalizedSettings.color);
+
+  return option?.value ?? templateOriginalColors[templateId];
+};
+
+const getResumeStyleVars = (settings: ResumeStyleSettings, templateId: TemplateId, templateSettings?: ResumeTemplateSettings) =>
   ({
     "--resume-heading-font": getFontValue(settings.headingFont),
     "--resume-body-font": getFontValue(settings.bodyFont),
@@ -394,7 +428,8 @@ const getResumeStyleVars = (settings: ResumeStyleSettings) =>
     "--resume-name-color": getColorValue(settings.nameColor),
     "--resume-section-title-color": getColorValue(settings.sectionTitleColor),
     "--resume-body-color": getColorValue(settings.bodyColor),
-    "--resume-accent-color": getColorValue(settings.accentColor)
+    "--resume-accent-color": getColorValue(settings.accentColor),
+    "--template-theme-color": getTemplateColorValue(templateId, templateSettings)
   }) as React.CSSProperties;
 
 const getNameFitStyle = (name: string, settings: ResumeStyleSettings, templateId: TemplateId): React.CSSProperties => {
@@ -531,6 +566,7 @@ export function ResumeWorkspace() {
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
   const photoSettings = normalizePhotoSettings(resume.photoSettings);
+  const templateSettings = normalizeTemplateSettings(resume.templateSettings);
   const isPhotoSupported = templateSupportsPhoto(templateId);
   const activeModuleConfig = getTemplateModuleConfig(templateId);
   const activeModuleLabels = activeModuleConfig.labels;
@@ -634,6 +670,26 @@ export function ResumeWorkspace() {
       ...current,
       photoSettings: {
         ...normalizePhotoSettings(current.photoSettings),
+        ...nextSettings
+      }
+    }));
+  };
+
+  const updateDecorationSettings = (nextSettings: Partial<ResumeDecorationSettings>) => {
+    setResume((current) => ({
+      ...current,
+      decorationSettings: {
+        ...normalizeDecorationSettings(current.decorationSettings),
+        ...nextSettings
+      }
+    }));
+  };
+
+  const updateTemplateSettings = (nextSettings: Partial<ResumeTemplateSettings>) => {
+    setResume((current) => ({
+      ...current,
+      templateSettings: {
+        ...normalizeTemplateSettings(current.templateSettings),
         ...nextSettings
       }
     }));
@@ -794,6 +850,8 @@ export function ResumeWorkspace() {
         styleSettings: normalizeStyleSettings(parsed.styleSettings),
         visibilitySettings: normalizeVisibilitySettings(parsed.visibilitySettings),
         photoSettings: normalizePhotoSettings(parsed.photoSettings),
+        decorationSettings: normalizeDecorationSettings(parsed.decorationSettings),
+        templateSettings: normalizeTemplateSettings(parsed.templateSettings),
         moduleOrder: normalizeModuleOrder(parsed.moduleOrder)
       });
       setImportError("");
@@ -1248,10 +1306,14 @@ export function ResumeWorkspace() {
             <p>点击右侧简历模块可定位左侧表单，拖动模块可调整顺序。</p>
           </div>
           <TemplateGallery activeTemplateId={templateId} onSelect={selectTemplate} />
+          {templateSupportsColor(templateId) ? (
+            <TemplateColorSwitcher settings={templateSettings} templateId={templateId} onChange={updateTemplateSettings} />
+          ) : null}
           <ResumePreview
             photoSupported={isPhotoSupported}
             resume={resume}
             templateId={templateId}
+            onDecorationSettingsChange={updateDecorationSettings}
             onPhotoSettingsChange={updatePhotoSettings}
             onSelectModule={focusEditorModule}
             onSwapModules={swapModules}
@@ -1321,7 +1383,10 @@ function TemplateStartScreen({
                 <TemplateSnapshot templateId={template.id} />
                 <span className="template-start-card-copy">
                   <strong>{template.label}</strong>
-                  <span>{templateDescriptions[template.id]}</span>
+                  <span>
+                    {templateDescriptions[template.id]}
+                    {templateSupportsColor(template.id) ? " · 支持换色" : ""}
+                  </span>
                 </span>
                 {isActive ? <span className="template-start-card-action">当前模板</span> : null}
               </button>
@@ -1437,7 +1502,10 @@ function TemplateGallery({
               <TemplateSnapshot templateId={template.id} />
               <span className="template-card-copy">
                 <strong>{template.label}</strong>
-                <span>{templateDescriptions[template.id]}</span>
+                <span>
+                  {templateDescriptions[template.id]}
+                  {templateSupportsColor(template.id) ? " · 支持换色" : ""}
+                </span>
               </span>
               {isActive ? <span className="template-card-badge">当前使用</span> : null}
             </button>
@@ -1459,6 +1527,7 @@ function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
           photoSupported={templateSupportsPhoto(templateId)}
           resume={previewResume}
           templateId={templateId}
+          onDecorationSettingsChange={() => undefined}
           onPhotoSettingsChange={() => undefined}
           onSelectModule={() => undefined}
           onSwapModules={() => undefined}
@@ -1466,6 +1535,49 @@ function TemplateSnapshot({ templateId }: { templateId: TemplateId }) {
         />
       </div>
     </div>
+  );
+}
+
+function TemplateColorSwitcher({
+  onChange,
+  settings,
+  templateId
+}: {
+  onChange: (nextSettings: Partial<ResumeTemplateSettings>) => void;
+  settings: ResumeTemplateSettings;
+  templateId: TemplateId;
+}) {
+  const normalizedSettings = normalizeTemplateSettings(settings);
+
+  return (
+    <section className="template-color-switcher" aria-label="模板换色">
+      <div>
+        <span className="eyebrow">模板换色</span>
+        <strong>边框与模块标题色</strong>
+      </div>
+      <div className="template-color-options">
+        {templateColorOptions.map((option) => {
+          const colorValue = option.value ?? templateOriginalColors[templateId];
+          const isActive = option.id === normalizedSettings.color;
+
+          return (
+            <button
+              aria-label={`切换为${option.label}`}
+              aria-pressed={isActive}
+              className={isActive ? "is-active" : ""}
+              key={option.id}
+              title={option.label}
+              type="button"
+              style={{ "--template-swatch-color": colorValue } as React.CSSProperties}
+              onClick={() => onChange({ color: option.id })}
+            >
+              <span />
+              <em>{option.label}</em>
+            </button>
+          );
+        })}
+      </div>
+    </section>
   );
 }
 
@@ -1934,6 +2046,7 @@ function ExperienceEditor({
 function ResumePreview({
   photoSupported,
   isStaticPreview = false,
+  onDecorationSettingsChange,
   onPhotoSettingsChange,
   onSelectModule,
   onSwapModules,
@@ -1943,6 +2056,7 @@ function ResumePreview({
 }: {
   photoSupported: boolean;
   isStaticPreview?: boolean;
+  onDecorationSettingsChange: (nextSettings: Partial<ResumeDecorationSettings>) => void;
   onPhotoSettingsChange: (nextSettings: Partial<ResumePhotoSettings>) => void;
   onSelectModule: (moduleId: ResumeModuleId) => void;
   onSwapModules: (sourceModuleId: ResumeModuleId, targetModuleId: ResumeModuleId) => void;
@@ -1961,6 +2075,8 @@ function ResumePreview({
   const styleSettings = normalizeStyleSettings(resume.styleSettings);
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
   const photoSettings = normalizePhotoSettings(resume.photoSettings);
+  const decorationSettings = normalizeDecorationSettings(resume.decorationSettings);
+  const templateSettings = normalizeTemplateSettings(resume.templateSettings);
   const moduleOrder = normalizeModuleOrder(resume.moduleOrder);
   const templateModuleConfig = getTemplateModuleConfig(templateId);
   const templateModuleSet = new Set(templateModuleConfig.modules);
@@ -1968,13 +2084,24 @@ function ResumePreview({
   const iconEnabled = iconSettings.enabled;
   const isPhotoEnabled = photoSupported && photoSettings.visible;
   const displayName = resume.profile.name || "你的姓名";
+  const displayTitle = templateId === "brick" ? "个人简历" : displayName;
   const nameFitStyle = getNameFitStyle(displayName, styleSettings, templateId);
+  const headerNameStyle = templateId === "brick" ? undefined : nameFitStyle;
   const getModuleLabel = (moduleId: ResumeModuleId) => getTemplateModuleLabel(templateId, moduleId);
   const contactItems = [
     { icon: iconSettings.phone, text: resume.profile.phone || "电话" },
     { icon: iconSettings.email, text: resume.profile.email || "邮箱" },
     { icon: iconSettings.city, text: resume.profile.city || "城市" }
   ];
+  const brickInfoItems = [
+    { icon: iconSettings.personalSummary, text: `姓名：${displayName}` },
+    { icon: iconSettings.targetRole, text: `求职意向：${resume.profile.targetRole || resume.targetJob.title || "产品经理"}` },
+    { icon: iconSettings.phone, text: `手机：${resume.profile.phone || "电话"}` },
+    { icon: iconSettings.email, text: `邮箱：${resume.profile.email || "邮箱"}` },
+    { icon: iconSettings.city, text: `地址：${resume.profile.city || "城市"}` }
+  ];
+  const headerContactItems = templateId === "brick" ? brickInfoItems : contactItems;
+  const targetLabel = templateId === "brick" ? "求职意向" : "目标岗位";
   const startPhotoResize = (event: React.MouseEvent<HTMLSpanElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -1988,6 +2115,32 @@ function ResumePreview({
       onPhotoSettingsChange({
         width: Math.min(180, Math.max(56, startWidth + moveEvent.clientX - startX)),
         height: Math.min(220, Math.max(70, startHeight + moveEvent.clientY - startY))
+      });
+    };
+
+    const handleUp = () => {
+      window.removeEventListener("mousemove", handleMove);
+      window.removeEventListener("mouseup", handleUp);
+    };
+
+    window.addEventListener("mousemove", handleMove);
+    window.addEventListener("mouseup", handleUp);
+  };
+  const startDecorationMove = (event: React.MouseEvent<SVGSVGElement>) => {
+    if (isStaticPreview || event.button !== 0) return;
+
+    event.preventDefault();
+    event.stopPropagation();
+
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const startOffsetX = decorationSettings.offsetX;
+    const startOffsetY = decorationSettings.offsetY;
+
+    const handleMove = (moveEvent: MouseEvent) => {
+      onDecorationSettingsChange({
+        offsetX: Math.min(900, Math.max(-900, startOffsetX + moveEvent.clientX - startX)),
+        offsetY: Math.min(900, Math.max(-900, startOffsetY + moveEvent.clientY - startY))
       });
     };
 
@@ -2082,6 +2235,33 @@ function ResumePreview({
       </div>
     </div>
   ) : null;
+  const brickDecorationNode =
+    templateId === "brick" ? (
+      <svg
+        aria-label="曲线装饰，可拖动调整位置"
+        className="brick-decoration-layer"
+        viewBox="0 0 794 1123"
+        style={{
+          transform: `translate(${decorationSettings.offsetX}px, ${decorationSettings.offsetY}px)`
+        }}
+        onMouseDown={startDecorationMove}
+      >
+        <path className="brick-decoration-hit" d="M80 180C170 225 262 177 350 190C462 207 502 204 580 216C640 225 693 236 735 260" />
+        <path className="brick-decoration-hit" d="M80 180C102 230 101 256 61 302C24 345 42 378 80 380C143 382 191 388 254 373C334 354 383 368 426 424C487 504 613 506 720 580C774 617 759 706 720 780C683 852 650 902 600 950C532 1015 442 1004 362 1035C267 1072 185 1094 44 1085" />
+        <circle className="brick-decoration-node-hit" cx="80" cy="180" r="30" />
+        <circle className="brick-decoration-node-hit" cx="80" cy="380" r="30" />
+        <circle className="brick-decoration-node-hit" cx="720" cy="580" r="30" />
+        <circle className="brick-decoration-node-hit" cx="720" cy="780" r="30" />
+        <circle className="brick-decoration-node-hit" cx="600" cy="950" r="30" />
+        <path d="M80 180C170 225 262 177 350 190C462 207 502 204 580 216C640 225 693 236 735 260" />
+        <path d="M80 180C102 230 101 256 61 302C24 345 42 378 80 380C143 382 191 388 254 373C334 354 383 368 426 424C487 504 613 506 720 580C774 617 759 706 720 780C683 852 650 902 600 950C532 1015 442 1004 362 1035C267 1072 185 1094 44 1085" />
+        <circle className="is-blue" cx="80" cy="180" r="18" />
+        <circle className="is-blue" cx="80" cy="380" r="18" />
+        <circle className="is-gold" cx="720" cy="580" r="18" />
+        <circle className="is-gold" cx="720" cy="780" r="18" />
+        <circle className="is-gold" cx="600" cy="950" r="18" />
+      </svg>
+    ) : null;
   const sectionRenderers: Record<ResumeModuleId, React.ReactNode> = {
     personalSummary: visibilitySettings.personalSummary ? (
       <ResumeSection controls={getModuleControls("personalSummary")} iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title={getModuleLabel("personalSummary")}>
@@ -2171,8 +2351,14 @@ function ResumePreview({
     ),
     awards:
       visibilitySettings.awards ? (
-        awards.length ? (
-          <ListSection controls={getModuleControls("awards")} iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title={getModuleLabel("awards")} />
+        awards.length || templateId === "brick" ? (
+          <ListSection
+            controls={getModuleControls("awards")}
+            iconEnabled={iconEnabled}
+            iconId={iconSettings.awards}
+            items={awards.length ? awards : ["暂无荣誉"]}
+            title={getModuleLabel("awards")}
+          />
         ) : null
       ) : (
         <HiddenModulePlaceholder controls={getModuleControls("awards")} label={getModuleLabel("awards")} moduleId="awards" />
@@ -2224,7 +2410,10 @@ function ResumePreview({
     const mainModules = activeModuleOrder.filter((moduleId) => !simpleSidebarModuleIds.includes(moduleId));
 
     return (
-      <article className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`} style={getResumeStyleVars(styleSettings)}>
+      <article
+        className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`}
+        style={getResumeStyleVars(styleSettings, templateId, templateSettings)}
+      >
         <header className={`resume-head ${isPhotoEnabled ? `photo-${photoSettings.position}` : "photo-none"}`}>
           {isPhotoEnabled ? photoNode : null}
           <div className="resume-head-content">
@@ -2258,13 +2447,17 @@ function ResumePreview({
   }
 
   return (
-    <article className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`} style={getResumeStyleVars(styleSettings)}>
+    <article
+      className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`}
+      style={getResumeStyleVars(styleSettings, templateId, templateSettings)}
+    >
+      {brickDecorationNode}
       <header className={`resume-head ${isPhotoEnabled ? `photo-${photoSettings.position}` : "photo-none"}`}>
         {isPhotoEnabled && photoSettings.position === "left" ? photoNode : null}
         <div className="resume-head-content">
-          <h2 style={nameFitStyle}>{displayName}</h2>
+          <h2 style={headerNameStyle}>{displayTitle}</h2>
           <p className="resume-contact-line">
-            {contactItems.map((item, index) => (
+            {headerContactItems.map((item, index) => (
               <span className="resume-contact-item" key={`${item.icon}-${index}`}>
                 <ResumeIcon enabled={iconEnabled} iconId={item.icon} />
                 <span className="resume-inline-text">{item.text}</span>
@@ -2273,7 +2466,7 @@ function ResumePreview({
           </p>
           <div className="resume-target">
             <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
-            <span className="resume-target-label">目标岗位</span>
+            <span className="resume-target-label">{targetLabel}</span>
             <span className="resume-inline-text">{resume.profile.targetRole || resume.targetJob.title || "产品经理"}</span>
           </div>
         </div>

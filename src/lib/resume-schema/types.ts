@@ -24,6 +24,17 @@ export type ResumePhotoSettings = {
   position: "left" | "right";
 };
 
+export type ResumeDecorationSettings = {
+  offsetX: number;
+  offsetY: number;
+};
+
+export type ResumeTemplateColorId = "original" | "rose" | "darkBlue" | "skyBlue" | "darkGray" | "taupe" | "orange";
+
+export type ResumeTemplateSettings = {
+  color: ResumeTemplateColorId;
+};
+
 export type Education = {
   school: string;
   degree: string;
@@ -142,6 +153,8 @@ export type ResumeDocument = {
   styleSettings?: ResumeStyleSettings;
   visibilitySettings?: ResumeVisibilitySettings;
   photoSettings?: ResumePhotoSettings;
+  decorationSettings?: ResumeDecorationSettings;
+  templateSettings?: ResumeTemplateSettings;
   moduleOrder?: ResumeModuleId[];
   personalSummary: string;
   strengths: string[];

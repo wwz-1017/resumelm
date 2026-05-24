@@ -1660,6 +1660,71 @@ button {
   font-weight: 800;
 }
 
+.template-color-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  max-width: 980px;
+  margin: 0 auto 16px;
+  padding: 14px 16px;
+  border: 1px solid rgba(49, 73, 52, 0.12);
+  border-radius: 18px;
+  background: rgba(255, 254, 250, 0.9);
+  box-shadow: 0 14px 34px rgba(31, 39, 34, 0.08);
+}
+
+.template-color-switcher strong {
+  display: block;
+  margin-top: 3px;
+  color: var(--ink);
+  font-size: 15px;
+}
+
+.template-color-options {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+.template-color-options button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border: 1px solid rgba(31, 39, 34, 0.12);
+  border-radius: 9px;
+  background: #fffefa;
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+}
+
+.template-color-options button:hover,
+.template-color-options button.is-active {
+  border-color: rgba(31, 39, 34, 0.48);
+  box-shadow: 0 8px 18px rgba(31, 39, 34, 0.12);
+  transform: translateY(-1px);
+}
+
+.template-color-options span {
+  width: 20px;
+  height: 20px;
+  border-radius: 5px;
+  background: var(--template-swatch-color);
+}
+
+.template-color-options em {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+}
+
 .template-snapshot {
   position: relative;
   container-type: inline-size;
@@ -2707,9 +2772,9 @@ button {
 }
 
 .template-useful {
-  --template-main: var(--resume-accent-color);
-  --template-soft: color-mix(in srgb, var(--resume-accent-color) 10%, #ffffff);
-  border: 12px solid #c8cdd1;
+  --template-main: var(--template-theme-color, #5f7591);
+  --template-soft: color-mix(in srgb, var(--template-main) 10%, #ffffff);
+  border: 12px solid color-mix(in srgb, var(--template-main) 34%, #c8cdd1);
   background: #ffffff;
 }
 
@@ -2731,7 +2796,7 @@ button {
 }
 
 .template-useful .resume-target {
-  color: var(--resume-accent-color);
+  color: var(--template-main);
 }
 
 .template-useful .resume-section h3 {
@@ -2741,7 +2806,7 @@ button {
   border: 1px solid color-mix(in srgb, var(--template-main) 34%, #ffffff);
   border-radius: 999px;
   background: var(--template-soft);
-  color: var(--resume-section-title-color);
+  color: var(--template-main);
   letter-spacing: 0.02em;
 }
 
@@ -2751,7 +2816,7 @@ button {
 }
 
 .template-simple {
-  --template-main: #4798bf;
+  --template-main: var(--template-theme-color, #4798bf);
   --template-side: #eeeeee;
   --template-line: #d8d8d8;
   display: grid;
@@ -2761,7 +2826,7 @@ button {
   padding: 0 48px 44px 0;
   border: 0;
   background:
-    linear-gradient(#4798bf, #4798bf) 0 0 / 100% 124px no-repeat,
+    linear-gradient(var(--template-main), var(--template-main)) 0 0 / 100% 124px no-repeat,
     linear-gradient(90deg, var(--template-side) 0 220px, #ffffff 220px) 0 124px / 100% calc(100% - 124px) no-repeat,
     #ffffff;
 }
@@ -2914,14 +2979,21 @@ button {
   color: #333333;
   font-size: 14px;
   line-height: 1.7;
+  padding-left: 0;
+  text-align: center;
 }
 
 .template-simple .simple-sidebar-panel .skill-list span {
   display: block;
+  text-align: center;
 }
 
 .template-simple .simple-sidebar-panel .skill-list span + span::before {
   content: "";
+}
+
+.template-simple .simple-sidebar-panel .resume-list {
+  list-style-position: inside;
 }
 
 .template-simple .simple-main-column {
@@ -2949,7 +3021,7 @@ button {
   padding: 0;
   border: 0;
   background: transparent;
-  color: #333333;
+  color: color-mix(in srgb, var(--template-main) 34%, #333333);
   font-family: var(--resume-body-font);
   font-size: 22px;
   font-weight: 700;
@@ -2959,7 +3031,7 @@ button {
 .template-simple .resume-section h3 .resume-icon {
   display: inline-flex;
   flex: 0 0 auto;
-  color: currentColor;
+  color: var(--template-main);
 }
 
 .template-simple .resume-section h3::after {
@@ -2975,12 +3047,12 @@ button {
 }
 
 .template-simple .resume-row strong {
-  color: #519bb6;
+  color: var(--template-main);
   font-weight: 700;
 }
 
 .template-simple .resume-row .muted {
-  color: #519bb6;
+  color: var(--template-main);
 }
 
 .template-simple .resume-row {
@@ -3006,8 +3078,8 @@ button {
 }
 
 .template-graduate {
-  --template-main: var(--resume-accent-color);
-  border: 12px solid #c9ced0;
+  --template-main: var(--template-theme-color, #294864);
+  border: 12px solid color-mix(in srgb, var(--template-main) 30%, #c9ced0);
   border-top-width: 18px;
   border-bottom-width: 18px;
   background:
@@ -3034,7 +3106,7 @@ button {
 }
 
 .template-graduate .resume-target {
-  color: var(--resume-accent-color);
+  color: var(--template-main);
 }
 
 .template-graduate .resume-section {
@@ -3043,8 +3115,8 @@ button {
 
 .template-graduate .resume-section h3 {
   padding-bottom: 6px;
-  border-bottom: 2px solid #dce4ea;
-  color: var(--resume-section-title-color);
+  border-bottom: 2px solid color-mix(in srgb, var(--template-main) 20%, #dce4ea);
+  color: var(--template-main);
 }
 
 .template-brick {
@@ -3052,19 +3124,11 @@ button {
   --template-line: #9d9280;
   --template-gold: #f0a313;
   position: relative;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  grid-template-rows: auto auto auto;
-  gap: 26px 46px;
+  display: block;
   overflow: hidden;
-  padding: 64px 48px 84px;
+  padding: 0;
   border: 0;
-  background:
-    radial-gradient(circle at 7% 17%, #2e6f92 0 28px, transparent 29px),
-    radial-gradient(circle at 6% 31%, #2e6f92 0 29px, transparent 30px),
-    radial-gradient(circle at 91% 57%, var(--template-gold) 0 31px, transparent 32px),
-    radial-gradient(circle at 96% 82%, var(--template-gold) 0 26px, transparent 27px),
-    linear-gradient(180deg, #dceffc 0%, #dceffc 84%, #d2e9f9 100%);
+  background: #d6e8f0;
   color: #153f57;
 }
 
@@ -3077,22 +3141,64 @@ button {
 }
 
 .template-brick::before {
-  top: 180px;
-  right: -40px;
-  left: 46px;
-  height: 650px;
-  border: 4px solid rgba(141, 130, 111, 0.82);
-  border-right-width: 5px;
-  border-left-width: 4px;
-  border-radius: 46% 54% 48% 52% / 12% 15% 38% 35%;
-  clip-path: polygon(0 0, 100% 0, 100% 88%, 58% 88%, 50% 58%, 0 58%);
+  display: none;
+}
+
+.brick-decoration-layer {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: 794px;
+  height: 1123px;
+  color: var(--template-line);
+  cursor: grab;
+  overflow: visible;
+  pointer-events: none;
+  transform-origin: 0 0;
+}
+
+.brick-decoration-layer:active {
+  cursor: grabbing;
+}
+
+.brick-decoration-layer path,
+.brick-decoration-layer circle {
+  pointer-events: visiblePainted;
+}
+
+.brick-decoration-layer .brick-decoration-hit {
+  fill: none;
+  stroke: transparent;
+  stroke-linecap: round;
+  stroke-width: 26;
+  pointer-events: stroke;
+}
+
+.brick-decoration-layer .brick-decoration-node-hit {
+  fill: transparent;
+  pointer-events: fill;
+}
+
+.brick-decoration-layer path:not(.brick-decoration-hit) {
+  fill: none;
+  stroke: #b8956a;
+  stroke-linecap: round;
+  stroke-width: 3;
+}
+
+.brick-decoration-layer circle.is-blue {
+  fill: #2c5f7c;
+}
+
+.brick-decoration-layer circle.is-gold {
+  fill: #d4a843;
 }
 
 .template-brick::after {
-  right: -30px;
-  bottom: -12px;
-  left: -22px;
-  height: 106px;
+  right: -34px;
+  bottom: -8px;
+  left: -30px;
+  height: 123px;
   background:
     radial-gradient(ellipse at 9% 100%, #2e6f92 0 64px, transparent 65px),
     radial-gradient(ellipse at 27% 100%, #d79f21 0 72px, transparent 73px),
@@ -3103,59 +3209,36 @@ button {
 }
 
 .template-brick .resume-head {
-  position: relative;
+  position: static;
   z-index: 1;
-  grid-column: 1 / -1;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 170px;
-  grid-template-areas:
-    "content photo"
-    "content photo";
-  column-gap: 44px;
-  align-items: start;
-  min-width: 0;
-  min-height: 220px;
-  padding: 0;
+  display: contents;
   border: 0;
-  overflow: visible;
   text-align: left;
 }
 
 .template-brick .resume-head-content {
-  display: grid;
-  grid-area: content;
-  grid-template-columns: minmax(0, 0.88fr) minmax(0, 1fr);
-  grid-template-areas:
-    "name name"
-    "target info"
-    "contact info";
-  gap: 12px 44px;
-  align-items: start;
-  justify-items: start;
-  width: 100%;
-  max-width: 100%;
-  min-width: 0;
-  min-height: 0;
+  display: contents;
   text-align: left;
 }
 
 .template-brick .resume-head.photo-none .resume-head-content {
-  grid-template-columns: minmax(0, 1fr) minmax(0, 0.9fr);
-  justify-items: start;
   text-align: left;
 }
 
 .template-brick .resume-head h2 {
-  grid-area: name;
-  width: 100%;
-  max-width: 100%;
+  position: absolute;
+  z-index: 1;
+  top: 60px;
+  left: 80px;
+  width: 300px;
+  height: 80px;
   overflow: hidden;
-  color: var(--template-main);
+  color: #2c5f7c;
   font-family: "KaiTi", "STKaiti", "Songti SC", serif;
-  font-size: clamp(42px, var(--resume-name-size), 66px);
+  font-size: 48px;
   font-weight: 500;
-  letter-spacing: 0.12em;
-  line-height: 1;
+  letter-spacing: 0.14em;
+  line-height: 1.05;
   text-align: inherit;
   text-overflow: clip;
   white-space: nowrap;
@@ -3181,12 +3264,16 @@ button {
 }
 
 .template-brick .resume-head p {
+  position: absolute;
+  z-index: 1;
+  top: 280px;
+  left: 540px;
   display: grid;
-  grid-area: info;
   align-content: start;
   gap: 10px;
-  min-height: 0;
-  margin: 4px 0 0;
+  width: 240px;
+  height: 300px;
+  margin: 0;
   color: var(--template-main);
   font-size: 13px;
   font-weight: 700;
@@ -3248,8 +3335,8 @@ button {
 .template-brick .resume-photo {
   display: grid;
   place-items: center;
-  width: 138px;
-  height: 158px;
+  width: 180px;
+  height: 180px;
   margin: 0 auto;
   border: 6px solid #ffffff;
   border-radius: 0;
@@ -3260,9 +3347,13 @@ button {
 }
 
 .template-brick .resume-photo-wrap {
-  grid-area: photo;
-  justify-self: center;
-  margin-top: 2px;
+  position: absolute;
+  z-index: 1;
+  top: 60px;
+  left: 580px;
+  width: 180px;
+  height: 180px;
+  margin: 0;
 }
 
 .template-brick .resume-target {
@@ -3275,6 +3366,10 @@ button {
   line-height: 1.45;
 }
 
+.template-brick .resume-head > .resume-head-content > .resume-target {
+  display: none;
+}
+
 .template-brick .resume-target .resume-target-label,
 .template-brick .resume-target .resume-inline-text {
   flex: 0 1 auto;
@@ -3284,9 +3379,10 @@ button {
 }
 
 .template-brick .resume-module-frame {
-  position: relative;
+  position: absolute;
   z-index: 1;
   margin: 0;
+  overflow: visible;
 }
 
 .template-brick .resume-module-frame > .resume-section {
@@ -3294,22 +3390,31 @@ button {
 }
 
 .template-brick .resume-module-frame[data-preview-module="personalSummary"] {
-  grid-column: 1;
+  top: 220px;
+  left: 80px;
+  width: 420px;
+  height: 180px;
 }
 
 .template-brick .resume-module-frame[data-preview-module="education"] {
-  grid-column: 1;
+  top: 450px;
+  left: 80px;
+  width: 420px;
+  height: 320px;
 }
 
 .template-brick .resume-module-frame[data-preview-module="awards"] {
-  grid-column: 1;
+  top: 820px;
+  left: 80px;
+  width: 420px;
+  height: 220px;
 }
 
 .template-brick .resume-module-frame[data-preview-module="internships"] {
-  grid-column: 2;
-  grid-row: 2 / span 3;
-  align-self: start;
-  margin-top: 62px;
+  top: 600px;
+  left: 480px;
+  width: 300px;
+  height: 380px;
 }
 
 .template-brick .resume-section {
@@ -3388,7 +3493,7 @@ button {
 }
 
 .template-leftBlue {
-  --template-main: var(--resume-accent-color);
+  --template-main: var(--template-theme-color, #294864);
   display: grid;
   grid-template-columns: 190px minmax(0, 1fr);
   column-gap: 30px;
@@ -3514,8 +3619,8 @@ button {
 
 .template-leftBlue .resume-section h3 {
   padding-bottom: 8px;
-  border-bottom: 2px solid #d7e0e7;
-  color: var(--resume-section-title-color);
+  border-bottom: 2px solid color-mix(in srgb, var(--template-main) 22%, #d7e0e7);
+  color: var(--template-main);
 }
 
 .template-minimalPm {
