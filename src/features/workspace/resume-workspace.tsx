@@ -107,11 +107,16 @@ const moduleLabels: Record<ResumeModuleId, string> = {
   awards: "奖项"
 };
 
+type TemplateModuleConfig = {
+  modules: ResumeModuleId[];
+  labels: Partial<Record<ResumeModuleId, string>>;
+};
+
 const templates: Array<{ id: TemplateId; label: string }> = [
   { id: "useful", label: "好用蓝灰" },
   { id: "simple", label: "简约天蓝" },
   { id: "graduate", label: "应届蓝线" },
-  { id: "brick", label: "砖红双栏" },
+  { id: "brick", label: "蓝橙活力" },
   { id: "leftBlue", label: "深蓝左栏" },
   { id: "minimalPm", label: "极简PM" }
 ];
@@ -120,12 +125,42 @@ const templateDescriptions: Record<TemplateId, string> = {
   useful: "蓝灰稳重，适合通用校招投递",
   simple: "天蓝横幅，左栏信息清晰",
   graduate: "蓝线清爽，突出应届生经历",
-  brick: "砖红双栏，适合强调个人信息",
+  brick: "蓝橙曲线，适合活力型校招简历",
   leftBlue: "深蓝左栏，视觉识别更强",
   minimalPm: "极简 PM，适合产品/运营方向"
 };
 
-const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate"];
+const defaultTemplateModuleConfig: TemplateModuleConfig = {
+  modules: ["personalSummary", "strengths", "education", "internships", "projects", "campusExperience", "skills", "awards"],
+  labels: {}
+};
+
+const templateModuleConfigs: Partial<Record<TemplateId, TemplateModuleConfig>> = {
+  brick: {
+    modules: ["personalSummary", "education", "internships", "awards"],
+    labels: {
+      personalSummary: "自我评价",
+      education: "教育背景",
+      internships: "工作经历",
+      awards: "获得荣誉"
+    }
+  }
+};
+
+const getTemplateModuleConfig = (templateId: TemplateId): TemplateModuleConfig =>
+  templateModuleConfigs[templateId] ?? defaultTemplateModuleConfig;
+
+const getTemplateModuleLabel = (templateId: TemplateId, moduleId: ResumeModuleId) =>
+  getTemplateModuleConfig(templateId).labels[moduleId] ?? moduleLabels[moduleId];
+
+const createTemplateModuleOrder = (templateId: TemplateId): ResumeModuleId[] => {
+  const configuredModules = getTemplateModuleConfig(templateId).modules;
+  const configuredSet = new Set(configuredModules);
+
+  return [...configuredModules, ...defaultTemplateModuleConfig.modules.filter((moduleId) => !configuredSet.has(moduleId))];
+};
+
+const photoTemplateIds: TemplateId[] = ["useful", "simple", "graduate", "brick"];
 const templateSupportsPhoto = (templateId: TemplateId) => photoTemplateIds.includes(templateId);
 
 const fontOptions: Array<{ id: ResumeFontId; label: string; value: string }> = [
@@ -362,6 +397,22 @@ const getResumeStyleVars = (settings: ResumeStyleSettings) =>
     "--resume-accent-color": getColorValue(settings.accentColor)
   }) as React.CSSProperties;
 
+const getNameFitStyle = (name: string, settings: ResumeStyleSettings, templateId: TemplateId): React.CSSProperties => {
+  const visibleName = name.trim() || "你的姓名";
+  const length = Array.from(visibleName).length || 1;
+  const constrainedSidebarWidth = templateId === "leftBlue" ? 146 : null;
+
+  if (!constrainedSidebarWidth) {
+    return {};
+  }
+
+  const fittedSize = Math.min(settings.nameSize, Math.floor((constrainedSidebarWidth / length) * 0.98));
+
+  return {
+    fontSize: `${Math.max(10, fittedSize)}px`
+  };
+};
+
 const getIconNode = (iconId: ResumeIconId, size = 14) => {
   const strokeWidth = 2;
 
@@ -481,6 +532,9 @@ export function ResumeWorkspace() {
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
   const photoSettings = normalizePhotoSettings(resume.photoSettings);
   const isPhotoSupported = templateSupportsPhoto(templateId);
+  const activeModuleConfig = getTemplateModuleConfig(templateId);
+  const activeModuleLabels = activeModuleConfig.labels;
+  const isModuleInActiveTemplate = (moduleId: ResumeModuleId) => activeModuleConfig.modules.includes(moduleId);
 
   useEffect(() => {
     const nextSessionId = getAnonymousSessionId();
@@ -636,6 +690,14 @@ export function ResumeWorkspace() {
 
   const getEditorModuleClassName = (moduleId: ResumeModuleId) =>
     `editor-module-anchor ${highlightedEditorModule === moduleId ? "is-highlighted" : ""}`;
+
+  const selectTemplate = (nextTemplateId: TemplateId) => {
+    setTemplateId(nextTemplateId);
+    setResume((current) => ({
+      ...current,
+      moduleOrder: createTemplateModuleOrder(nextTemplateId)
+    }));
+  };
 
   const toggleVisibility = (section: keyof ResumeVisibilitySettings) => {
     setResume((current) => {
@@ -875,7 +937,7 @@ export function ResumeWorkspace() {
   };
 
   const startWithTemplate = (nextTemplateId: TemplateId) => {
-    setTemplateId(nextTemplateId);
+    selectTemplate(nextTemplateId);
     setIsIntroVisible(false);
     setIsTemplateStartVisible(false);
   };
@@ -1017,11 +1079,12 @@ export function ResumeWorkspace() {
               />
             ) : null}
 
+            {isModuleInActiveTemplate("personalSummary") ? (
             <div className={getEditorModuleClassName("personalSummary")} data-editor-module="personalSummary">
               <SectionHeading
                 icon={<Sparkles size={15} />}
                 isVisible={visibilitySettings.personalSummary}
-                title="个人评价"
+                title={activeModuleLabels.personalSummary ?? "个人评价"}
                 visibilityKey="personalSummary"
                 onToggleVisibility={toggleVisibility}
               />
@@ -1031,12 +1094,14 @@ export function ResumeWorkspace() {
                 onChange={(value) => setResume((current) => ({ ...current, personalSummary: value }))}
               />
             </div>
+            ) : null}
 
+            {isModuleInActiveTemplate("strengths") ? (
             <div className={getEditorModuleClassName("strengths")} data-editor-module="strengths">
               <SectionHeading
                 icon={<Heart size={15} />}
                 isVisible={visibilitySettings.strengths}
-                title="个人优势"
+                title={activeModuleLabels.strengths ?? "个人优势"}
                 visibilityKey="strengths"
                 onToggleVisibility={toggleVisibility}
               />
@@ -1046,13 +1111,15 @@ export function ResumeWorkspace() {
                 onChange={(value) => setResume((current) => ({ ...current, strengths: splitLines(value) }))}
               />
             </div>
+            ) : null}
 
+            {isModuleInActiveTemplate("education") ? (
             <div className={getEditorModuleClassName("education")} data-editor-module="education">
               <SectionHeading
                 actionLabel="添加"
                 icon={<GraduationCap size={15} />}
                 isVisible={visibilitySettings.education}
-                title="教育经历"
+                title={activeModuleLabels.education ?? "教育经历"}
                 visibilityKey="education"
                 onAction={addEducation}
                 onToggleVisibility={toggleVisibility}
@@ -1070,13 +1137,15 @@ export function ResumeWorkspace() {
                 </EditorBlock>
               ))}
             </div>
+            ) : null}
 
+            {isModuleInActiveTemplate("internships") ? (
             <div className={getEditorModuleClassName("internships")} data-editor-module="internships">
               <ExperienceEditor
                 items={resume.internships}
                 isVisible={visibilitySettings.internships}
                 section="internships"
-                title="实习经历"
+                title={activeModuleLabels.internships ?? "实习经历"}
                 visibilityKey="internships"
                 onAdd={addExperience}
                 onRemove={removeExperience}
@@ -1084,12 +1153,14 @@ export function ResumeWorkspace() {
                 onUpdate={updateExperience}
               />
             </div>
+            ) : null}
+            {isModuleInActiveTemplate("projects") ? (
             <div className={getEditorModuleClassName("projects")} data-editor-module="projects">
               <ExperienceEditor
                 items={resume.projects}
                 isVisible={visibilitySettings.projects}
                 section="projects"
-                title="项目经历"
+                title={activeModuleLabels.projects ?? "项目经历"}
                 visibilityKey="projects"
                 onAdd={addExperience}
                 onRemove={removeExperience}
@@ -1097,12 +1168,14 @@ export function ResumeWorkspace() {
                 onUpdate={updateExperience}
               />
             </div>
+            ) : null}
+            {isModuleInActiveTemplate("campusExperience") ? (
             <div className={getEditorModuleClassName("campusExperience")} data-editor-module="campusExperience">
               <ExperienceEditor
                 items={resume.campusExperience}
                 isVisible={visibilitySettings.campusExperience}
                 section="campusExperience"
-                title="校园经历"
+                title={activeModuleLabels.campusExperience ?? "校园经历"}
                 visibilityKey="campusExperience"
                 onAdd={addExperience}
                 onRemove={removeExperience}
@@ -1110,12 +1183,14 @@ export function ResumeWorkspace() {
                 onUpdate={updateExperience}
               />
             </div>
+            ) : null}
 
+            {isModuleInActiveTemplate("skills") ? (
             <div className={getEditorModuleClassName("skills")} data-editor-module="skills">
               <SectionHeading
                 icon={<Tag size={15} />}
                 isVisible={visibilitySettings.skills}
-                title="技能"
+                title={activeModuleLabels.skills ?? "技能"}
                 visibilityKey="skills"
                 onToggleVisibility={toggleVisibility}
               />
@@ -1125,11 +1200,13 @@ export function ResumeWorkspace() {
                 onChange={(value) => setResume((current) => ({ ...current, skills: splitLines(value) }))}
               />
             </div>
+            ) : null}
+            {isModuleInActiveTemplate("awards") ? (
             <div className={getEditorModuleClassName("awards")} data-editor-module="awards">
               <SectionHeading
                 icon={<Award size={15} />}
                 isVisible={visibilitySettings.awards}
-                title="奖项"
+                title={activeModuleLabels.awards ?? "奖项"}
                 visibilityKey="awards"
                 onToggleVisibility={toggleVisibility}
               />
@@ -1139,6 +1216,7 @@ export function ResumeWorkspace() {
                 onChange={(value) => setResume((current) => ({ ...current, awards: splitLines(value) }))}
               />
             </div>
+            ) : null}
 
             <SectionHeading icon={<BriefcaseBusiness size={15} />} title="目标 JD" />
             <TextField
@@ -1169,7 +1247,7 @@ export function ResumeWorkspace() {
             </div>
             <p>点击右侧简历模块可定位左侧表单，拖动模块可调整顺序。</p>
           </div>
-          <TemplateGallery activeTemplateId={templateId} onSelect={setTemplateId} />
+          <TemplateGallery activeTemplateId={templateId} onSelect={selectTemplate} />
           <ResumePreview
             photoSupported={isPhotoSupported}
             resume={resume}
@@ -1884,8 +1962,14 @@ function ResumePreview({
   const visibilitySettings = normalizeVisibilitySettings(resume.visibilitySettings);
   const photoSettings = normalizePhotoSettings(resume.photoSettings);
   const moduleOrder = normalizeModuleOrder(resume.moduleOrder);
+  const templateModuleConfig = getTemplateModuleConfig(templateId);
+  const templateModuleSet = new Set(templateModuleConfig.modules);
+  const activeModuleOrder = moduleOrder.filter((moduleId) => templateModuleSet.has(moduleId));
   const iconEnabled = iconSettings.enabled;
   const isPhotoEnabled = photoSupported && photoSettings.visible;
+  const displayName = resume.profile.name || "你的姓名";
+  const nameFitStyle = getNameFitStyle(displayName, styleSettings, templateId);
+  const getModuleLabel = (moduleId: ResumeModuleId) => getTemplateModuleLabel(templateId, moduleId);
   const contactItems = [
     { icon: iconSettings.phone, text: resume.profile.phone || "电话" },
     { icon: iconSettings.email, text: resume.profile.email || "邮箱" },
@@ -1949,6 +2033,7 @@ function ResumePreview({
     isStaticPreview ? null : (
       <ResumeModuleControls
         isVisible={visibilitySettings[moduleId]}
+        label={getModuleLabel(moduleId)}
         moduleId={moduleId}
         onToggleVisibility={onToggleVisibility}
       />
@@ -1999,11 +2084,11 @@ function ResumePreview({
   ) : null;
   const sectionRenderers: Record<ResumeModuleId, React.ReactNode> = {
     personalSummary: visibilitySettings.personalSummary ? (
-      <ResumeSection controls={getModuleControls("personalSummary")} iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title="个人评价">
+      <ResumeSection controls={getModuleControls("personalSummary")} iconEnabled={iconEnabled} iconId={iconSettings.personalSummary} title={getModuleLabel("personalSummary")}>
         {resume.personalSummary || "用 2-3 句话概括你的背景、能力和求职方向。"}
       </ResumeSection>
     ) : (
-      <HiddenModulePlaceholder controls={getModuleControls("personalSummary")} moduleId="personalSummary" />
+      <HiddenModulePlaceholder controls={getModuleControls("personalSummary")} label={getModuleLabel("personalSummary")} moduleId="personalSummary" />
     ),
     strengths: visibilitySettings.strengths ? (
       <TagSection
@@ -2011,17 +2096,17 @@ function ResumePreview({
         iconEnabled={iconEnabled}
         iconId={iconSettings.strengths}
         items={nonEmpty(resume.strengths).length ? nonEmpty(resume.strengths) : ["学习能力", "项目执行", "沟通协作"]}
-        title="个人优势"
+        title={getModuleLabel("strengths")}
       />
     ) : (
-      <HiddenModulePlaceholder controls={getModuleControls("strengths")} moduleId="strengths" />
+      <HiddenModulePlaceholder controls={getModuleControls("strengths")} label={getModuleLabel("strengths")} moduleId="strengths" />
     ),
     education: visibilitySettings.education ? (
       <section className="resume-section">
         {getModuleControls("education")}
         <h3>
           <ResumeIcon enabled={iconEnabled} iconId={iconSettings.education} />
-          <span className="resume-inline-text">教育经历</span>
+          <span className="resume-inline-text">{getModuleLabel("education")}</span>
         </h3>
         {(resume.education.length ? resume.education : [blankEducation()]).map((item, index) => (
           <div className="resume-item" key={index}>
@@ -2035,7 +2120,7 @@ function ResumePreview({
         ))}
       </section>
     ) : (
-      <HiddenModulePlaceholder controls={getModuleControls("education")} moduleId="education" />
+      <HiddenModulePlaceholder controls={getModuleControls("education")} label={getModuleLabel("education")} moduleId="education" />
     ),
     internships: visibilitySettings.internships ? (
       <ExperiencePreview
@@ -2044,10 +2129,10 @@ function ResumePreview({
         iconEnabled={iconEnabled}
         iconId={iconSettings.internships}
         items={internships}
-        title="实习经历"
+        title={getModuleLabel("internships")}
       />
     ) : (
-      <HiddenModulePlaceholder controls={getModuleControls("internships")} moduleId="internships" />
+      <HiddenModulePlaceholder controls={getModuleControls("internships")} label={getModuleLabel("internships")} moduleId="internships" />
     ),
     projects: visibilitySettings.projects ? (
       <ExperiencePreview
@@ -2056,10 +2141,10 @@ function ResumePreview({
         iconEnabled={iconEnabled}
         iconId={iconSettings.projects}
         items={projects}
-        title="项目经历"
+        title={getModuleLabel("projects")}
       />
     ) : (
-      <HiddenModulePlaceholder controls={getModuleControls("projects")} moduleId="projects" />
+      <HiddenModulePlaceholder controls={getModuleControls("projects")} label={getModuleLabel("projects")} moduleId="projects" />
     ),
     campusExperience: visibilitySettings.campusExperience ? (
       <ExperiencePreview
@@ -2068,10 +2153,10 @@ function ResumePreview({
         iconEnabled={iconEnabled}
         iconId={iconSettings.campusExperience}
         items={campusExperience}
-        title="校园经历"
+        title={getModuleLabel("campusExperience")}
       />
     ) : (
-      <HiddenModulePlaceholder controls={getModuleControls("campusExperience")} moduleId="campusExperience" />
+      <HiddenModulePlaceholder controls={getModuleControls("campusExperience")} label={getModuleLabel("campusExperience")} moduleId="campusExperience" />
     ),
     skills: visibilitySettings.skills ? (
       <TagSection
@@ -2079,18 +2164,18 @@ function ResumePreview({
         iconEnabled={iconEnabled}
         iconId={iconSettings.skills}
         items={skills.length ? skills : ["数据分析", "用户研究", "文档表达"]}
-        title="技能"
+        title={getModuleLabel("skills")}
       />
     ) : (
-      <HiddenModulePlaceholder controls={getModuleControls("skills")} moduleId="skills" />
+      <HiddenModulePlaceholder controls={getModuleControls("skills")} label={getModuleLabel("skills")} moduleId="skills" />
     ),
     awards:
       visibilitySettings.awards ? (
         awards.length ? (
-          <ListSection controls={getModuleControls("awards")} iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title="奖项" />
+          <ListSection controls={getModuleControls("awards")} iconEnabled={iconEnabled} iconId={iconSettings.awards} items={awards} title={getModuleLabel("awards")} />
         ) : null
       ) : (
-        <HiddenModulePlaceholder controls={getModuleControls("awards")} moduleId="awards" />
+        <HiddenModulePlaceholder controls={getModuleControls("awards")} label={getModuleLabel("awards")} moduleId="awards" />
       )
   };
   const simpleSidebarModuleIds: ResumeModuleId[] = ["strengths", "skills", "awards"];
@@ -2135,15 +2220,15 @@ function ResumePreview({
     ) : null;
 
   if (templateId === "simple") {
-    const sidebarModules = moduleOrder.filter((moduleId) => simpleSidebarModuleIds.includes(moduleId));
-    const mainModules = moduleOrder.filter((moduleId) => !simpleSidebarModuleIds.includes(moduleId));
+    const sidebarModules = activeModuleOrder.filter((moduleId) => simpleSidebarModuleIds.includes(moduleId));
+    const mainModules = activeModuleOrder.filter((moduleId) => !simpleSidebarModuleIds.includes(moduleId));
 
     return (
       <article className={`resume-paper template-${templateId} header-align-${styleSettings.headerAlignment}`} style={getResumeStyleVars(styleSettings)}>
         <header className={`resume-head ${isPhotoEnabled ? `photo-${photoSettings.position}` : "photo-none"}`}>
           {isPhotoEnabled ? photoNode : null}
           <div className="resume-head-content">
-            <h2>{resume.profile.name || "你的姓名"}</h2>
+            <h2 style={nameFitStyle}>{displayName}</h2>
             <div className="resume-target">
               <ResumeIcon enabled={iconEnabled} iconId={iconSettings.targetRole} />
               <span className="resume-target-label">目标岗位</span>
@@ -2177,7 +2262,7 @@ function ResumePreview({
       <header className={`resume-head ${isPhotoEnabled ? `photo-${photoSettings.position}` : "photo-none"}`}>
         {isPhotoEnabled && photoSettings.position === "left" ? photoNode : null}
         <div className="resume-head-content">
-          <h2>{resume.profile.name || "你的姓名"}</h2>
+          <h2 style={nameFitStyle}>{displayName}</h2>
           <p className="resume-contact-line">
             {contactItems.map((item, index) => (
               <span className="resume-contact-item" key={`${item.icon}-${index}`}>
@@ -2195,7 +2280,7 @@ function ResumePreview({
         {isPhotoEnabled && photoSettings.position === "right" ? photoNode : null}
       </header>
 
-      {moduleOrder.map(renderModuleFrame)}
+      {activeModuleOrder.map(renderModuleFrame)}
     </article>
   );
 }
@@ -2220,22 +2305,24 @@ const dimensionMaxScores: Record<ScoreDimension, number> = {
 
 function ResumeModuleControls({
   isVisible,
+  label,
   moduleId,
   onToggleVisibility
 }: {
   isVisible: boolean;
+  label?: string;
   moduleId: ResumeModuleId;
   onToggleVisibility: (section: keyof ResumeVisibilitySettings) => void;
 }) {
-  const label = moduleLabels[moduleId];
+  const resolvedLabel = label ?? moduleLabels[moduleId];
 
   return (
-    <div className="resume-edit-controls" aria-label={`${label}模块控制`}>
+    <div className="resume-edit-controls" aria-label={`${resolvedLabel}模块控制`}>
       <span className="resume-drag-handle" aria-hidden="true" title="拖动模块框调整位置">
         <GripVertical size={13} />
       </span>
       <button
-        aria-label={isVisible ? `隐藏${label}` : `显示${label}`}
+        aria-label={isVisible ? `隐藏${resolvedLabel}` : `显示${resolvedLabel}`}
         className={isVisible ? "" : "is-off"}
         title={isVisible ? "隐藏模块" : "显示模块"}
         type="button"
@@ -2250,11 +2337,13 @@ function ResumeModuleControls({
   );
 }
 
-function HiddenModulePlaceholder({ controls, moduleId }: { controls: React.ReactNode; moduleId: ResumeModuleId }) {
+function HiddenModulePlaceholder({ controls, label, moduleId }: { controls: React.ReactNode; label?: string; moduleId: ResumeModuleId }) {
+  const resolvedLabel = label ?? moduleLabels[moduleId];
+
   return (
     <section className="resume-section resume-hidden-placeholder">
       {controls}
-      <span>{moduleLabels[moduleId]}已隐藏，导出模板后不会显示，点击眼睛恢复</span>
+      <span>{resolvedLabel}已隐藏，导出模板后不会显示，点击眼睛恢复</span>
     </section>
   );
 }
