@@ -182,7 +182,7 @@ export function normalizeVisibilitySettings(settings?: Partial<ResumeVisibilityS
 }
 
 export function createDefaultModuleOrder(): ResumeModuleId[] {
-  return ["personalSummary", "strengths", "education", "internships", "projects", "campusExperience", "skills", "awards"];
+  return ["education", "awards", "personalSummary", "internships", "projects", "campusExperience", "skills"];
 }
 
 export function normalizeModuleOrder(order?: ResumeModuleId[]): ResumeModuleId[] {
@@ -218,7 +218,14 @@ export function normalizePhotoSettings(settings?: Partial<ResumePhotoSettings>):
 export function createDefaultDecorationSettings(): ResumeDecorationSettings {
   return {
     offsetX: 0,
-    offsetY: 0
+    offsetY: 0,
+    nodes: [
+      { x: 80, y: 180 },
+      { x: 80, y: 380 },
+      { x: 720, y: 580 },
+      { x: 720, y: 780 },
+      { x: 600, y: 950 }
+    ]
   };
 }
 
@@ -228,7 +235,14 @@ export function normalizeDecorationSettings(settings?: Partial<ResumeDecorationS
 
   return {
     offsetX: Math.min(900, Math.max(-900, Number.isFinite(next.offsetX) ? next.offsetX : defaults.offsetX)),
-    offsetY: Math.min(900, Math.max(-900, Number.isFinite(next.offsetY) ? next.offsetY : defaults.offsetY))
+    offsetY: Math.min(900, Math.max(-900, Number.isFinite(next.offsetY) ? next.offsetY : defaults.offsetY)),
+    nodes: (next.nodes ?? defaults.nodes).map((node, i) => {
+      const fallback = defaults.nodes[i] ?? defaults.nodes[0];
+      return {
+        x: Math.min(994, Math.max(-200, Number.isFinite(node?.x) ? node.x : fallback.x)),
+        y: Math.min(1323, Math.max(-200, Number.isFinite(node?.y) ? node.y : fallback.y))
+      };
+    })
   };
 }
 

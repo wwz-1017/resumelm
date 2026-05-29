@@ -24,9 +24,12 @@ export type ResumePhotoSettings = {
   position: "left" | "right";
 };
 
+export type ResumeDecorationPoint = { x: number; y: number };
+
 export type ResumeDecorationSettings = {
   offsetX: number;
   offsetY: number;
+  nodes: ResumeDecorationPoint[];
 };
 
 export type ResumeTemplateColorId = "original" | "rose" | "darkBlue" | "skyBlue" | "darkGray" | "taupe" | "orange";
