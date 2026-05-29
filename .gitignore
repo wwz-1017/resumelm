@@ -16,3 +16,4 @@ tsconfig.tsbuildinfo
 .vercel
 .wrangler
 .dev.vars
+.open-next/
