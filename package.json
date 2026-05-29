@@ -6,9 +6,9 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "pages:build": "next build && npx @cloudflare/next-on-pages",
-    "pages:deploy": "npx wrangler pages deploy .vercel/output/static",
-    "pages:dev": "npx @cloudflare/next-on-pages --watch",
+    "pages:build": "npx opennextjs-cloudflare build",
+    "pages:deploy": "npx wrangler pages deploy .open-next/worker.js",
+    "pages:dev": "npx opennextjs-cloudflare dev",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"
   },
@@ -21,7 +21,7 @@
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
-    "@cloudflare/next-on-pages": "^1.13.16",
+    "@opennextjs/cloudflare": "^1.19.11",
     "@types/node": "^22.10.0",
     "@types/react": "^19.0.0",
     "@types/react-dom": "^19.0.0",
