@@ -7,7 +7,7 @@
     "build": "next build",
     "start": "next start",
     "pages:build": "npx opennextjs-cloudflare build",
-    "pages:deploy": "npx wrangler pages deploy .open-next/worker.js",
+    "pages:deploy": "npx wrangler pages deploy .open-next",
     "pages:dev": "npx opennextjs-cloudflare dev",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit"

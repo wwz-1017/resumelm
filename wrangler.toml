@@ -1,4 +1,4 @@
 name = "resumelm"
 compatibility_date = "2025-05-29"
 compatibility_flags = ["nodejs_compat"]
-pages_build_output_dir = ".open-next/worker.js"
+pages_build_output_dir = ".open-next"
