@@ -13,3 +13,6 @@ pnpm-debug.log*
 .DS_Store
 .superpowers/
 tsconfig.tsbuildinfo
+.vercel
+.wrangler
+.dev.vars
